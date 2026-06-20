@@ -39,44 +39,47 @@ export function TimerDisplay() {
   const formatTime = (num: number) => String(num).padStart(2, '0')
 
   return (
-    <div className="bg-gradient-to-br from-cyan-100 to-blue-100 dark:from-slate-700 dark:to-slate-600 rounded-3xl p-8 shadow-lg">
+    <div className="bg-white/40 backdrop-blur-lg border bg-cyan-100 rounded-[40px] p-8 shadow-xl">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-white">Monitoring Berlangsung</h2>
-        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+        <h2 className="text-xl font-bold text-gray-800">Monitoring Berlangsung</h2>
+        <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 rounded-full border border-green-500/20">
+          <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-xs font-semibold text-green-700">Aktif</span>
+        </div>
       </div>
 
       {/* Timer display */}
       <div className="flex gap-4 justify-center mb-8">
-        <div className="bg-yellow-400 dark:bg-yellow-500 rounded-2xl px-6 py-4 shadow-md">
-          <div className="text-4xl font-bold text-white text-center">{formatTime(localTimer.hours)}</div>
-          <div className="text-sm text-yellow-900 dark:text-yellow-200 text-center mt-2">hours</div>
+        <div className="bg-gradient-to-b from-yellow-400 to-amber-500 rounded-2xl px-6 py-4 shadow-lg min-w-24 border border-yellow-300/30">
+          <div className="text-4xl font-extrabold text-white text-center tracking-tight">{formatTime(localTimer.hours)}</div>
+          <div className="text-xs text-yellow-950/85 text-center font-bold uppercase tracking-wider mt-1">hours</div>
         </div>
-        <div className="flex items-center text-3xl font-bold text-gray-700 dark:text-gray-300">:</div>
-        <div className="bg-purple-400 dark:bg-purple-500 rounded-2xl px-6 py-4 shadow-md">
-          <div className="text-4xl font-bold text-white text-center">{formatTime(localTimer.minutes)}</div>
-          <div className="text-sm text-purple-900 dark:text-purple-200 text-center mt-2">minutes</div>
+        <div className="flex items-center text-3xl font-extrabold text-gray-400">:</div>
+        <div className="bg-gradient-to-b from-purple-500 to-indigo-600 rounded-2xl px-6 py-4 shadow-lg min-w-24 border border-purple-400/30">
+          <div className="text-4xl font-extrabold text-white text-center tracking-tight">{formatTime(localTimer.minutes)}</div>
+          <div className="text-xs text-purple-950/85 text-center font-bold uppercase tracking-wider mt-1">minutes</div>
         </div>
-        <div className="flex items-center text-3xl font-bold text-gray-700 dark:text-gray-300">:</div>
-        <div className="bg-green-400 dark:bg-green-500 rounded-2xl px-6 py-4 shadow-md">
-          <div className="text-4xl font-bold text-white text-center">{formatTime(localTimer.seconds)}</div>
-          <div className="text-sm text-green-900 dark:text-green-200 text-center mt-2">seconds</div>
+        <div className="flex items-center text-3xl font-extrabold text-gray-400">:</div>
+        <div className="bg-gradient-to-b from-emerald-500 to-teal-600 rounded-2xl px-6 py-4 shadow-lg min-w-24 border border-emerald-400/30">
+          <div className="text-4xl font-extrabold text-white text-center tracking-tight">{formatTime(localTimer.seconds)}</div>
+          <div className="text-xs text-emerald-950/85 text-center font-bold uppercase tracking-wider mt-1">seconds</div>
         </div>
       </div>
 
       {/* Status information */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white dark:bg-slate-600 rounded-xl p-4">
-          <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">Timer Status</div>
-          <div className="text-lg font-bold text-blue-600 dark:text-blue-400">Berjalan</div>
+        <div className="bg-white/70 backdrop-blur-sm border border-white/50 rounded-xl p-4 shadow-sm">
+          <div className="text-xs font-semibold text-gray-500 mb-1">Timer Status</div>
+          <div className="text-lg font-bold text-blue-600">Berjalan</div>
         </div>
-        <div className="bg-white dark:bg-slate-600 rounded-xl p-4">
-          <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">Status Mata</div>
+        <div className="bg-white/70 backdrop-blur-sm border border-white/50 rounded-xl p-4 shadow-sm">
+          <div className="text-xs font-semibold text-gray-500 mb-1">Status Mata</div>
           <div className={`text-lg font-bold ${
             eyeStatus === 'normal' 
-              ? 'text-green-600 dark:text-green-400'
+              ? 'text-green-600'
               : eyeStatus === 'risk_myopia'
-              ? 'text-orange-600 dark:text-orange-400'
-              : 'text-red-600 dark:text-red-400'
+              ? 'text-orange-600'
+              : 'text-red-650'
           }`}>
             {eyeStatus === 'normal' ? 'Normal' : eyeStatus === 'risk_myopia' ? 'Risiko Miopia' : 'Kelelahan'}
           </div>

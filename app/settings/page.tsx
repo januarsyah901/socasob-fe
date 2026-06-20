@@ -2,7 +2,7 @@
 
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { useState, useEffect } from 'react'
-import { RefreshCw, Volume2, Bell } from 'lucide-react'
+import { RefreshCw, Volume2, Bell, Bot, Info } from 'lucide-react'
 
 export default function SettingsPage() {
   const [ipAddress, setIpAddress] = useState('')
@@ -67,7 +67,7 @@ export default function SettingsPage() {
         {/* Robot Connection Section */}
         <div className="bg-gradient-to-br from-green-100 to-emerald-100 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-8 shadow-lg border-2 border-green-300 dark:border-green-700">
           <div className="flex items-center gap-3 mb-6">
-            <div className="text-4xl">🤖</div>
+            <Bot className="w-8 h-8 text-green-600 dark:text-green-400" />
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Cek Koneksi SocaSob</h2>
           </div>
 
@@ -196,9 +196,10 @@ export default function SettingsPage() {
         </div>
 
         {/* Info Box */}
-        <div className="bg-blue-50 dark:bg-slate-800 border-l-4 border-blue-500 rounded-lg p-4">
-          <p className="text-blue-800 dark:text-blue-300">
-            💡 Pengaturan disimpan secara lokal. Untuk integrasi penuh dengan backend, IP address dan preferences akan disinkronkan saat terhubung ke server.
+        <div className="bg-blue-50 dark:bg-slate-800 border-l-4 border-blue-500 rounded-lg p-4 flex gap-3 items-start">
+          <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+          <p className="text-blue-800 dark:text-blue-300 text-sm">
+            Pengaturan disimpan secara lokal. Untuk integrasi penuh dengan backend, IP address dan preferences akan disinkronkan saat terhubung ke server.
           </p>
         </div>
       </div>

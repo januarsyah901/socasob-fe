@@ -3,6 +3,7 @@
 
 import * as React from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
+import { Eye, Search, AlertTriangle, Ruler, Coffee, Clock } from 'lucide-react'
 
 interface ResumeMetric {
   label: string
@@ -37,7 +38,7 @@ export default function ResumePage() {
                     <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Eye Health Score</p>
                     <p className="text-4xl font-bold text-cyan-600 dark:text-cyan-400 mt-2">84</p>
                   </div>
-                  <div className="text-5xl">👁️</div>
+                  <Eye className="w-12 h-12 text-cyan-500" />
                 </div>
               </div>
 
@@ -48,7 +49,7 @@ export default function ResumePage() {
                     <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Risiko Miopia</p>
                     <p className="text-2xl font-bold text-orange-600 dark:text-orange-400 mt-2">Rendah</p>
                   </div>
-                  <div className="text-5xl">🔍</div>
+                  <Search className="w-12 h-12 text-orange-500" />
                 </div>
               </div>
 
@@ -59,7 +60,7 @@ export default function ResumePage() {
                     <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Risiko Ketidakamananan Mata</p>
                     <p className="text-2xl font-bold text-red-600 dark:text-red-400 mt-2">Sedang</p>
                   </div>
-                  <div className="text-5xl">⚠️</div>
+                  <AlertTriangle className="w-12 h-12 text-red-500" />
                 </div>
               </div>
 
@@ -70,7 +71,7 @@ export default function ResumePage() {
                     <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Rata-rata Jarak Mata</p>
                     <p className="text-4xl font-bold text-green-600 dark:text-green-400 mt-2">57 cm</p>
                   </div>
-                  <div className="text-5xl">📏</div>
+                  <Ruler className="w-12 h-12 text-green-500" />
                 </div>
               </div>
 
@@ -81,7 +82,7 @@ export default function ResumePage() {
                     <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Kepatuhan Istirahat</p>
                     <p className="text-4xl font-bold text-purple-600 dark:text-purple-400 mt-2">89%</p>
                   </div>
-                  <div className="text-5xl">😴</div>
+                  <Coffee className="w-12 h-12 text-purple-500" />
                 </div>
               </div>
 
@@ -92,7 +93,7 @@ export default function ResumePage() {
                     <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Total Jam Monitoring</p>
                     <p className="text-4xl font-bold text-blue-600 dark:text-blue-400 mt-2">245 jam</p>
                   </div>
-                  <div className="text-5xl">⏱️</div>
+                  <Clock className="w-12 h-12 text-blue-500" />
                 </div>
               </div>
             </div>

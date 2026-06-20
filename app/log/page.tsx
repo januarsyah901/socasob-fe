@@ -2,7 +2,7 @@
 
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { useState } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Info } from 'lucide-react'
 
 interface DailyLog {
   date: string
@@ -146,9 +146,10 @@ export default function LogPage() {
         </div>
 
         {/* Info Box */}
-        <div className="bg-blue-50 dark:bg-slate-800 border-l-4 border-blue-500 rounded-lg p-4">
-          <p className="text-blue-800 dark:text-blue-300">
-            💡 Data history akan otomatis diperbarui saat terhubung dengan backend.
+        <div className="bg-blue-50 dark:bg-slate-800 border-l-4 border-blue-500 rounded-lg p-4 flex gap-3 items-start">
+          <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+          <p className="text-blue-800 dark:text-blue-300 text-sm">
+            Data history akan otomatis diperbarui saat terhubung dengan backend.
           </p>
         </div>
       </div>
