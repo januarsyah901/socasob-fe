@@ -39,7 +39,7 @@ export function TimerDisplay() {
   const formatTime = (num: number) => String(num).padStart(2, '0')
 
   return (
-    <div className="bg-white/40 backdrop-blur-lg border bg-cyan-100 rounded-[40px] p-8 shadow-xl">
+    <div className="bg-cyan-300/90 backdrop-blur-lg border border-cyan-200/60 rounded-[40px] p-8 shadow-xl">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-bold text-gray-800">Monitoring Berlangsung</h2>
         <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 rounded-full border border-green-500/20">

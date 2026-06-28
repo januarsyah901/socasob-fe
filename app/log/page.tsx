@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { useState } from 'react'
 import { ChevronDown, Info } from 'lucide-react'
@@ -62,7 +63,22 @@ export default function LogPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="relative z-0 min-h-[calc(100vh-80px)] overflow-hidden p-6 md:p-8">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-zinc-100/50 to-blue-50/30 z-[-20] pointer-events-none" />
+        <div className="absolute inset-0 z-[-15] pointer-events-none flex items-center justify-center opacity-10">
+          <Image
+            src="/images/Logo Socasob.png"
+            alt="Socasob Logo Watermark"
+            width={500}
+            height={500}
+            className="object-contain"
+          />
+        </div>
+        <div className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-cyan-400/20 blur-3xl z-[-10] pointer-events-none" />
+        <div className="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-80 h-80 rounded-full bg-indigo-400/20 blur-3xl z-[-10] pointer-events-none" />
+        <div className="absolute top-1/2 right-10 w-60 h-60 rounded-full bg-emerald-400/10 blur-3xl z-[-10] pointer-events-none" />
+
+        <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-gradient-to-r from-yellow-200 to-yellow-100 dark:from-yellow-900 dark:to-yellow-800 rounded-2xl p-6 shadow-lg">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Log Monitoring</h1>
@@ -152,6 +168,7 @@ export default function LogPage() {
             Data history akan otomatis diperbarui saat terhubung dengan backend.
           </p>
         </div>
+      </div>
       </div>
     </DashboardLayout>
   )
