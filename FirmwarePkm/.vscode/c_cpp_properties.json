@@ -3,11 +3,11 @@
     {
       "name": "ESP-IDF",
       "compilerPath": "C:\\Espressif\\tools\\xtensa-esp-elf\\esp-15.2.0_20251204\\xtensa-esp-elf\\bin\\xtensa-esp32-elf-gcc.exe",
-      "compileCommands": "${config:idf.buildPath}/compile_commands.json",
-      "intelliSenseMode": "gcc-x86",
+      "compileCommands": "${workspaceFolder}/build/compile_commands.json",
+      "intelliSenseMode": "linux-gcc-xtensa",
       "includePath": [
-        "${config:idf.espIdfPath}/components/**",
         "${workspaceFolder}/**",
+        "${workspaceFolder}/include",
         "${workspaceFolder}/managed_components/**"
       ],
       "browse": {

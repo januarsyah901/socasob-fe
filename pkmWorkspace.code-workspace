@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "FirmwarePkm"
+		},
+		{
+			"path": "Server"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"tag.h": "c",
+			"connect_wifi.h": "c",
+			"stdio.h": "c",
+			"freertos.h": "c"
+		}
+	}
+}

@@ -1,36 +1,45 @@
 #include <stdio.h>
-
-
+#include <string.h>
 #include <esp_system.h>
 #include <nvs_flash.h>
+
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
+
 #include "driver/gpio.h"
-
 #include "esp_camera.h"
-#include "esp_http_server.h"
-#include "esp_timer.h"
 #include "camera_pins.h"
+#include "esp_log.h"
+#include "tag.h"
 #include "connect_wifi.h"
+#include "esp_http_client.h"
 
-static const char *TAG = "esp32-cam Webserver";
+#define CONFIG_XCLK_FREQ 20000000
+#define JPEG_QUALITY 30
+#define FB_COUNT 3
 
-#define PART_BOUNDARY "123456789000000000000987654321"
-static const char* _STREAM_CONTENT_TYPE = "multipart/x-mixed-replace;boundary=" PART_BOUNDARY;
-static const char* _STREAM_BOUNDARY = "\r\n--" PART_BOUNDARY "\r\n";
-static const char* _STREAM_PART = "Content-Type: image/jpeg\r\nContent-Length: %u\r\n\r\n";
+#define SERVER_URL "http://192.168.1.X:3000/upload-frame" 
+#define CAMERA_STACK_SIZE (8 * 1024)
+#define HTTP_STACK_SIZE (8 * 1024)
 
-#define CONFIG_XCLK_FREQ 20000000 
+SemaphoreHandle_t camera_semaphore = NULL;
+bool is_wifi_connected = false;
 
-static esp_err_t init_camera(void)
-{
+camera_fb_t *global_fb = NULL;
+
+StackType_t xCameraReadStack[CAMERA_STACK_SIZE];
+StaticTask_t xCameraReadTaskBuffer;
+StackType_t xHttpStreamStack[HTTP_STACK_SIZE];
+StaticTask_t xHttpStreamTaskBuffer;
+
+esp_err_t init_camera_driver(void) {
     camera_config_t camera_config = {
-        .pin_pwdn  = CAM_PIN_PWDN,
+        .pin_pwdn = CAM_PIN_PWDN,
         .pin_reset = CAM_PIN_RESET,
         .pin_xclk = CAM_PIN_XCLK,
         .pin_sccb_sda = CAM_PIN_SIOD,
         .pin_sccb_scl = CAM_PIN_SIOC,
-
         .pin_d7 = CAM_PIN_D7,
         .pin_d6 = CAM_PIN_D6,
         .pin_d5 = CAM_PIN_D5,
@@ -42,135 +51,122 @@ static esp_err_t init_camera(void)
         .pin_vsync = CAM_PIN_VSYNC,
         .pin_href = CAM_PIN_HREF,
         .pin_pclk = CAM_PIN_PCLK,
-
         .xclk_freq_hz = CONFIG_XCLK_FREQ,
         .ledc_timer = LEDC_TIMER_0,
         .ledc_channel = LEDC_CHANNEL_0,
-
-        .pixel_format = PIXFORMAT_JPEG,
+        .pixel_format = PIXFORMAT_JPEG, 
         .frame_size = FRAMESIZE_VGA,
-
-        .jpeg_quality = 10,
-        .fb_count = 1,
-        .grab_mode = CAMERA_GRAB_WHEN_EMPTY};//CAMERA_GRAB_LATEST. Sets when buffers should be filled
-    esp_err_t err = esp_camera_init(&camera_config);
-    if (err != ESP_OK)
-    {
-        return err;
-    }
-    return ESP_OK;
+        .jpeg_quality = JPEG_QUALITY,
+        .fb_count = FB_COUNT,
+        .fb_location = CAMERA_FB_IN_PSRAM,
+        .grab_mode = CAMERA_GRAB_WHEN_EMPTY
+    }; 
+    return esp_camera_init(&camera_config);
 }
 
-esp_err_t jpg_stream_httpd_handler(httpd_req_t *req){
-    camera_fb_t * fb = NULL;
-    esp_err_t res = ESP_OK;
-    size_t _jpg_buf_len;
-    uint8_t * _jpg_buf;
-    char * part_buf[64];
-    static int64_t last_frame = 0;
-    if(!last_frame) {
-        last_frame = esp_timer_get_time();
-    }
+void vTaskHttpStream(void *pvParameters) {
+    for (;;) {
 
-    res = httpd_resp_set_type(req, _STREAM_CONTENT_TYPE);
-    if(res != ESP_OK){
-        return res;
-    }
+        if (xSemaphoreTake(camera_semaphore, portMAX_DELAY) == pdTRUE) {
 
-    while(true){
-        fb = esp_camera_fb_get();
-        if (!fb) {
-            ESP_LOGE(TAG, "Camera capture failed");
-            res = ESP_FAIL;
-            break;
-        }
-        if(fb->format != PIXFORMAT_JPEG){
-            bool jpeg_converted = frame2jpg(fb, 80, &_jpg_buf, &_jpg_buf_len);
-            if(!jpeg_converted){
-                ESP_LOGE(TAG, "JPEG compression failed");
-                esp_camera_fb_return(fb);
-                res = ESP_FAIL;
+            camera_fb_t *fb_to_send = global_fb;
+
+            if (is_wifi_connected && fb_to_send != NULL) {
+                esp_http_client_config_t config = {
+                    .url = SERVER_URL,
+                    .method = HTTP_METHOD_POST,
+                    .timeout_ms = 2000,
+                };
+
+                esp_http_client_handle_t client = esp_http_client_init(&config);
+                if (client != NULL) {
+                    esp_http_client_set_header(client, "Content-Type", "image/jpeg");
+                    esp_http_client_set_post_field(client, (const char *)fb_to_send->buf, fb_to_send->len);
+
+                    esp_err_t err = esp_http_client_perform(client);
+                    if (err == ESP_OK) {
+                        ESP_LOGI("HTTP_TASK", "Frame terkirim via Semaphore. Status: %d", esp_http_client_get_status_code(client));
+                    } else {
+                        ESP_LOGE("HTTP_TASK", "Gagal kirim: %s", esp_err_to_name(err));
+                    }
+                    esp_http_client_cleanup(client);
+                }
             }
-        } else {
-            _jpg_buf_len = fb->len;
-            _jpg_buf = fb->buf;
-        }
 
-        if(res == ESP_OK){
-            res = httpd_resp_send_chunk(req, _STREAM_BOUNDARY, strlen(_STREAM_BOUNDARY));
+            if (fb_to_send != NULL) {
+                esp_camera_fb_return(fb_to_send);
+                global_fb = NULL; 
+            }
         }
-        if(res == ESP_OK){
-            size_t hlen = snprintf((char *)part_buf, 64, _STREAM_PART, _jpg_buf_len);
-
-            res = httpd_resp_send_chunk(req, (const char *)part_buf, hlen);
-        }
-        if(res == ESP_OK){
-            res = httpd_resp_send_chunk(req, (const char *)_jpg_buf, _jpg_buf_len);
-        }
-        if(fb->format != PIXFORMAT_JPEG){
-            free(_jpg_buf);
-        }
-        esp_camera_fb_return(fb);
-        if(res != ESP_OK){
-            break;
-        }
-        int64_t fr_end = esp_timer_get_time();
-        int64_t frame_time = fr_end - last_frame;
-        last_frame = fr_end;
-        frame_time /= 1000;
-        ESP_LOGI(TAG, "MJPG: %uKB %ums (%.1ffps)",
-            (uint32_t)(_jpg_buf_len/1024),
-            (uint32_t)frame_time, 1000.0 / (uint32_t)frame_time);
     }
-
-    last_frame = 0;
-    return res;
 }
 
-httpd_uri_t uri_get = {
-    .uri = "/",
-    .method = HTTP_GET,
-    .handler = jpg_stream_httpd_handler,
-    .user_ctx = NULL};
-httpd_handle_t setup_server(void)
-{
-    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
-    httpd_handle_t stream_httpd  = NULL;
+void vTaskCameraRead(void *pvParameters) {
+    for (;;) {
+        // Jika frame sebelumnya belum selesai dikirim oleh HTTP Task, jangan jepret dulu
+        if (global_fb != NULL) {
+            ESP_LOGW("CAM_TASK", "Frame sebelumnya masih diproses, skip frame ini...");
+            vTaskDelay(pdMS_TO_TICKS(10));
+            continue;
+        }
 
-    if (httpd_start(&stream_httpd , &config) == ESP_OK)
-    {
-        httpd_register_uri_handler(stream_httpd , &uri_get);
+        camera_fb_t *fb = esp_camera_fb_get();
+        if (!fb) {
+            ESP_LOGE("CAM_TASK", "Gagal tangkap gambar");
+            vTaskDelay(pdMS_TO_TICKS(100));
+            continue;
+        }
+
+        global_fb = fb;
+
+        xSemaphoreGive(camera_semaphore);
+
+        vTaskDelay(pdMS_TO_TICKS(30)); 
     }
-
-    return stream_httpd;
 }
 
-void app_main()
-{
-    esp_err_t err;
 
+void vTaskWifiConnect(void *pvParameter) {
+    while (connect_wifi() == ESP_FAIL) {
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+    ESP_LOGI("WIFI", "WiFi Terhubung!");
+    is_wifi_connected = true; 
+    vTaskDelete(NULL); 
+}
+
+void app_main() {
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-    {
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
         ret = nvs_flash_init();
     }
 
-    connect_wifi();
-
-    if (wifi_connect_status)
-    {
-        err = init_camera();
-        if (err != ESP_OK)
-        {
-            printf("err: %s\n", esp_err_to_name(err));
-            return;
-        }
-        setup_server();
-        ESP_LOGI(TAG, "ESP32 CAM Web Server is up and running\n");
+    // 1. Init Kamera Driver
+    if (init_camera_driver() != ESP_OK) {
+        ESP_LOGE(TAG_CAMERA, "Camera Init Failed!");
+        return;
     }
-    else
-        ESP_LOGI(TAG, "Failed to connected with Wi-Fi, check your network Credentials\n");
-}
+    ESP_LOGI(TAG_CAMERA, "Camera Init Success");
 
+    // 2. Buat Binary Semaphore
+    camera_semaphore = xSemaphoreCreateBinary();
+    if (camera_semaphore == NULL) {
+        ESP_LOGE("MAIN", "Gagal membuat Semaphore!");
+        return;
+    }
+
+    // 3. Jalankan Task Pendukung
+    xTaskCreate(vTaskWifiConnect, "taskWifiConnect", 3072, NULL, 20, NULL);
+
+    xTaskCreateStaticPinnedToCore(
+        vTaskCameraRead, "taskCameraRead", CAMERA_STACK_SIZE, NULL, 15, 
+        xCameraReadStack, &xCameraReadTaskBuffer, 1
+    );
+
+    xTaskCreateStaticPinnedToCore(
+        vTaskHttpStream, "taskHttpStream", HTTP_STACK_SIZE, NULL, 12, 
+        xHttpStreamStack, &xHttpStreamTaskBuffer, 0
+    );
+}

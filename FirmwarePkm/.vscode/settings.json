@@ -18,5 +18,5 @@
     "camera_pins.h": "c"
   },
   "idf.flashType": "UART",
-  "idf.portWin": "COM7"
+  "idf.portWin": "COM8"
 }
