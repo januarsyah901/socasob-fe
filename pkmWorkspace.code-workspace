@@ -12,7 +12,8 @@
 			"tag.h": "c",
 			"connect_wifi.h": "c",
 			"stdio.h": "c",
-			"freertos.h": "c"
+			"freertos.h": "c",
+			"lvgl.h": "c"
 		}
 	}
 }

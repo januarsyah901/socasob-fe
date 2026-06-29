@@ -27,9 +27,25 @@ dependencies:
     source:
       type: idf
     version: 6.0.1
+  lvgl/lvgl:
+    component_hash: 184e532558c1c45fefed631f3e235423d22582aafb4630f3e8885c35281a49ae
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 9.5.0
+  waveshare/esp_lcd_st7735:
+    component_hash: 811c4168555af5878eb9ec8c3eee8af277afebc3bc516bc0daa57656eee09c69
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.1
 direct_dependencies:
 - espressif/esp32-camera
 - idf
-manifest_hash: 62bd0cc5b1ff0dc660881afd79d4b166add74c860920a9a2c0a97be0145a998e
+- lvgl/lvgl
+- waveshare/esp_lcd_st7735
+manifest_hash: 2418b5153a201719288c77acee66016627cfb2ec6c0e2c81eb966cdfb19f589e
 target: esp32
 version: 3.0.0
