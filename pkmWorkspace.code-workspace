@@ -13,7 +13,19 @@
 			"connect_wifi.h": "c",
 			"stdio.h": "c",
 			"freertos.h": "c",
-			"lvgl.h": "c"
+			"lvgl.h": "c",
+			"esp_lcd_panel_vendor.h": "c",
+			"string.h": "c",
+			"esp_lcd_st7735.h": "c",
+			"esp_heap_caps.h": "c",
+			"gpio.h": "c",
+			"semphr.h": "c",
+			"task.h": "c",
+			"cameratask.h": "c",
+			"esp_system.h": "c",
+			"wifistreamtask.h": "c",
+			"esp_lcd_panel_io.h": "c",
+			"taskhandlers.h": "c"
 		}
 	}
 }

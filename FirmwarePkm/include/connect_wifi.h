@@ -16,7 +16,8 @@
 #include <lwip/sys.h>
 #include <lwip/api.h>
 #include <lwip/netdb.h>
-#include "tag.h"
+
+#include "cameraTask.h"
 
 extern int wifi_connect_status;
 
