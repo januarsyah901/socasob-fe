@@ -2,6 +2,7 @@
 
 import { useSocket } from '@/lib/socket-context'
 import { useEffect, useState } from 'react'
+import { cn } from '@/lib/utils'
 
 export function TimerDisplay() {
   const { timer, eyeStatus } = useSocket()
@@ -38,50 +39,88 @@ export function TimerDisplay() {
 
   const formatTime = (num: number) => String(num).padStart(2, '0')
 
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'normal':
+        return 'Normal'
+      case 'risk_myopia':
+        return 'Risiko Miopia'
+      case 'risk_fatigue':
+        return 'Kelelahan'
+      default:
+        return 'Kelelahan'
+    }
+  }
+
   return (
-    <div className="bg-cyan-300/90 backdrop-blur-lg border border-cyan-200/60 rounded-[40px] p-8 shadow-xl">
+    <div className="bg-paper border border-mist shadow-subtle rounded-xl p-6 md:p-8 flex flex-col justify-between">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-800">Monitoring Berlangsung</h2>
-        <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 rounded-full border border-green-500/20">
-          <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-xs font-semibold text-green-700">Aktif</span>
+        <h2 className="font-ppmondwest text-2xl text-graphite font-normal tracking-tight">
+          Monitoring Berlangsung
+        </h2>
+        <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-linen border border-mist rounded-full">
+          <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+          <span className="text-[11px] font-medium text-ash uppercase tracking-wider">Aktif</span>
         </div>
       </div>
 
       {/* Timer display */}
-      <div className="flex gap-4 justify-center mb-8">
-        <div className="bg-gradient-to-b from-yellow-400 to-amber-500 rounded-2xl px-6 py-4 shadow-lg min-w-24 border border-yellow-300/30">
-          <div className="text-4xl font-extrabold text-white text-center tracking-tight">{formatTime(localTimer.hours)}</div>
-          <div className="text-xs text-yellow-950/85 text-center font-bold uppercase tracking-wider mt-1">hours</div>
+      <div className="flex gap-3 justify-center items-center my-6">
+        {/* Hours */}
+        <div className="bg-linen border border-mist rounded-lg px-4 py-3 min-w-[70px] flex flex-col items-center">
+          <div className="font-ppmondwest text-4xl text-ink-black tracking-tight leading-none">
+            {formatTime(localTimer.hours)}
+          </div>
+          <div className="text-[10px] text-ash font-medium uppercase tracking-wider mt-1.5 font-af">
+            Jam
+          </div>
         </div>
-        <div className="flex items-center text-3xl font-extrabold text-gray-400">:</div>
-        <div className="bg-gradient-to-b from-purple-500 to-indigo-600 rounded-2xl px-6 py-4 shadow-lg min-w-24 border border-purple-400/30">
-          <div className="text-4xl font-extrabold text-white text-center tracking-tight">{formatTime(localTimer.minutes)}</div>
-          <div className="text-xs text-purple-950/85 text-center font-bold uppercase tracking-wider mt-1">minutes</div>
+        
+        <div className="text-xl font-normal text-fog leading-none select-none">:</div>
+        
+        {/* Minutes */}
+        <div className="bg-linen border border-mist rounded-lg px-4 py-3 min-w-[70px] flex flex-col items-center">
+          <div className="font-ppmondwest text-4xl text-ink-black tracking-tight leading-none">
+            {formatTime(localTimer.minutes)}
+          </div>
+          <div className="text-[10px] text-ash font-medium uppercase tracking-wider mt-1.5 font-af">
+            Menit
+          </div>
         </div>
-        <div className="flex items-center text-3xl font-extrabold text-gray-400">:</div>
-        <div className="bg-gradient-to-b from-emerald-500 to-teal-600 rounded-2xl px-6 py-4 shadow-lg min-w-24 border border-emerald-400/30">
-          <div className="text-4xl font-extrabold text-white text-center tracking-tight">{formatTime(localTimer.seconds)}</div>
-          <div className="text-xs text-emerald-950/85 text-center font-bold uppercase tracking-wider mt-1">seconds</div>
+        
+        <div className="text-xl font-normal text-fog leading-none select-none">:</div>
+        
+        {/* Seconds */}
+        <div className="bg-linen border border-mist rounded-lg px-4 py-3 min-w-[70px] flex flex-col items-center">
+          <div className="font-ppmondwest text-4xl text-ink-black tracking-tight leading-none">
+            {formatTime(localTimer.seconds)}
+          </div>
+          <div className="text-[10px] text-ash font-medium uppercase tracking-wider mt-1.5 font-af">
+            Detik
+          </div>
         </div>
       </div>
 
       {/* Status information */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="bg-white/70 backdrop-blur-sm border border-white/50 rounded-xl p-4 shadow-sm">
-          <div className="text-xs font-semibold text-gray-500 mb-1">Timer Status</div>
-          <div className="text-lg font-bold text-blue-600">Berjalan</div>
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="bg-linen border border-mist rounded-lg p-3.5">
+          <div className="text-[10px] font-bold text-ash uppercase tracking-wider mb-1 font-af">
+            Sesi Monitor
+          </div>
+          <div className="font-ppmondwest text-lg text-graphite font-normal leading-tight">
+            Berjalan
+          </div>
         </div>
-        <div className="bg-white/70 backdrop-blur-sm border border-white/50 rounded-xl p-4 shadow-sm">
-          <div className="text-xs font-semibold text-gray-500 mb-1">Status Mata</div>
-          <div className={`text-lg font-bold ${
-            eyeStatus === 'normal' 
-              ? 'text-green-600'
-              : eyeStatus === 'risk_myopia'
-              ? 'text-orange-600'
-              : 'text-red-650'
-          }`}>
-            {eyeStatus === 'normal' ? 'Normal' : eyeStatus === 'risk_myopia' ? 'Risiko Miopia' : 'Kelelahan'}
+        <div className="bg-linen border border-mist rounded-lg p-3.5">
+          <div className="text-[10px] font-bold text-ash uppercase tracking-wider mb-1 font-af">
+            Status Mata
+          </div>
+          <div className={cn(
+            "font-ppmondwest text-lg font-normal leading-tight",
+            eyeStatus === 'normal' ? "text-graphite" : "text-signal-blue"
+          )}>
+            {getStatusText(eyeStatus)}
           </div>
         </div>
       </div>
