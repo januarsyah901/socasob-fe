@@ -1,10 +1,21 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
-import { Inter, JetBrains_Mono } from 'next/font/google'
+import { Inter, Fraunces, JetBrains_Mono } from 'next/font/google'
 import './globals.css'
 import { SocketProvider } from '@/lib/socket-context'
 
-const geistSans = Inter({ variable: '--font-geist-sans', subsets: ['latin'] })
+const fontPpmondwest = Fraunces({
+  variable: '--font-ppmondwest',
+  subsets: ['latin'],
+  weight: ['400', '500'],
+})
+
+const fontAf = Inter({
+  variable: '--font-af',
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+})
+
 const geistMono = JetBrains_Mono({
   variable: '--font-geist-mono',
   subsets: ['latin'],
@@ -39,8 +50,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
-      <body className="font-sans antialiased bg-background text-foreground">
+    <html lang="en" className={`${fontPpmondwest.variable} ${fontAf.variable} ${geistMono.variable}`}>
+      <body className="font-af antialiased bg-parchment text-charcoal">
         <SocketProvider>
           {children}
         </SocketProvider>

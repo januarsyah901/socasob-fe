@@ -16,6 +16,15 @@ Complete guide untuk semua dokumentasi yang tersedia dalam proyek ini.
 
 ### Main Documentation
 
+**[PRODUCT_REQUIREMENT_DOCUMENT.md](./PRODUCT_REQUIREMENT_DOCUMENT.md)** 📋
+- Product vision & goals
+- Functional & Non-functional requirements
+- System architecture & data flow
+- Integration details & future roadmap
+- **Baca untuk memahami kebutuhan & arah produk**
+
+---
+
 **[README.md](./README.md)** 📖
 - Overview lengkap proyek
 - Feature description
@@ -130,6 +139,7 @@ Complete guide untuk semua dokumentasi yang tersedia dalam proyek ini.
 
 | Need | Read |
 |------|------|
+| Product Specs / PRD | PRODUCT_REQUIREMENT_DOCUMENT.md |
 | Quick setup | QUICK_START.md |
 | Full overview | README.md |
 | Backend setup | BACKEND_INTEGRATION.md |
@@ -360,6 +370,7 @@ pnpm lint
 
 | Document | Version | Last Updated |
 |----------|---------|--------------|
+| PRODUCT_REQUIREMENT_DOCUMENT.md | 1.0.0 | 2026-07-10 |
 | README.md | 1.0.0 | 2026-01-10 |
 | BACKEND_INTEGRATION.md | 1.0.0 | 2026-01-10 |
 | API_SPECIFICATION.md | 1.0.0 | 2026-01-10 |
