@@ -26,7 +26,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Initialize socket connection
-    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
+    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'https://be-socasob.hallojanu.xyz', {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
