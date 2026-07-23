@@ -13,6 +13,8 @@ interface SocketContextType {
   }
   eyeDistance: string
   eyeStatus: 'normal' | 'risk_myopia' | 'risk_fatigue' | 'disconnected'
+  confidence: number
+  eyeScore: number
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined)
@@ -21,12 +23,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [timer, setTimer] = useState({ hours: 0, minutes: 0, seconds: 0 })
-  const [eyeDistance, setEyeDistance] = useState('Dekat')
-  const [eyeStatus, setEyeStatus] = useState<SocketContextType['eyeStatus']>('normal')
+  const [eyeDistance, setEyeDistance] = useState('Jauh')
+  const [eyeStatus, setEyeStatus] = useState<SocketContextType['eyeStatus']>('disconnected')
+  const [confidence, setConfidence] = useState(0)
+  const [eyeScore, setEyeScore] = useState(0)
 
   useEffect(() => {
-    // Initialize socket connection
-    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'https://be-socasob.hallojanu.xyz', {
+    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
@@ -34,16 +37,17 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     })
 
     socketInstance.on('connect', () => {
-      console.log('[v0] Socket connected')
+      console.log('[SocaSob] Socket connected')
       setIsConnected(true)
+      setEyeStatus('normal')
     })
 
     socketInstance.on('disconnect', () => {
-      console.log('[v0] Socket disconnected')
+      console.log('[SocaSob] Socket disconnected')
       setIsConnected(false)
+      setEyeStatus('disconnected')
     })
 
-    // Listen for real-time updates from backend
     socketInstance.on('timer-update', (data) => {
       setTimer({
         hours: data.hours || 0,
@@ -53,11 +57,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     })
 
     socketInstance.on('eye-distance', (data) => {
-      setEyeDistance(data.distance || 'Dekat')
+      setEyeDistance(data.distance || 'Jauh')
+      if (data.confidence !== undefined) setConfidence(Math.round(data.confidence * 100))
     })
 
     socketInstance.on('eye-status', (data) => {
       setEyeStatus(data.status || 'normal')
+      if (data.score !== undefined) setEyeScore(data.score)
     })
 
     setSocket(socketInstance)
@@ -73,6 +79,8 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     timer,
     eyeDistance,
     eyeStatus,
+    confidence,
+    eyeScore,
   }
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>

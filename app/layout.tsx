@@ -1,24 +1,15 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
-import { Inter, Fraunces, JetBrains_Mono } from 'next/font/google'
+import { Figtree } from 'next/font/google'
 import './globals.css'
+import { ThemeApplier } from '@/components/layout/theme-applier'
 import { SocketProvider } from '@/lib/socket-context'
+import { ToastProvider } from '@/components/ui/toast'
 
-const fontPpmondwest = Fraunces({
-  variable: '--font-ppmondwest',
-  subsets: ['latin'],
-  weight: ['400', '500'],
-})
-
-const fontAf = Inter({
-  variable: '--font-af',
+const fontFigtree = Figtree({
+  variable: '--font-figtree',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
-})
-
-const geistMono = JetBrains_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
 })
 
 export const metadata: Metadata = {
@@ -26,35 +17,21 @@ export const metadata: Metadata = {
   description: 'Smart eye health monitoring system with real-time analytics',
   generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: 'images/Logo SocaSob.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: 'images/Logo SocaSob Dark.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: 'images/Logo SocaSob.png',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: 'images/Logo SocaSob.png',
+    icon: '/images/Logo Socasob.png',
+    apple: '/images/Logo Socasob.png',
   },
 }
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${fontPpmondwest.variable} ${fontAf.variable} ${geistMono.variable}`}>
-      <body className="font-af antialiased bg-parchment text-charcoal">
-        <SocketProvider>
-          {children}
-        </SocketProvider>
+    <html lang="id" className={fontFigtree.variable} suppressHydrationWarning>
+      <body className="font-figtree antialiased bg-bg text-text">
+        <ThemeApplier />
+        <ToastProvider>
+          <SocketProvider>
+            {children}
+          </SocketProvider>
+        </ToastProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

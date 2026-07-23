@@ -2,125 +2,115 @@
 
 import { useSocket } from '@/lib/socket-context'
 import { useEffect, useState } from 'react'
+import { Clock, Activity, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 
 export function TimerDisplay() {
-  const { timer, eyeStatus } = useSocket()
+  const { timer, eyeStatus, isConnected } = useSocket()
   const [localTimer, setLocalTimer] = useState({ hours: 0, minutes: 0, seconds: 0 })
 
   useEffect(() => {
-    if (timer) {
-      setLocalTimer(timer)
-    }
+    if (timer) setLocalTimer(timer)
   }, [timer])
 
-  // Local countdown timer
   useEffect(() => {
+    if (!isConnected) return
     const interval = setInterval(() => {
       setLocalTimer((prev) => {
         let { hours, minutes, seconds } = prev
-
         seconds++
-        if (seconds >= 60) {
-          seconds = 0
-          minutes++
-        }
-        if (minutes >= 60) {
-          minutes = 0
-          hours++
-        }
-
+        if (seconds >= 60) { seconds = 0; minutes++ }
+        if (minutes >= 60) { minutes = 0; hours++ }
         return { hours, minutes, seconds }
       })
     }, 1000)
-
     return () => clearInterval(interval)
-  }, [])
+  }, [isConnected])
 
-  const formatTime = (num: number) => String(num).padStart(2, '0')
+  const fmt = (n: number) => String(n).padStart(2, '0')
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'normal':
-        return 'Normal'
-      case 'risk_myopia':
-        return 'Risiko Miopia'
-      case 'risk_fatigue':
-        return 'Kelelahan'
-      default:
-        return 'Kelelahan'
+  const totalMinutes = localTimer.hours * 60 + localTimer.minutes
+
+  const statusBadge = () => {
+    switch (eyeStatus) {
+      case 'normal': return <Badge variant="success">Normal / Sehat</Badge>
+      case 'risk_myopia': return <Badge variant="warning">Risiko Jarak Dekat</Badge>
+      case 'risk_fatigue': return <Badge variant="error">Kelelahan Mata</Badge>
+      default: return <Badge variant="default">Tidak Terhubung</Badge>
     }
   }
 
   return (
-    <div className="bg-paper border border-mist shadow-subtle rounded-xl p-6 md:p-8 flex flex-col justify-between">
+    <div className="card-sm p-6 md:p-8 flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="font-ppmondwest text-2xl text-graphite font-normal tracking-tight">
-          Monitoring Berlangsung
-        </h2>
-        <div className="flex items-center gap-1.5 px-2.5 py-0.5 bg-linen border border-mist rounded-full">
-          <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-[11px] font-medium text-ash uppercase tracking-wider">Aktif</span>
+        <div className="flex items-center gap-2.5">
+          <Clock className="w-5 h-5 text-signal-blue" />
+          <h2 className="text-lg font-semibold text-text tracking-tight">
+            Durasi Monitoring
+          </h2>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {isConnected ? (
+            <>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-active-teal opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-active-teal" />
+              </span>
+              <span className="text-[10px] font-semibold text-active-teal uppercase tracking-wider">Aktif</span>
+            </>
+          ) : (
+            <>
+              <span className="w-2 h-2 rounded-full bg-text-muted" />
+              <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Offline</span>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Timer display */}
-      <div className="flex gap-3 justify-center items-center my-6">
-        {/* Hours */}
-        <div className="bg-linen border border-mist rounded-lg px-4 py-3 min-w-[70px] flex flex-col items-center">
-          <div className="font-ppmondwest text-4xl text-ink-black tracking-tight leading-none">
-            {formatTime(localTimer.hours)}
+      {/* Timer Digits */}
+      <div className="flex gap-2 justify-center items-center my-4">
+        {[
+          { value: fmt(localTimer.hours), label: 'Jam' },
+          { value: fmt(localTimer.minutes), label: 'Menit' },
+          { value: fmt(localTimer.seconds), label: 'Detik' },
+        ].map((seg, i) => (
+          <div key={seg.label} className="flex items-center gap-2">
+            <div className={cn(
+              'bg-surface-2 border rounded-2xl px-4 py-3.5 min-w-[68px] flex flex-col items-center transition-all duration-300',
+              isConnected ? 'border-signal-blue/20' : 'border-border'
+            )}>
+              <div className="text-4xl md:text-5xl font-bold text-text tracking-tight leading-none font-figtree tabular-nums">
+                {seg.value}
+              </div>
+              <div className="text-[9px] font-semibold text-text-muted uppercase tracking-wider mt-2">
+                {seg.label}
+              </div>
+            </div>
+            {i < 2 && <span className="text-xl text-text-muted select-none mb-4">:</span>}
           </div>
-          <div className="text-[10px] text-ash font-medium uppercase tracking-wider mt-1.5 font-af">
-            Jam
-          </div>
-        </div>
-        
-        <div className="text-xl font-normal text-fog leading-none select-none">:</div>
-        
-        {/* Minutes */}
-        <div className="bg-linen border border-mist rounded-lg px-4 py-3 min-w-[70px] flex flex-col items-center">
-          <div className="font-ppmondwest text-4xl text-ink-black tracking-tight leading-none">
-            {formatTime(localTimer.minutes)}
-          </div>
-          <div className="text-[10px] text-ash font-medium uppercase tracking-wider mt-1.5 font-af">
-            Menit
-          </div>
-        </div>
-        
-        <div className="text-xl font-normal text-fog leading-none select-none">:</div>
-        
-        {/* Seconds */}
-        <div className="bg-linen border border-mist rounded-lg px-4 py-3 min-w-[70px] flex flex-col items-center">
-          <div className="font-ppmondwest text-4xl text-ink-black tracking-tight leading-none">
-            {formatTime(localTimer.seconds)}
-          </div>
-          <div className="text-[10px] text-ash font-medium uppercase tracking-wider mt-1.5 font-af">
-            Detik
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Status information */}
-      <div className="grid grid-cols-2 gap-4 mt-4">
-        <div className="bg-linen border border-mist rounded-lg p-3.5">
-          <div className="text-[10px] font-bold text-ash uppercase tracking-wider mb-1 font-af">
-            Sesi Monitor
+      {/* Stats Row */}
+      <div className="grid grid-cols-2 gap-3 mt-auto pt-4 border-t border-border">
+        <div className="bg-surface-2 border border-border rounded-xl p-3.5">
+          <div className="flex items-center gap-1.5 text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">
+            <Activity className="w-3 h-3" />
+            Total Menit
           </div>
-          <div className="font-ppmondwest text-lg text-graphite font-normal leading-tight">
-            Berjalan
+          <div className="text-xl font-bold text-text leading-tight">
+            {totalMinutes} <span className="text-xs font-normal text-text-muted">mnt</span>
           </div>
         </div>
-        <div className="bg-linen border border-mist rounded-lg p-3.5">
-          <div className="text-[10px] font-bold text-ash uppercase tracking-wider mb-1 font-af">
+        <div className="bg-surface-2 border border-border rounded-xl p-3.5">
+          <div className="flex items-center gap-1.5 text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">
+            <Zap className="w-3 h-3" />
             Status Mata
           </div>
-          <div className={cn(
-            "font-ppmondwest text-lg font-normal leading-tight",
-            eyeStatus === 'normal' ? "text-graphite" : "text-signal-blue"
-          )}>
-            {getStatusText(eyeStatus)}
+          <div className="leading-tight">
+            {statusBadge()}
           </div>
         </div>
       </div>

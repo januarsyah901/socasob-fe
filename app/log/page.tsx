@@ -1,244 +1,233 @@
 'use client'
 
-import Image from 'next/image'
 import { DashboardLayout } from '@/components/dashboard-layout'
-import { useState, useEffect } from 'react'
-import { ChevronDown, Info, Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronDown, Info, Calendar, Clock, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PageHeader } from '@/components/layout/page-header'
+import { Badge } from '@/components/ui/badge'
+
+interface SessionDetail {
+  start: string
+  end: string
+  durationClose: number   // menit
+  durationFar: number     // menit
+  compliance: number      // % kepatuhan istirahat
+}
 
 interface DailyLog {
   date: string
-  durationsShort: number
-  durationsLong: number
+  startTime: string
+  endTime: string
+  durationClose: number   // menit
+  durationFar: number     // menit
+  compliancePercent: number
 }
 
 interface WeeklyHistory {
   date: string
+  dayLabel: string
   status: 'normal' | 'risk_myopia' | 'risk_fatigue'
+  startTime: string
+  endTime: string
+  durationClose: number
+  durationFar: number
+  compliancePercent: number
 }
 
-const formatIndonesianDate = (dateStr: string) => {
-  if (!dateStr) return '';
-  const months = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-  ];
-  const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    const year = parts[0];
-    const monthIdx = parseInt(parts[1], 10) - 1;
-    const day = parseInt(parts[2], 10);
-    return `${day} ${months[monthIdx]} ${year}`;
+const mockDailyLog: DailyLog = {
+  date: 'Hari Ini (10 Januari 2026)',
+  startTime: '08:15',
+  endTime: '16:40',
+  durationClose: 82,
+  durationFar: 198,
+  compliancePercent: 78,
+}
+
+const mockWeeklyHistory: WeeklyHistory[] = [
+  { date: '10 Jan 2026', dayLabel: 'Hari Ini', status: 'normal', startTime: '08:15', endTime: '16:40', durationClose: 82, durationFar: 198, compliancePercent: 78 },
+  { date: '9 Jan 2026', dayLabel: 'Kemarin', status: 'risk_myopia', startTime: '09:00', endTime: '18:20', durationClose: 210, durationFar: 110, compliancePercent: 42 },
+  { date: '8 Jan 2026', dayLabel: 'Rabu', status: 'risk_myopia', startTime: '08:30', endTime: '17:00', durationClose: 185, durationFar: 125, compliancePercent: 38 },
+  { date: '7 Jan 2026', dayLabel: 'Selasa', status: 'normal', startTime: '08:45', endTime: '15:30', durationClose: 95, durationFar: 225, compliancePercent: 84 },
+  { date: '6 Jan 2026', dayLabel: 'Senin', status: 'normal', startTime: '08:00', endTime: '16:15', durationClose: 68, durationFar: 247, compliancePercent: 91 },
+  { date: '5 Jan 2026', dayLabel: 'Minggu', status: 'normal', startTime: '10:20', endTime: '14:00', durationClose: 40, durationFar: 140, compliancePercent: 89 },
+  { date: '4 Jan 2026', dayLabel: 'Sabtu', status: 'risk_fatigue', startTime: '07:30', endTime: '22:00', durationClose: 340, durationFar: 170, compliancePercent: 21 },
+]
+
+const statusBadge = (status: string) => {
+  switch (status) {
+    case 'normal': return <Badge variant="success">Normal</Badge>
+    case 'risk_myopia': return <Badge variant="warning">Risiko Dekat</Badge>
+    case 'risk_fatigue': return <Badge variant="error">Kelelahan Mata</Badge>
+    default: return <Badge variant="default">Unknown</Badge>
   }
-  return dateStr;
-};
+}
+
+function DurationBar({ close, far }: { close: number; far: number }) {
+  const total = close + far
+  const closePct = Math.round((close / total) * 100)
+  const farPct = 100 - closePct
+  return (
+    <div className="mt-3 space-y-1.5">
+      <div className="flex items-center gap-2 text-xs text-text-muted">
+        <span className="w-2 h-2 rounded-full bg-error/70 shrink-0" />
+        <span>Dekat {close} mnt ({closePct}%)</span>
+        <span className="mx-1 text-border">·</span>
+        <span className="w-2 h-2 rounded-full bg-success/70 shrink-0" />
+        <span>Aman {far} mnt ({farPct}%)</span>
+      </div>
+      <div className="w-full h-2 rounded-full bg-surface-2 border border-border overflow-hidden flex">
+        <div className="bg-error/70 h-full transition-all" style={{ width: `${closePct}%` }} />
+        <div className="bg-success/70 h-full transition-all" style={{ width: `${farPct}%` }} />
+      </div>
+    </div>
+  )
+}
 
 export default function LogPage() {
   const [expandedSection, setExpandedSection] = useState<'daily' | 'weekly' | null>('daily')
-  const [dailyLog, setDailyLog] = useState<DailyLog | null>(null)
-  const [weeklyHistory, setWeeklyHistory] = useState<WeeklyHistory[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-socasob.hallojanu.xyz'
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        setLoading(true)
-        setError(null)
-
-        // Fetch Daily
-        const dailyRes = await fetch(`${baseUrl}/api/log/today`)
-        if (!dailyRes.ok) throw new Error('Gagal mengambil data harian dari backend.')
-        const dailyData = await dailyRes.json()
-
-        // Fetch Weekly
-        const weeklyRes = await fetch(`${baseUrl}/api/log/weekly`)
-        if (!weeklyRes.ok) throw new Error('Gagal mengambil data mingguan dari backend.')
-        const weeklyData = await weeklyRes.json()
-
-        if (dailyData.success && dailyData.data) {
-          setDailyLog({
-            date: `Hari Ini (${formatIndonesianDate(dailyData.data.date)})`,
-            durationsShort: Math.round((dailyData.data.nearDuration || 0) / 60),
-            durationsLong: Math.round((dailyData.data.farDuration || 0) / 60),
-          })
-        }
-
-        if (weeklyData.success && Array.isArray(weeklyData.data)) {
-          const formatted = weeklyData.data.map((item: any) => ({
-            date: formatIndonesianDate(item.date),
-            status: item.eyeHealthStatus || 'normal'
-          })).reverse()
-          setWeeklyHistory(formatted)
-        }
-      } catch (err: any) {
-        console.error(err)
-        setError(err.message || 'Terjadi kesalahan koneksi backend.')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchData()
-  }, [baseUrl])
-
-  const getStatusTextColor = (status: string) => {
-    switch (status) {
-      case 'normal':
-        return 'text-graphite'
-      case 'risk_myopia':
-      case 'risk_fatigue':
-        return 'text-signal-blue'
-      default:
-        return 'text-ash'
-    }
-  }
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'normal':
-        return 'Normal'
-      case 'risk_myopia':
-        return 'Risiko Mata Lelah'
-      case 'risk_fatigue':
-        return 'Kelelahan Mata'
-      default:
-        return 'Unknown'
-    }
-  }
+  const [expandedDay, setExpandedDay] = useState<number | null>(null)
 
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Editorial Page Header */}
-        <div className="border-b border-mist/40 pb-6">
-          <span className="text-xs font-bold font-af text-signal-blue uppercase tracking-widest">
-            Catatan Riwayat
-          </span>
-          <h1 className="font-ppmondwest text-4xl text-graphite font-normal tracking-tight mt-2">
-            Log Monitoring
-          </h1>
-          <p className="font-af text-sm text-ash mt-1">
-            Pantau history durasi tatap layar dan status kesehatan mata harian serta mingguan Anda.
-          </p>
+      <div className="space-y-8 animate-fade-up">
+        <PageHeader
+          eyebrow="Catatan Riwayat"
+          title="Log Monitoring"
+          description="Pantau histori durasi tatap layar dan status kesehatan mata harian serta mingguan Anda."
+        />
+
+        {/* Today's Summary */}
+        <div className="card-sm overflow-hidden">
+          <button
+            onClick={() => setExpandedSection(expandedSection === 'daily' ? null : 'daily')}
+            className="w-full flex items-center justify-between p-5 md:p-6 hover:bg-surface-2/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-signal-blue/10 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-signal-blue" />
+              </div>
+              <h2 className="text-base font-semibold text-text tracking-tight">Hasil Pantau Hari Ini</h2>
+            </div>
+            <ChevronDown className={cn('w-5 h-5 text-text-muted transition-transform duration-300', expandedSection === 'daily' && 'rotate-180')} />
+          </button>
+
+          {expandedSection === 'daily' && (
+            <div className="px-5 pb-6 md:px-6 md:pb-7 space-y-5 animate-fade-in border-t border-border">
+              {/* Jam Monitoring */}
+              <div className="flex items-center gap-6 pt-4 text-sm text-text-muted">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-success" />
+                  <span>Mulai: <strong className="text-text">{mockDailyLog.startTime}</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-error/60" />
+                  <span>Selesai: <strong className="text-text">{mockDailyLog.endTime}</strong></span>
+                </div>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-surface-2 border border-border rounded-2xl p-5 text-center">
+                  <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block mb-2">Tatap Dekat</span>
+                  <div className="text-4xl font-bold text-error leading-none">{mockDailyLog.durationClose}</div>
+                  <p className="text-xs text-text-muted mt-2">menit (&lt; 30cm)</p>
+                </div>
+                <div className="bg-surface-2 border border-border rounded-2xl p-5 text-center">
+                  <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block mb-2">Tatap Aman</span>
+                  <div className="text-4xl font-bold text-success leading-none">{mockDailyLog.durationFar}</div>
+                  <p className="text-xs text-text-muted mt-2">menit (≥ 30cm)</p>
+                </div>
+                <div className="bg-surface-2 border border-border rounded-2xl p-5 text-center">
+                  <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block mb-2">Kepatuhan Istirahat</span>
+                  <div className={cn('text-4xl font-bold leading-none', mockDailyLog.compliancePercent >= 70 ? 'text-success' : 'text-warning')}>
+                    {mockDailyLog.compliancePercent}%
+                  </div>
+                  <p className="text-xs text-text-muted mt-2">target ≥ 70%</p>
+                </div>
+              </div>
+
+              {/* Distribusi Bar */}
+              <DurationBar close={mockDailyLog.durationClose} far={mockDailyLog.durationFar} />
+            </div>
+          )}
         </div>
 
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 space-y-4 bg-paper border border-mist shadow-subtle rounded-xl">
-            <Loader2 className="w-8 h-8 text-twilight animate-spin" />
-            <p className="text-sm text-ash font-af">Memuat data monitoring...</p>
-          </div>
-        ) : error ? (
-          <div className="bg-linen border border-mist rounded-xl p-8 text-center space-y-3">
-            <p className="text-sm text-charcoal font-semibold font-af">Gagal memuat data riwayat</p>
-            <p className="text-xs text-ash font-af">{error}</p>
-          </div>
-        ) : (
-          <>
-            {/* Daily Log Section */}
-            <div className="bg-paper border border-mist shadow-subtle rounded-xl overflow-hidden">
-              <button
-                onClick={() => setExpandedSection(expandedSection === 'daily' ? null : 'daily')}
-                className="w-full flex items-center justify-between p-6 hover:bg-linen/50 transition-colors"
-              >
-                <h2 className="font-ppmondwest text-xl text-graphite font-normal tracking-tight">
-                  {dailyLog ? dailyLog.date : 'Hasil Pantau Hari Ini'}
-                </h2>
-                <ChevronDown
-                  className={cn(
-                    "w-5 h-5 text-ash transition-transform duration-200",
-                    expandedSection === 'daily' ? "rotate-180" : ""
-                  )}
-                />
-              </button>
-
-              {expandedSection === 'daily' && (
-                <div className="px-6 pb-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-linen border border-mist rounded-lg p-5 text-center">
-                      <div className="font-ppmondwest text-5xl text-ink-black leading-none">
-                        {dailyLog ? dailyLog.durationsShort : 0}
-                      </div>
-                      <div className="text-[10px] text-ash font-semibold uppercase tracking-wider mt-3 font-af">
-                        Durasi Tatap Dekat (Menit)
-                      </div>
-                    </div>
-                    <div className="bg-linen border border-mist rounded-lg p-5 text-center">
-                      <div className="font-ppmondwest text-5xl text-ink-black leading-none">
-                        {dailyLog ? dailyLog.durationsLong : 0}
-                      </div>
-                      <div className="text-[10px] text-ash font-semibold uppercase tracking-wider mt-3 font-af">
-                        Durasi Tatap Jauh (Menit)
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+        {/* Weekly History */}
+        <div className="card-sm overflow-hidden">
+          <button
+            onClick={() => setExpandedSection(expandedSection === 'weekly' ? null : 'weekly')}
+            className="w-full flex items-center justify-between p-5 md:p-6 hover:bg-surface-2/50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-signal-blue/10 flex items-center justify-center">
+                <Calendar className="w-4 h-4 text-signal-blue" />
+              </div>
+              <h2 className="text-base font-semibold text-text tracking-tight">Riwayat 7 Hari Terakhir</h2>
             </div>
+            <ChevronDown className={cn('w-5 h-5 text-text-muted transition-transform duration-300', expandedSection === 'weekly' && 'rotate-180')} />
+          </button>
 
-            {/* Weekly History Section */}
-            <div className="bg-paper border border-mist shadow-subtle rounded-xl overflow-hidden">
-              <button
-                onClick={() => setExpandedSection(expandedSection === 'weekly' ? null : 'weekly')}
-                className="w-full flex items-center justify-between p-6 hover:bg-linen/50 transition-colors"
-              >
-                <h2 className="font-ppmondwest text-xl text-graphite font-normal tracking-tight">
-                  History Satu Pekan Terakhir
-                </h2>
-                <ChevronDown
-                  className={cn(
-                    "w-5 h-5 text-ash transition-transform duration-200",
-                    expandedSection === 'weekly' ? "rotate-180" : ""
-                  )}
-                />
-              </button>
-
-              {expandedSection === 'weekly' && (
-                <div className="px-6 pb-6">
-                  {weeklyHistory.length === 0 ? (
-                    <p className="text-center py-6 text-sm text-ash font-af">Belum ada riwayat pekan ini.</p>
-                  ) : (
-                    <div className="border border-mist rounded-lg overflow-hidden">
-                      {/* Table Header */}
-                      <div className="grid grid-cols-3 bg-linen font-af text-[11px] font-bold text-ash uppercase tracking-wider border-b border-mist">
-                        <div className="col-span-1 px-4 py-3">Tanggal</div>
-                        <div className="col-span-2 px-4 py-3">Status Deteksi</div>
+          {expandedSection === 'weekly' && (
+            <div className="px-5 pb-6 md:px-6 md:pb-7 animate-fade-in border-t border-border">
+              <div className="space-y-2 pt-4">
+                {mockWeeklyHistory.map((item, idx) => (
+                  <div key={idx} className="border border-border rounded-2xl overflow-hidden">
+                    {/* Row header — clickable to expand */}
+                    <button
+                      onClick={() => setExpandedDay(expandedDay === idx ? null : idx)}
+                      className="w-full grid grid-cols-12 items-center text-sm py-3.5 px-5 hover:bg-surface-2/30 transition-colors text-left"
+                    >
+                      <div className="col-span-4">
+                        <p className="font-semibold text-text">{item.dayLabel}</p>
+                        <p className="text-xs text-text-muted">{item.date}</p>
                       </div>
+                      <div className="col-span-3 text-xs text-text-muted">
+                        {item.startTime} – {item.endTime}
+                      </div>
+                      <div className="col-span-3">
+                        {statusBadge(item.status)}
+                      </div>
+                      <div className="col-span-2 flex justify-end">
+                        <ChevronDown className={cn('w-4 h-4 text-text-muted transition-transform duration-200', expandedDay === idx && 'rotate-180')} />
+                      </div>
+                    </button>
 
-                      {/* Table Rows */}
-                      <div className="divide-y divide-mist/50">
-                        {weeklyHistory.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className={cn(
-                              "grid grid-cols-3 font-af text-sm py-3",
-                              idx % 2 === 0 ? "bg-paper" : "bg-linen/40"
-                            )}
-                          >
-                            <div className="col-span-1 px-4 text-charcoal font-medium">
-                              {item.date}
-                            </div>
-                            <div className={cn("col-span-2 px-4 font-semibold", getStatusTextColor(item.status))}>
-                              {getStatusLabel(item.status)}
-                            </div>
+                    {/* Expandable Detail */}
+                    {expandedDay === idx && (
+                      <div className="px-5 pb-4 pt-2 bg-surface-2/30 border-t border-border animate-fade-in">
+                        <div className="grid grid-cols-3 gap-3 mb-3">
+                          <div className="text-center">
+                            <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mb-1">Tatap Dekat</p>
+                            <p className="text-xl font-bold text-error">{item.durationClose} <span className="text-xs font-normal">mnt</span></p>
                           </div>
-                        ))}
+                          <div className="text-center">
+                            <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mb-1">Tatap Aman</p>
+                            <p className="text-xl font-bold text-success">{item.durationFar} <span className="text-xs font-normal">mnt</span></p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-[10px] text-text-muted uppercase tracking-wider font-semibold mb-1">Kepatuhan</p>
+                            <p className={cn('text-xl font-bold', item.compliancePercent >= 70 ? 'text-success' : 'text-warning')}>
+                              {item.compliancePercent}%
+                            </p>
+                          </div>
+                        </div>
+                        <DurationBar close={item.durationClose} far={item.durationFar} />
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </>
-        )}
+          )}
+        </div>
 
         {/* Info Box */}
-        <div className="bg-linen border border-mist rounded-lg p-4 flex gap-3 items-start shadow-sm">
-          <Info className="w-5 h-5 text-twilight shrink-0 mt-0.5" />
-          <div className="text-sm text-charcoal font-af leading-relaxed">
-            Data history akan otomatis diperbarui dan disinkronisasikan saat sistem terhubung dengan backend SocaSob.
+        <div className="bg-surface-2 border border-border rounded-2xl p-5 flex gap-4 items-start">
+          <Info className="w-5 h-5 text-signal-blue shrink-0 mt-0.5" />
+          <div className="text-sm text-text-muted leading-relaxed">
+            Data history diperbarui otomatis saat sistem terhubung ke backend SocaSob. Lihat ringkasan analisis 6 bulan di halaman{' '}
+            <a href="/resume" className="text-signal-blue font-medium hover:underline">Resume</a>.
           </div>
         </div>
       </div>

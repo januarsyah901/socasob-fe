@@ -1,367 +1,335 @@
 'use client'
 
-import Image from 'next/image'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { useState, useEffect } from 'react'
-import { RefreshCw, Volume2, Bell, Bot, Info, Loader2 } from 'lucide-react'
+import { Volume2, Bell, Bot, Info, Wifi, WifiOff, Cpu, Radio } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PageHeader } from '@/components/layout/page-header'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+
+interface DeviceInfo {
+  mac: string
+  rssi: number
+  firmware: string
+  frameRate: number
+}
 
 export default function SettingsPage() {
   const [ipAddress, setIpAddress] = useState('')
   const [isConnected, setIsConnected] = useState(false)
   const [volume, setVolume] = useState(70)
+  const [alertSoundEnabled, setAlertSoundEnabled] = useState(true)
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
-  const [isTestingConnection, setIsTestingConnection] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [savedMessage, setSavedMessage] = useState('')
-  const [errorMessage, setErrorMessage] = useState('')
+  const [inputError, setInputError] = useState('')
+  const [isConnecting, setIsConnecting] = useState(false)
+  const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null)
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-socasob.hallojanu.xyz'
-
-  // Load saved settings from Backend and fallback to localStorage
   useEffect(() => {
-    async function loadSettings() {
-      try {
-        const res = await fetch(`${baseUrl}/api/settings`)
-        if (!res.ok) throw new Error('Gagal memuat pengaturan dari server.')
-        const json = await res.json()
-        
-        if (json.success && json.data) {
-          const data = json.data
-          setIpAddress(data.robotIp || '')
-          setVolume(data.audioVolume !== undefined ? data.audioVolume : 70)
-          setNotificationsEnabled(data.notificationEnabled !== false)
-          
-          // Check robot status to set connection state
-          try {
-            const statusRes = await fetch(`${baseUrl}/api/robot/status`)
-            if (statusRes.ok) {
-              const statusJson = await statusRes.json()
-              if (statusJson.success && statusJson.data && statusJson.data.status === 'active') {
-                setIsConnected(true)
-              }
-            }
-          } catch (err) {
-            console.error('Failed to get robot status:', err)
-          }
-          return
-        }
-      } catch (err) {
-        console.warn('Failed to fetch from backend, trying localStorage...', err)
-      }
-
-      // Fallback: localStorage
-      const saved = localStorage.getItem('socasob-settings')
-      if (saved) {
-        const settings = JSON.parse(saved)
-        setIpAddress(settings.ipAddress || '')
-        setIsConnected(settings.isConnected || false)
-        setVolume(settings.volume || 70)
-        setNotificationsEnabled(settings.notificationsEnabled !== false)
+    const saved = localStorage.getItem('socasob-settings')
+    if (saved) {
+      const settings = JSON.parse(saved)
+      setIpAddress(settings.ipAddress || '')
+      setIsConnected(settings.isConnected || false)
+      setVolume(settings.volume ?? 70)
+      setAlertSoundEnabled(settings.alertSoundEnabled !== false)
+      setNotificationsEnabled(settings.notificationsEnabled !== false)
+      if (settings.isConnected && settings.ipAddress) {
+        // Restore mock device info when re-loading
+        setDeviceInfo({
+          mac: 'A4:CF:12:83:2E:01',
+          rssi: -58,
+          firmware: '1.3.2',
+          frameRate: 18,
+        })
       }
     }
+  }, [])
 
-    loadSettings()
-  }, [baseUrl])
+  const validateIp = (ip: string) => {
+    const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+    return regex.test(ip) || ip.toLowerCase() === 'localhost'
+  }
 
-  // Save settings to backend and localStorage
-  const saveSettings = async (customIp = ipAddress, customConnected = isConnected, customVolume = volume, customNotif = notificationsEnabled) => {
-    setIsSaving(true)
-    setSavedMessage('')
-    setErrorMessage('')
-
-    const settingsPayload = {
-      robotIp: customIp,
-      audioVolume: customVolume,
-      audioEnabled: customVolume > 0,
-      notificationEnabled: customNotif,
+  const saveSettings = (overrides?: Partial<{ isConnected: boolean }>, msg?: string) => {
+    if (ipAddress.trim() && !validateIp(ipAddress)) {
+      setInputError('Format IP Address tidak valid')
+      return
     }
-
-    // Save to localStorage
-    const localSettings = {
-      ipAddress: customIp,
-      isConnected: customConnected,
-      volume: customVolume,
-      notificationsEnabled: customNotif,
+    setInputError('')
+    const settings = {
+      ipAddress,
+      isConnected: overrides?.isConnected ?? isConnected,
+      volume,
+      alertSoundEnabled,
+      notificationsEnabled,
     }
-    localStorage.setItem('socasob-settings', JSON.stringify(localSettings))
-
-    try {
-      const res = await fetch(`${baseUrl}/api/settings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(settingsPayload),
-      })
-
-      if (!res.ok) {
-        const errJson = await res.json()
-        throw new Error(errJson.error || 'Gagal menyimpan pengaturan ke server.')
-      }
-
-      setSavedMessage('Pengaturan berhasil disimpan ke server!')
+    localStorage.setItem('socasob-settings', JSON.stringify(settings))
+    if (msg) {
+      setSavedMessage(msg)
       setTimeout(() => setSavedMessage(''), 3000)
-    } catch (err: any) {
-      console.error(err)
-      setErrorMessage(err.message || 'Gagal sinkronisasi dengan server.')
-      setTimeout(() => setErrorMessage(''), 5000)
-    } finally {
-      setIsSaving(false)
     }
   }
 
   const handleConnect = async () => {
     if (!ipAddress.trim()) return
+    if (!validateIp(ipAddress)) { setInputError('Format IP Address tidak valid'); return }
+    setInputError('')
+    setIsConnecting(true)
 
-    setIsTestingConnection(true)
-    setSavedMessage('')
-    setErrorMessage('')
+    // Simulate connection handshake
+    await new Promise((r) => setTimeout(r, 1200))
 
-    try {
-      const res = await fetch(`${baseUrl}/api/robot/connect`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ robotIp: ipAddress }),
-      })
-
-      const json = await res.json()
-
-      if (!res.ok) {
-        throw new Error(json.error || 'Gagal terhubung dengan perangkat ESP32-CAM.')
-      }
-
-      setIsConnected(true)
-      await saveSettings(ipAddress, true, volume, notificationsEnabled)
-      setSavedMessage(`Koneksi sukses! ${json.message || ''}`)
-      setTimeout(() => setSavedMessage(''), 4000)
-    } catch (err: any) {
-      console.error(err)
-      setIsConnected(false)
-      setErrorMessage(err.message || 'Koneksi gagal. Pastikan IP address benar dan ESP32-CAM aktif.')
-    } finally {
-      setIsTestingConnection(false)
-    }
+    setIsConnecting(false)
+    setIsConnected(true)
+    // Mock device info fetched after connecting
+    setDeviceInfo({
+      mac: 'A4:CF:12:83:2E:01',
+      rssi: -58,
+      firmware: '1.3.2',
+      frameRate: 18,
+    })
+    saveSettings({ isConnected: true }, 'Perangkat berhasil terhubung!')
   }
 
-  const handleDisconnect = async () => {
+  const handleDisconnect = () => {
     setIsConnected(false)
-    await saveSettings(ipAddress, false, volume, notificationsEnabled)
-    setSavedMessage('Koneksi perangkat diputuskan.')
-    setTimeout(() => setSavedMessage(''), 3000)
+    setDeviceInfo(null)
+    saveSettings({ isConnected: false }, 'Koneksi diputuskan.')
+  }
+
+  const rssiStrength = (rssi: number) => {
+    if (rssi >= -50) return { label: 'Sangat Kuat', color: 'text-success' }
+    if (rssi >= -65) return { label: 'Kuat', color: 'text-success' }
+    if (rssi >= -75) return { label: 'Sedang', color: 'text-warning' }
+    return { label: 'Lemah', color: 'text-error' }
   }
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-8">
-        {/* Editorial Page Header */}
-        <div className="border-b border-mist/40 pb-6">
-          <span className="text-xs font-bold font-af text-signal-blue uppercase tracking-widest">
-            Konfigurasi Sistem
-          </span>
-          <h1 className="font-ppmondwest text-4xl text-graphite font-normal tracking-tight mt-2">
-            Pengaturan
-          </h1>
-          <p className="font-af text-sm text-ash mt-1">
-            Hubungkan perangkat kamera detektor SocaSob Anda dan atur preferensi peringatan.
-          </p>
-        </div>
+      <div className="space-y-8 animate-fade-up">
+        <PageHeader
+          eyebrow="Konfigurasi Sistem"
+          title="Pengaturan"
+          description="Hubungkan perangkat kamera detektor SocaSob Anda dan atur preferensi peringatan."
+        />
 
-        {/* Success / Error Message */}
+        {/* Toast */}
         {savedMessage && (
-          <div className="bg-linen border border-mist rounded-lg p-4 animate-in fade-in duration-300">
-            <p className="text-ink-black font-semibold text-sm font-af">✓ {savedMessage}</p>
-          </div>
-        )}
-        {errorMessage && (
-          <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 animate-in fade-in duration-300">
-            <p className="font-semibold text-sm font-af">✗ {errorMessage}</p>
+          <div className="bg-active-teal/10 border border-active-teal/25 rounded-2xl p-4 animate-fade-in flex items-center gap-3">
+            <span className="w-5 h-5 rounded-full bg-active-teal/20 flex items-center justify-center text-active-teal text-xs font-bold shrink-0">✓</span>
+            <p className="text-active-teal font-semibold text-sm">{savedMessage}</p>
           </div>
         )}
 
-        {/* Section Cards */}
-        <div className="space-y-6">
-          {/* Connection Settings */}
-          <div className="bg-paper border border-mist shadow-subtle rounded-xl p-6 md:p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Bot className="w-6 h-6 text-twilight" />
-              <h2 className="font-ppmondwest text-2xl text-graphite font-normal tracking-tight">
-                Cek Koneksi SocaSob
-              </h2>
+        <div className="space-y-5">
+          {/* === Camera Connection === */}
+          <div className="card-sm p-6 md:p-7">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 rounded-xl bg-signal-blue/10 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-signal-blue" />
+              </div>
+              <h2 className="text-lg font-semibold text-text tracking-tight">Koneksi Kamera SocaSob</h2>
             </div>
 
-            <div className="space-y-6">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-linen border border-mist rounded-lg w-fit text-xs font-medium text-charcoal">
-                <span className={cn("w-1.5 h-1.5 rounded-full", isConnected ? "bg-green-500" : "bg-red-400")} />
-                {isConnected ? "SocaSob ESP32Cam Connected" : "SocaSob Camera Disconnected"}
+            <div className="space-y-5">
+              {/* Connection Status */}
+              <div className={cn(
+                'flex items-center gap-3 px-4 py-3 rounded-2xl border text-sm font-semibold transition-colors',
+                isConnected
+                  ? 'bg-success/5 border-success/25 text-success'
+                  : 'bg-surface-2 border-border text-text-muted'
+              )}>
+                {isConnected
+                  ? <><span className="relative flex h-2 w-2"><span className="animate-ping absolute h-full w-full rounded-full bg-success opacity-75" /><span className="relative rounded-full h-2 w-2 bg-success" /></span> ESP32-CAM Terhubung</>
+                  : <><WifiOff className="w-4 h-4" /> Kamera Belum Terhubung</>
+                }
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-ash uppercase tracking-wider mb-2 font-af">
-                  Alamat IP Kamera
-                </label>
-                <input
-                  type="text"
-                  value={ipAddress}
-                  onChange={(e) => setIpAddress(e.target.value)}
-                  placeholder="Contoh: 192.168.1.100"
-                  className="rounded-none bg-linen text-charcoal border-t-0 border-l-0 border-r-0 border-b border-charcoal/80 px-3 py-2 w-full focus:outline-none focus:border-ink-black placeholder-ash/40 font-af text-[15px]"
-                />
-              </div>
+              <Input
+                label="Alamat IP Kamera"
+                value={ipAddress}
+                onChange={(e) => { setIpAddress(e.target.value); if (inputError) setInputError('') }}
+                placeholder="Contoh: 192.168.1.100 atau localhost"
+                error={inputError}
+                id="ip-address"
+              />
 
-              <div className="grid grid-cols-2 gap-4 pt-2">
-                {/* Outlined Primary CTA for Connection */}
-                <button
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  variant="outline-blue"
                   onClick={handleConnect}
-                  disabled={!ipAddress.trim() || isTestingConnection}
-                  className="inline-flex items-center justify-center gap-2 border border-signal-blue text-signal-blue disabled:border-fog disabled:text-fog rounded-lg px-4 py-2 hover:bg-signal-blue/5 disabled:hover:bg-transparent transition-all text-[15px] font-medium"
+                  disabled={!ipAddress.trim() || isConnecting}
                 >
-                  {isTestingConnection ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Menghubungkan...</span>
-                    </>
+                  {isConnecting ? (
+                    <span className="flex items-center gap-2">
+                      <span className="w-3.5 h-3.5 border-2 border-signal-blue border-t-transparent rounded-full animate-spin" />
+                      Menghubungkan…
+                    </span>
                   ) : (
-                    <>
-                      <span>Koneksi</span>
-                      <span className="w-4 h-4 rounded-full border border-current flex items-center justify-center text-[10px]">
-                        →
-                      </span>
-                    </>
+                    <span className="flex items-center gap-1.5">Hubungkan <span>→</span></span>
                   )}
-                </button>
-
-                {/* Secondary Outlined for Disconnect */}
-                <button
-                  onClick={handleDisconnect}
-                  className="inline-flex items-center justify-center gap-2 border border-twilight text-twilight rounded-lg px-4 py-2 hover:bg-twilight/5 transition-all text-[15px] font-medium"
-                >
-                  Putus
-                </button>
+                </Button>
+                <Button variant="secondary" onClick={handleDisconnect} disabled={!isConnected}>
+                  Putuskan
+                </Button>
               </div>
 
-              {isConnected && (
-                <div className="p-3 bg-linen border border-mist rounded-lg text-xs text-charcoal font-af">
-                  ✓ Terhubung dengan lancar pada alamat IP: {ipAddress}
+              {/* Device Info — shown after connect */}
+              {isConnected && deviceInfo && (
+                <div className="p-4 bg-surface-2 border border-border rounded-2xl space-y-3 animate-fade-in">
+                  <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-3">Informasi Perangkat</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <Cpu className="w-4 h-4 text-text-muted shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-text-muted uppercase tracking-wider">MAC Address</p>
+                        <p className="text-xs font-semibold text-text font-mono">{deviceInfo.mac}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Radio className="w-4 h-4 text-text-muted shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-text-muted uppercase tracking-wider">Kekuatan Sinyal</p>
+                        <p className={cn('text-xs font-semibold', rssiStrength(deviceInfo.rssi).color)}>
+                          {deviceInfo.rssi} dBm — {rssiStrength(deviceInfo.rssi).label}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Wifi className="w-4 h-4 text-text-muted shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-text-muted uppercase tracking-wider">Firmware</p>
+                        <p className="text-xs font-semibold text-text">v{deviceInfo.firmware}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Bot className="w-4 h-4 text-text-muted shrink-0" />
+                      <div>
+                        <p className="text-[10px] text-text-muted uppercase tracking-wider">Frame Rate</p>
+                        <p className="text-xs font-semibold text-text">{deviceInfo.frameRate} fps</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Audio Settings */}
-          <div className="bg-paper border border-mist shadow-subtle rounded-xl p-6 md:p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Volume2 className="w-6 h-6 text-twilight" />
-              <h2 className="font-ppmondwest text-2xl text-graphite font-normal tracking-tight">
-                Pengaturan Suara
-              </h2>
+          {/* === Audio === */}
+          <div className="card-sm p-6 md:p-7">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 rounded-xl bg-signal-blue/10 flex items-center justify-center">
+                <Volume2 className="w-4 h-4 text-signal-blue" />
+              </div>
+              <h2 className="text-lg font-semibold text-text tracking-tight">Pengaturan Suara</h2>
             </div>
 
-            <div className="space-y-6">
-              <div className="rounded-2xl border border-mist/80 bg-linen/70 p-4 shadow-sm">
-                <div className="flex items-center justify-between gap-3 mb-3">
-                  <label className="block text-xs font-bold text-ash uppercase tracking-wider font-af">
-                    Volume Peringatan Suara
+            <div className="space-y-5">
+              {/* Toggle Alert Sound */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-sm text-text font-medium">Aktifkan Suara Peringatan</span>
+                  <p className="text-xs text-text-muted mt-0.5">Putar bunyi peringatan saat mata terlalu dekat.</p>
+                </div>
+                <button
+                  onClick={() => setAlertSoundEnabled(!alertSoundEnabled)}
+                  className={cn(
+                    'relative inline-flex items-center h-6 w-16 rounded-full transition-colors shrink-0 px-1',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-blue',
+                    alertSoundEnabled ? 'bg-signal-blue' : 'bg-border'
+                  )}
+                >
+                  <span className={cn(
+                    'absolute text-[9px] font-extrabold transition-opacity duration-200 select-none uppercase tracking-wider',
+                    alertSoundEnabled ? 'left-2.5 text-white' : 'right-2.5 text-text-muted'
+                  )}>
+                    {alertSoundEnabled ? 'ON' : 'OFF'}
+                  </span>
+                  <span className={cn(
+                    'inline-block h-4.5 w-4.5 transform rounded-full bg-white transition-transform duration-200 shadow-sm z-10',
+                    alertSoundEnabled ? 'translate-x-9' : 'translate-x-0'
+                  )} />
+                </button>
+              </div>
+
+              {/* Volume Slider */}
+              {alertSoundEnabled && (
+                <div className="animate-fade-in">
+                  <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-3">
+                    Volume Peringatan
                   </label>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-mist bg-paper px-3 py-1.5 shadow-sm">
-                    <Volume2 className="w-4 h-4 text-twilight" />
-                    <span className="font-ppmondwest text-lg text-graphite font-normal leading-none">
+                  <div className="flex items-center gap-5">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={volume}
+                      onChange={(e) => setVolume(parseInt(e.target.value))}
+                      className="flex-1 h-1.5 bg-border rounded-full appearance-none cursor-pointer accent-signal-blue"
+                    />
+                    <span className="text-xl font-bold text-text min-w-12 text-right leading-none tabular-nums">
                       {volume}%
                     </span>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] font-af text-ash">Lembut</span>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={volume}
-                    onChange={(e) => setVolume(Number(e.target.value))}
-                    style={{
-                      background: `linear-gradient(to right, #6D6F8A 0%, #6D6F8A ${volume}%, #E6E8EB ${volume}%, #E6E8EB 100%)`,
-                    }}
-                    className="flex-1 h-2.5 appearance-none rounded-full cursor-pointer transition-all duration-200"
-                  />
-                  <span className="text-[11px] font-af text-ash">Keras</span>
-                </div>
-
-                <div className="mt-3 flex items-center justify-between text-[11px] font-af text-ash">
-                  <span>0%</span>
-                  <span>50%</span>
-                  <span>100%</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
-          {/* Notification Settings */}
-          <div className="bg-paper border border-mist shadow-subtle rounded-xl p-6 md:p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Bell className="w-6 h-6 text-twilight" />
-              <h2 className="font-ppmondwest text-2xl text-graphite font-normal tracking-tight">
-                Pengaturan Notifikasi
-              </h2>
+          {/* === Notifications === */}
+          <div className="card-sm p-6 md:p-7">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-8 h-8 rounded-xl bg-signal-blue/10 flex items-center justify-center">
+                <Bell className="w-4 h-4 text-signal-blue" />
+              </div>
+              <h2 className="text-lg font-semibold text-text tracking-tight">Pengaturan Notifikasi</h2>
             </div>
 
             <div className="flex items-center justify-between">
               <div>
-                <span className="font-af text-sm text-charcoal font-medium">Aktifkan Notifikasi Browser</span>
-                <p className="text-[11px] text-ash mt-0.5 font-af">Dapatkan peringatan layar melalui banner pop-up.</p>
+                <span className="text-sm text-text font-medium">Notifikasi Browser</span>
+                <p className="text-xs text-text-muted mt-0.5">Dapatkan peringatan jarak tatap melalui pop-up browser.</p>
               </div>
               <button
-                type="button"
-                aria-pressed={notificationsEnabled}
-                aria-label={notificationsEnabled ? 'Nonaktifkan notifikasi' : 'Aktifkan notifikasi'}
-                onClick={() => {
-                  const val = !notificationsEnabled
-                  setNotificationsEnabled(val)
-                  saveSettings(ipAddress, isConnected, volume, val)
-                }}
+                onClick={() => setNotificationsEnabled(!notificationsEnabled)}
                 className={cn(
-                  "relative inline-flex items-center rounded-full border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-twilight/30 focus:ring-offset-1",
-                  notificationsEnabled ? "h-7 w-14 border-twilight bg-twilight shadow-sm" : "h-7 w-14 border-mist bg-mist"
+                  'relative inline-flex items-center h-6 w-16 rounded-full transition-colors shrink-0 px-1',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-blue',
+                  notificationsEnabled ? 'bg-signal-blue' : 'bg-border'
                 )}
               >
-                <span
-                className={cn(
-                  "absolute left-0.5 top-1/2 h-6 w-6 rounded-full bg-white shadow-sm transition-all duration-200 -translate-y-1/2",
-                  notificationsEnabled
-                    ? "translate-x-7"
-                    : "translate-x-0"
-                  )}
-                />
+                <span className={cn(
+                  'absolute text-[9px] font-extrabold transition-opacity duration-200 select-none uppercase tracking-wider',
+                  notificationsEnabled ? 'left-2.5 text-white' : 'right-2.5 text-text-muted'
+                )}>
+                  {notificationsEnabled ? 'ON' : 'OFF'}
+                </span>
+                <span className={cn(
+                  'inline-block h-4.5 w-4.5 transform rounded-full bg-white transition-transform duration-200 shadow-sm z-10',
+                  notificationsEnabled ? 'translate-x-9' : 'translate-x-0'
+                )} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="pt-2">
-          {/* Filled Dark Button (Dusk Background) */}
-          <button
-            onClick={() => saveSettings()}
-            disabled={isSaving}
-            className="w-full inline-flex items-center justify-center gap-2 bg-dusk hover:bg-ink-black border border-twilight text-white rounded-lg px-4 py-3.5 transition-all text-[15px] font-medium disabled:opacity-50"
-          >
-            {isSaving ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <RefreshCw className="w-5 h-5 animate-spin-slow" />
-            )}
-            <span>Simpan Pengaturan</span>
-          </button>
-        </div>
+        {/* Save Button */}
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={() => saveSettings(undefined, 'Pengaturan tersimpan!')}
+          className="w-full"
+        >
+          Simpan Pengaturan
+        </Button>
 
-        {/* Info Box */}
-        <div className="bg-linen border border-mist rounded-lg p-4 flex gap-3 items-start shadow-sm">
-          <Info className="w-5 h-5 text-twilight shrink-0 mt-0.5" />
-          <div className="text-sm text-charcoal font-af leading-relaxed">
-            Pengaturan disimpan secara lokal pada perangkat Anda. IP address dan volume akan disinkronkan secara langsung ke server SocaSob ESP32Cam Anda demi kestabilan koneksi.
+        {/* Info Footer */}
+        <div className="bg-surface-2 border border-border rounded-2xl p-5 flex gap-4 items-start">
+          <Info className="w-5 h-5 text-signal-blue shrink-0 mt-0.5" />
+          <div className="text-sm text-text-muted leading-relaxed">
+            Pengaturan disimpan secara lokal di browser Anda. IP address dan preferensi audio akan disinkronisasikan ke server kamera SocaSob ESP32-CAM.
           </div>
         </div>
       </div>

@@ -1,114 +1,111 @@
-import Image from 'next/image'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { TimerDisplay } from '@/components/timer-display'
 import { EyeMetrics } from '@/components/eye-metrics'
+import { ConnectionBanner } from '@/components/connection-banner'
 import Link from 'next/link'
 
 export default function HomePage() {
   return (
     <DashboardLayout>
-      <div className="space-y-12">
-        {/* Atmospheric Illustration Card (Hero) */}
-        <section className="relative overflow-hidden rounded-3xl min-h-[380px] bg-gradient-to-br from-indigo-950 via-slate-900 to-cerulean flex items-center p-8 md:p-16 lg:p-20 shadow-subtle-3 border border-mist/20">
-          {/* Hand-painted digital style SVG illustration elements */}
-          <div className="absolute inset-0 z-0 pointer-events-none opacity-40 mix-blend-screen">
-            {/* Moonlit sky and stars illustration */}
-            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="twilightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#1f1f29" stopOpacity="0.8" />
-                  <stop offset="50%" stopColor="#0081c0" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#41a1cf" stopOpacity="0.2" />
-                </linearGradient>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#twilightGrad)" />
-              {/* Moon */}
-              <circle cx="85%" cy="25%" r="40" fill="#fefffc" opacity="0.95" filter="blur(1px)" />
-              <circle cx="82%" cy="25%" r="40" fill="#1f1f29" opacity="0.95" />
-              {/* Star sparkles */}
-              <circle cx="20%" cy="30%" r="1" fill="#ffffff" />
-              <circle cx="45%" cy="15%" r="1.5" fill="#ffffff" opacity="0.8" />
-              <circle cx="60%" cy="40%" r="1" fill="#ffffff" opacity="0.5" />
-              <circle cx="75%" cy="10%" r="2" fill="#ffffff" />
-              {/* Simple painterly hills/meadow lines */}
-              <path d="M0 320 C 300 280, 600 350, 1200 300 L1200 400 L0 400 Z" fill="#282834" opacity="0.3" />
-              <path d="M0 340 C 400 360, 800 310, 1200 350 L1200 400 L0 400 Z" fill="#1f1f29" opacity="0.5" />
+      <div className="space-y-8 md:space-y-10 animate-fade-up">
+
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <span className="text-[10px] font-semibold text-signal-blue uppercase tracking-widest block mb-1">
+              Dashboard Monitoring
+            </span>
+            <h1 className="text-2xl md:text-3xl font-bold text-text tracking-tight leading-tight">
+              Pantau Pandangan,<br className="hidden md:block" /> Sayangi Netra.
+            </h1>
+            <p className="text-sm text-text-muted mt-2 leading-relaxed">
+              Data jarak mata dan kondisi penglihatan Anda tersinkronisasi secara real-time dari kamera SocaSob.
+            </p>
+          </div>
+          <Link
+            href="/log"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-signal-blue hover:text-signal-blue/70 transition-colors shrink-0"
+          >
+            <span>Lihat histori lengkap</span>
+            <span>→</span>
+          </Link>
+        </div>
+
+        {/* Connection Banner — selalu visible */}
+        <ConnectionBanner />
+
+        {/* Timer + Eye Metrics — data utama langsung terlihat */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <TimerDisplay />
+          <div className="flex flex-col justify-between gap-6">
+            <EyeMetrics />
+          </div>
+        </section>
+
+        {/* Quick Nav Cards */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Link
+            href="/log"
+            className="card-sm p-5 flex items-center gap-4 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-signal-blue/10 flex items-center justify-center shrink-0 group-hover:bg-signal-blue/20 transition-colors">
+              <svg className="w-5 h-5 text-signal-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75a2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-text">Log Harian</p>
+              <p className="text-xs text-text-muted mt-0.5">Riwayat 7 hari terakhir</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/resume"
+            className="card-sm p-5 flex items-center gap-4 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-active-teal/10 flex items-center justify-center shrink-0 group-hover:bg-active-teal/20 transition-colors">
+              <svg className="w-5 h-5 text-active-teal" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-text">Resume Kesehatan</p>
+              <p className="text-xs text-text-muted mt-0.5">Analitik 6 bulan terakhir</p>
+            </div>
+          </Link>
+
+          <Link
+            href="/settings"
+            className="card-sm p-5 flex items-center gap-4 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0 group-hover:bg-warning/20 transition-colors">
+              <svg className="w-5 h-5 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-text">Pengaturan</p>
+              <p className="text-xs text-text-muted mt-0.5">Hubungkan kamera SocaSob</p>
+            </div>
+          </Link>
+        </section>
+
+        {/* Tip Box */}
+        <div className="bg-signal-blue/5 border border-signal-blue/20 rounded-2xl p-5 flex gap-4 items-start">
+          <div className="w-8 h-8 rounded-xl bg-signal-blue/15 flex items-center justify-center shrink-0">
+            <svg className="w-4 h-4 text-signal-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
             </svg>
           </div>
-
-          {/* Frosted Hero Overlay Card */}
-          <div className="relative z-10 bg-white/5 backdrop-blur-md border border-white/15 rounded-3xl p-6 md:p-10 max-w-xl text-white shadow-subtle-3">
-            <span className="text-xs font-bold font-af text-signal-blue uppercase tracking-widest">
-              Sistem Pantau Pintar
-            </span>
-            <h1 className="font-ppmondwest text-3xl md:text-4xl lg:text-[48px] text-white font-normal leading-[1.1] tracking-tight mt-2 mb-4">
-              Pantau Pandangan, Sayangi Netra.
-            </h1>
-            <p className="font-af text-sm md:text-base text-white/80 leading-relaxed mb-6">
-              SocaSob mendeteksi jarak tatap mata dan memberikan peringatan berkala untuk menjaga penglihatan Anda dari risiko kelelahan dan miopia.
-            </p>
-            <Link
-              href="/settings"
-              className="inline-flex items-center gap-2 text-sm font-medium text-white border border-white/60 rounded-lg px-4 py-2 hover:bg-white/10 transition-all"
-            >
-              <span>Hubungkan Kamera</span>
-              <span className="w-4 h-4 rounded-full border border-white/60 flex items-center justify-center text-[10px]">
-                →
-              </span>
-            </Link>
-          </div>
-        </section>
-
-        {/* 6+6 Layout Section */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-          {/* Greeting Box - styled as a White Content Card */}
-          <div className="bg-paper border border-mist shadow-subtle rounded-xl p-6 md:p-8 flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-linen border border-mist p-1 shadow-sm">
-                <Image
-                  src="/images/socasob-mascot.png"
-                  alt="SocaSob Mascot"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div>
-                <h2 className="font-ppmondwest text-3xl text-graphite font-normal tracking-tight">
-                  Halo, Sobat Soca!
-                </h2>
-                <p className="font-af text-sm text-ash leading-relaxed mt-2">
-                  Mari pelihara kebiasaan menatap layar yang sehat. Anda dapat memantau durasi tatap dekat dan status mata secara real-time di panel ini.
-                </p>
-              </div>
-            </div>
-
-            <div className="border-t border-mist/30 pt-4 mt-6">
-              <Link 
-                href="/log" 
-                className="inline-flex items-center gap-1.5 text-[15px] font-medium text-signal-blue hover:underline"
-              >
-                <span>Lihat histori monitoring lengkap</span>
-                <span className="text-[10px]">→</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* Timer Display Card */}
-          <TimerDisplay />
-        </section>
-
-        {/* Eye Health Metrics Section */}
-        <section className="border-t border-mist/40 pt-8">
-          <div className="max-w-xl">
-            <h2 className="font-ppmondwest text-2xl md:text-3xl text-graphite font-normal tracking-tight">
-              Kondisi Penglihatan Real-Time
-            </h2>
-            <p className="font-af text-sm text-ash mt-1">
-              Data di bawah ini disinkronkan secara langsung dari detektor kamera SocaSob Anda.
+          <div>
+            <p className="text-sm font-semibold text-text mb-0.5">Aturan 20-20-20</p>
+            <p className="text-xs text-text-muted leading-relaxed">
+              Setiap 20 menit menatap layar, alihkan pandangan ke objek berjarak 20 kaki (6 meter) selama 20 detik untuk melemaskan otot mata.
             </p>
           </div>
-          <EyeMetrics />
-        </section>
+        </div>
+
       </div>
     </DashboardLayout>
   )
