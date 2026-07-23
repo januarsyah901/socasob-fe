@@ -1,6 +1,6 @@
 # SocaSob Frontend
 
-Aplikasi monitoring kesehatan mata yang intelligent dengan real-time data streaming menggunakan Socket.io. Built dengan Next.js 16, React 19, dan Tailwind CSS.
+Aplikasi monitoring kesehatan mata yang intelligent dengan real-time data streaming menggunakan Socket.io. Built dengan Next.js 13, React 18, dan Tailwind CSS 3.
 
 ## Features
 
@@ -13,8 +13,8 @@ Aplikasi monitoring kesehatan mata yang intelligent dengan real-time data stream
 ### 📋 Log Page
 - **Daily Monitoring**: Durasi tatap dekat dan jauh hari ini
 - **Weekly History**: Riwayat 7 hari terakhir dengan status deteksi
-- **Expandable Sections**: Toggle untuk melihhat detail harian dan mingguan
-- **Status Indicators**: Visual indicators untuk Normal/Risiko Mata Lalah/Kelelahan Mata
+- **Expandable Sections**: Toggle untuk melihat detail harian dan mingguan
+- **Status Indicators**: Visual indicators untuk Normal/Risiko Mata Lelah/Kelelahan Mata
 
 ### 📊 Resume Page
 - **6-Month Summary**: Ringkasan 6 bulan terakhir
@@ -42,9 +42,9 @@ Aplikasi monitoring kesehatan mata yang intelligent dengan real-time data stream
 
 ## Tech Stack
 
-- **Frontend Framework**: Next.js 16 (App Router)
-- **React Version**: React 19
-- **Styling**: Tailwind CSS 4.2
+- **Frontend Framework**: Next.js 13 (App Router)
+- **React Version**: React 18
+- **Styling**: Tailwind CSS 3.4
 - **Real-time Communication**: Socket.io Client 4.8.3
 - **Icons**: Lucide React
 - **Language**: TypeScript
@@ -79,7 +79,7 @@ socasob-frontend/
 
 ### Prerequisites
 - Node.js 18+ 
-- pnpm (recommended) atau npm/yarn
+- npm (recommended) atau pnpm/yarn
 
 ### Installation
 
@@ -91,7 +91,7 @@ cd socasob-frontend
 
 2. Install dependencies
 ```bash
-pnpm install
+npm install
 ```
 
 3. Setup environment
@@ -102,7 +102,7 @@ cp .env.example .env.local
 
 4. Run development server
 ```bash
-pnpm dev
+npm run dev
 ```
 
 5. Open browser
@@ -126,18 +126,20 @@ NEXT_PUBLIC_SOCKET_URL=http://localhost:3001
 
 ### Start Dev Server
 ```bash
-pnpm dev
+npm run dev
+# Atau jika mengalami OpenSSL error pada versi Node.js tertentu:
+npm run dev:legacy
 ```
 
 ### Build for Production
 ```bash
-pnpm build
-pnpm start
+npm run build
+npm start
 ```
 
 ### Lint Code
 ```bash
-pnpm lint
+npm run lint
 ```
 
 ## Backend Integration
@@ -241,10 +243,10 @@ vercel deploy
 FROM node:18-alpine
 WORKDIR /app
 COPY . .
-RUN pnpm install
-RUN pnpm build
+RUN npm install
+RUN npm run build
 EXPOSE 3000
-CMD ["pnpm", "start"]
+CMD ["npm", "start"]
 ```
 
 ## Troubleshooting
@@ -267,7 +269,7 @@ CMD ["pnpm", "start"]
 
 ## Contributing
 
-Kontribusi sambut baik! Mohon:
+Kontribusi sangat disambut baik! Mohon:
 1. Fork repository
 2. Create feature branch
 3. Commit changes
