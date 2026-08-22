@@ -7,26 +7,19 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
 export function TimerDisplay() {
-  const { timer, eyeStatus, isConnected } = useSocket()
+  const { timer, eyeStatus, isConnected, robotId } = useSocket()
   const [localTimer, setLocalTimer] = useState({ hours: 0, minutes: 0, seconds: 0 })
 
   useEffect(() => {
     if (timer) setLocalTimer(timer)
   }, [timer])
 
+  // Jika socket disconnect atau robot tidak aktif, reset timer display
   useEffect(() => {
-    if (!isConnected) return
-    const interval = setInterval(() => {
-      setLocalTimer((prev) => {
-        let { hours, minutes, seconds } = prev
-        seconds++
-        if (seconds >= 60) { seconds = 0; minutes++ }
-        if (minutes >= 60) { minutes = 0; hours++ }
-        return { hours, minutes, seconds }
-      })
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [isConnected])
+    if (!isConnected || !robotId) {
+      setLocalTimer({ hours: 0, minutes: 0, seconds: 0 })
+    }
+  }, [isConnected, robotId])
 
   const fmt = (n: number) => String(n).padStart(2, '0')
 

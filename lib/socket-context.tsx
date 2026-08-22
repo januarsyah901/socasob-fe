@@ -1,11 +1,16 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
+
+const BE_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
+const BE_API = process.env.NEXT_PUBLIC_API_URL || BE_URL
 
 interface SocketContextType {
   socket: Socket | null
   isConnected: boolean
+  robotId: string | null
+  setRobotId: (id: string) => void
   timer: {
     hours: number
     minutes: number
@@ -22,30 +27,49 @@ const SocketContext = createContext<SocketContextType | undefined>(undefined)
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
+  const [robotId, setRobotIdState] = useState<string | null>(null)
   const [timer, setTimer] = useState({ hours: 0, minutes: 0, seconds: 0 })
   const [eyeDistance, setEyeDistance] = useState('Jauh')
   const [eyeStatus, setEyeStatus] = useState<SocketContextType['eyeStatus']>('disconnected')
   const [confidence, setConfidence] = useState(0)
   const [eyeScore, setEyeScore] = useState(0)
 
+  // Baca robotId dari localStorage saat mount
   useEffect(() => {
-    const socketInstance = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001', {
+    const saved = localStorage.getItem('socasob-robot-id')
+    if (saved) setRobotIdState(saved)
+  }, [])
+
+  // Inisialisasi socket
+  useEffect(() => {
+    const socketInstance = io(BE_URL, {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: Infinity,
     })
 
     socketInstance.on('connect', () => {
-      console.log('[SocaSob] Socket connected')
+      console.log('[SocaSob] Socket connected:', socketInstance.id)
       setIsConnected(true)
       setEyeStatus('normal')
+
+      // Join room robot jika robotId sudah ada
+      const savedRobotId = localStorage.getItem('socasob-robot-id')
+      if (savedRobotId) {
+        socketInstance.emit('subscribe-robot', { robot_id: savedRobotId })
+        console.log(`[SocaSob] Auto-subscribed to robot:${savedRobotId}`)
+      }
     })
 
     socketInstance.on('disconnect', () => {
       console.log('[SocaSob] Socket disconnected')
       setIsConnected(false)
       setEyeStatus('disconnected')
+    })
+
+    socketInstance.on('subscribed', (data: { robot_id: string; room: string }) => {
+      console.log(`[SocaSob] Subscribed to room: ${data.room}`)
     })
 
     socketInstance.on('timer-update', (data) => {
@@ -58,10 +82,15 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 
     socketInstance.on('eye-distance', (data) => {
       setEyeDistance(data.distance || 'Jauh')
-      if (data.confidence !== undefined) setConfidence(Math.round(data.confidence * 100))
+      if (data.confidence !== undefined) setConfidence(Math.round(data.confidence))
     })
 
     socketInstance.on('eye-status', (data) => {
+      if (data.status === 'disconnected') {
+        setEyeStatus('disconnected')
+        setEyeScore(0)
+        return
+      }
       setEyeStatus(data.status || 'normal')
       if (data.score !== undefined) setEyeScore(data.score)
     })
@@ -73,9 +102,27 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  // Fungsi untuk set robotId dan langsung subscribe ke room
+  const setRobotId = useCallback((id: string) => {
+    setRobotIdState(id)
+    localStorage.setItem('socasob-robot-id', id)
+    if (socket?.connected && id) {
+      socket.emit('subscribe-robot', { robot_id: id })
+      console.log(`[SocaSob] Subscribed to robot:${id}`)
+      // Reset timer & status saat pindah robot
+      setTimer({ hours: 0, minutes: 0, seconds: 0 })
+      setEyeDistance('Jauh')
+      setEyeStatus('disconnected')
+      setConfidence(0)
+      setEyeScore(0)
+    }
+  }, [socket])
+
   const value: SocketContextType = {
     socket,
     isConnected,
+    robotId,
+    setRobotId,
     timer,
     eyeDistance,
     eyeStatus,
@@ -92,4 +139,14 @@ export function useSocket() {
     throw new Error('useSocket must be used within a SocketProvider')
   }
   return context
+}
+
+/** Helper: fetch ke BE API dengan base URL yang benar */
+export async function beApi(path: string, options?: RequestInit) {
+  const url = `${BE_API}${path}`
+  const res = await fetch(url, {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  })
+  return res.json()
 }
