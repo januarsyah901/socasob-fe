@@ -2,6 +2,15 @@
 
 Aplikasi monitoring kesehatan mata yang intelligent dengan real-time data streaming menggunakan Socket.io. Built dengan Next.js 13, React 18, dan Tailwind CSS 3.
 
+---
+
+### 🌐 Live Production Deployment
+- **URL Publik**: [socasob.hallojanu.xyz](https://socasob.hallojanu.xyz) (Status: 🟢 200 OK)
+- **Backend Connected**: [be-socasob.hallojanu.xyz](https://be-socasob.hallojanu.xyz)
+- **ML Vision Pipeline**: [socasob-ml.hallojanu.xyz](https://socasob-ml.hallojanu.xyz)
+
+---
+
 ## Features
 
 ### 🏠 Homepage
