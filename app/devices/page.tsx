@@ -405,10 +405,7 @@ export default function DevicesPage() {
                           <div className="flex items-center gap-1.5">
                             {robot.isOnline ? (
                               <>
-                                <span className="relative flex h-2 w-2">
-                                  <span className="animate-ping absolute h-full w-full rounded-full bg-success opacity-75" />
-                                  <span className="relative rounded-full h-2 w-2 bg-success" />
-                                </span>
+                                <span className="w-2 h-2 rounded-full bg-success" />
                                 <span className="text-success font-medium">Online</span>
                               </>
                             ) : (

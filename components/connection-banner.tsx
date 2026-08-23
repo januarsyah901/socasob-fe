@@ -60,10 +60,7 @@ export function ConnectionBanner() {
   return (
     <div className="flex items-center justify-between bg-success/5 border border-success/25 rounded-2xl px-5 py-3.5 animate-fade-in">
       <div className="flex items-center gap-3">
-        <span className="relative flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success" />
-        </span>
+        <span className="w-2.5 h-2.5 rounded-full bg-success" />
         <span className="text-sm font-semibold text-success">
           Robot Aktif — Data Real-time
         </span>
