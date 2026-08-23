@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
+import { sendDesktopNotification, playGentleChime } from './desktop-notifications'
 
 const BE_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
 const BE_API = process.env.NEXT_PUBLIC_API_URL || BE_URL
@@ -81,8 +82,32 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     })
 
     socketInstance.on('eye-distance', (data) => {
-      setEyeDistance(data.distance || 'Jauh')
+      const dist = data.distance || 'Jauh'
+      setEyeDistance(dist)
       if (data.confidence !== undefined) setConfidence(Math.round(data.confidence))
+
+      // Trigger desktop notification & chime jika terlalu dekat
+      if (dist === 'Dekat') {
+        const settingsStr = localStorage.getItem('socasob-settings')
+        let soundEnabled = true
+        let notifyEnabled = true
+        if (settingsStr) {
+          try {
+            const s = JSON.parse(settingsStr)
+            soundEnabled = s.alertSoundEnabled !== false
+            notifyEnabled = s.notificationsEnabled !== false
+          } catch {}
+        }
+
+        if (soundEnabled) playGentleChime('warning')
+        if (notifyEnabled) {
+          sendDesktopNotification({
+            title: '⚠️ Peringatan Jarak Layar SocaSob',
+            body: 'Jarak mata Anda kurang dari 30 cm. Mundurkan posisi duduk Anda demi menjaga kesehatan netra.',
+            tag: 'socasob-distance-alert',
+          })
+        }
+      }
     })
 
     socketInstance.on('eye-status', (data) => {
@@ -91,8 +116,18 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         setEyeScore(0)
         return
       }
-      setEyeStatus(data.status || 'normal')
+      const st = data.status || 'normal'
+      setEyeStatus(st)
       if (data.score !== undefined) setEyeScore(data.score)
+
+      // Jika kelelahan ekstrem, beri notifikasi istirahat 20-20-20
+      if (st === 'risk_fatigue') {
+        sendDesktopNotification({
+          title: '🌿 Waktunya Istirahat Mata (20-20-20)',
+          body: 'Mata Anda mulai lelah setelah menatap layar. Lakukan senam mata 20 detik sekarang!',
+          tag: 'socasob-fatigue-alert',
+        })
+      }
     })
 
     setSocket(socketInstance)

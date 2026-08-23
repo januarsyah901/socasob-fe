@@ -25,8 +25,8 @@
     --text-muted: var(--color-slate-channel);
     --text-on-accent: #ffffff;
 
-    --shadow-dreamy: 0 4px 12px rgba(11, 54, 88, 0.04);
-    --shadow-dreamy-lg: 0 12px 48px rgba(11, 54, 88, 0.08);
+    --shadow-dreamy: rgba(11, 54, 88, 0.04) 0px 4px 12px 0px;
+    --shadow-dreamy-lg: rgba(11, 54, 88, 0.08) 0px 12px 48px 0px;
   }
 
   .dark {
@@ -46,8 +46,8 @@
     --color-canvas-white: #0f172a;
     --color-active-teal: #2dd4bf;
 
-    --shadow-dreamy: 0 4px 12px rgba(0, 0, 0, 0.2);
-    --shadow-dreamy-lg: 0 12px 48px rgba(0, 0, 0, 0.3);
+    --shadow-dreamy: rgba(0, 0, 0, 0.3) 0px 4px 12px 0px;
+    --shadow-dreamy-lg: rgba(0, 0, 0, 0.5) 0px 12px 48px 0px;
   }
 
   html {
@@ -68,13 +68,13 @@
   }
 
   ::selection {
-    background: rgba(78, 154, 217, 0.15);
+    background: rgba(78, 154, 217, 0.2);
     color: var(--text);
   }
 
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
   ::-webkit-scrollbar-track {
     background: var(--bg);
@@ -86,6 +86,13 @@
   ::-webkit-scrollbar-thumb:hover {
     background: var(--color-pale-steel);
   }
+
+  /* Accessible focus indicators */
+  :focus-visible {
+    outline: 2px solid var(--color-signal-blue);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
 }
 
 @layer utilities {
@@ -96,6 +103,19 @@
   .surface-2 {
     background: var(--surface-2);
   }
+  .text-body {
+    color: var(--text);
+  }
+  .text-muted {
+    color: var(--text-muted);
+  }
+  .border-base {
+    border-color: var(--border);
+  }
+  .bg-base {
+    background: var(--bg);
+  }
+
   .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -109,44 +129,49 @@
     box-shadow: var(--shadow-dreamy);
   }
   .input-base {
+    width: 100%;
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: 24px;
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 1.25rem;
+    font-size: 0.925rem;
     color: var(--text);
-    font-size: 0.875rem;
     outline: none;
-    transition: all 0.15s ease;
+    transition: all 0.2s ease;
   }
   .input-base:focus {
     border-color: var(--color-signal-blue);
-    box-shadow: 0 0 0 3px rgba(78, 154, 217, 0.15);
+    box-shadow: 0 0 0 3px rgba(78, 154, 217, 0.18);
   }
   .input-base::placeholder {
     color: var(--text-muted);
+    opacity: 0.7;
   }
 
   .animate-fade-up {
-    animation: fade-up 0.4s ease-out both;
+    animation: fade-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   .animate-fade-in {
-    animation: fade-in 0.3s ease-out both;
+    animation: fade-in 0.35s ease-out both;
   }
   .animate-twinkle {
-    animation: twinkle 3s ease-in-out infinite;
+    animation: twinkle 3.5s ease-in-out infinite;
   }
   .animate-drift {
-    animation: drift 6s ease-in-out infinite alternate;
+    animation: drift 18s linear infinite alternate;
   }
   .animate-pulse-glow-red {
     animation: pulse-glow-red 2s ease-in-out infinite;
+  }
+  .animate-pulse-glow-teal {
+    animation: pulse-glow-teal 2s ease-in-out infinite;
   }
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
 
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes fade-in {
@@ -158,21 +183,68 @@
     50% { opacity: 0.9; }
   }
   @keyframes drift {
-    from { transform: translateX(-4%); }
-    to { transform: translateX(4%); }
-  }
-  @keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-  @keyframes emoji-pop {
-    0% { transform: scale(0.5); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    from { transform: translateX(-3%); }
+    to { transform: translateX(3%); }
   }
   @keyframes pulse-glow-red {
     0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
-    50% { box-shadow: 0 0 20px 4px rgba(220, 38, 38, 0.15); }
+    50% { box-shadow: 0 0 24px 4px rgba(220, 38, 38, 0.2); }
   }
+  @keyframes pulse-glow-teal {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(66, 179, 177, 0); }
+    50% { box-shadow: 0 0 20px 4px rgba(66, 179, 177, 0.2); }
+  }
+}
+
+/* Print Stylesheet for Medical Summary Report / PDF Export */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  aside, header, nav, footer, button, .cookie-banner {
+    display: none !important;
+  }
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+  .print-area {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 1.5rem 2rem !important;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 10.5pt;
+    line-height: 1.4;
+  }
+  * {
+    color: #000000 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+  a {
+    text-decoration: none !important;
+    color: #000000 !important;
+  }
+  .print-area section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .print-area header,
+  .print-area footer {
+    break-inside: avoid;
+  }
+  h1 { font-size: 20pt; font-weight: 700; margin-bottom: 0.25rem; }
+  h2 { font-size: 12pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; margin-top: 1rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
