@@ -87,15 +87,15 @@ export function MedicalReportView({ report }: { report: MedicalReportData }) {
         
         {/* Background watermark (visible slightly) */}
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none no-print">
-          <Eye className="w-96 h-96" />
+          <img src="/images/Logo Socasob.png" alt="" className="w-96 h-96 object-contain grayscale" />
         </div>
 
         <div className="p-8 md:p-12 relative z-10">
           {/* Clinic & System Header */}
           <header className="border-b-[3px] border-slate-900 pb-6 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="size-16 rounded-xl bg-signal-blue flex items-center justify-center shrink-0">
-                <Eye className="size-8 text-white" />
+              <div className="size-16 shrink-0 flex items-center justify-center">
+                <img src="/images/Logo Socasob.png" alt="SocaSob Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight uppercase" style={{ fontFamily: 'var(--font-figtree)' }}>
@@ -252,9 +252,6 @@ export function MedicalReportView({ report }: { report: MedicalReportData }) {
               <div className="flex flex-col items-end text-center">
                 <p className="font-semibold text-slate-600 mb-16">Dokter Pemeriksa / Optometris</p>
                 <div className="w-48 border-b-2 border-slate-900 relative">
-                  <div className="absolute bottom-1 right-8 opacity-20 pointer-events-none no-print rotate-[-15deg]">
-                    <span className="text-4xl font-black text-blue-900 uppercase tracking-widest border-4 border-blue-900 p-1">VERIFIED</span>
-                  </div>
                 </div>
                 <p className="text-slate-900 font-bold mt-2">................................................</p>
                 <p className="text-slate-500 text-[10px] uppercase mt-1 tracking-widest">SIP / NIK</p>

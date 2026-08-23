@@ -29,10 +29,6 @@ export default function HomePage() {
               <span className="text-[10px] font-extrabold text-signal-blue uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-signal-blue/10 border border-signal-blue/20">
                 Dashboard Monitoring AI
               </span>
-              <span className="flex items-center gap-1 text-[10px] font-bold text-active-teal uppercase tracking-wider">
-                <span className="w-1.5 h-1.5 rounded-full bg-active-teal animate-pulse" />
-                Live Telemetry
-              </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-text tracking-tight leading-tight font-figtree">
               Pantau Pandangan, Sayangi Netra.
