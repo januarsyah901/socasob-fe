@@ -8,6 +8,7 @@ import {
   Home,
   ClipboardList,
   BarChart3,
+  Bot,
   Settings,
   Menu,
   X,
@@ -20,6 +21,7 @@ const navItems = [
   { href: '/', label: 'Beranda', icon: Home },
   { href: '/log', label: 'Log', icon: ClipboardList },
   { href: '/resume', label: 'Resume', icon: BarChart3 },
+  { href: '/devices', label: 'Perangkat', icon: Bot },
 ]
 
 export function Sidebar() {

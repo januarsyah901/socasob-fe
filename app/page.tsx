@@ -43,7 +43,22 @@ export default function HomePage() {
         </section>
 
         {/* Quick Nav Cards */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            href="/devices"
+            className="card-sm p-5 flex items-center gap-4 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-signal-blue/10 flex items-center justify-center shrink-0 group-hover:bg-signal-blue/20 transition-colors">
+              <svg className="w-5 h-5 text-signal-blue" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25zm.75-12h9v9h-9v-9z" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-text">Perangkat</p>
+              <p className="text-xs text-text-muted mt-0.5">Kelola robot ESP32</p>
+            </div>
+          </Link>
+
           <Link
             href="/log"
             className="card-sm p-5 flex items-center gap-4 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
@@ -86,7 +101,7 @@ export default function HomePage() {
             </div>
             <div>
               <p className="text-sm font-semibold text-text">Pengaturan</p>
-              <p className="text-xs text-text-muted mt-0.5">Hubungkan kamera SocaSob</p>
+              <p className="text-xs text-text-muted mt-0.5">Preferensi & Audio</p>
             </div>
           </Link>
         </section>

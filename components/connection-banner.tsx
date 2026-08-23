@@ -16,14 +16,14 @@ export function ConnectionBanner() {
         <div className="flex items-center gap-3">
           <span className="w-2.5 h-2.5 rounded-full bg-warning animate-pulse" />
           <span className="text-sm font-semibold text-warning">
-            Robot Belum Dikonfigurasi
+            Perangkat Belum Dipilih
           </span>
         </div>
         <Link
-          href="/settings"
+          href="/devices"
           className="text-xs font-semibold text-signal-blue hover:underline"
         >
-          Konfigurasi →
+          Pilih Perangkat →
         </Link>
       </div>
     )
