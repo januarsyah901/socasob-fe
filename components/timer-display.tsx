@@ -44,19 +44,6 @@ export function TimerDisplay() {
             Durasi Monitoring
           </h2>
         </div>
-        <div className="flex items-center gap-1.5">
-          {isConnected ? (
-            <>
-              <span className="w-2 h-2 rounded-full bg-active-teal" />
-              <span className="text-[10px] font-semibold text-active-teal uppercase tracking-wider">Aktif</span>
-            </>
-          ) : (
-            <>
-              <span className="w-2 h-2 rounded-full bg-text-muted" />
-              <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Offline</span>
-            </>
-          )}
-        </div>
       </div>
 
       {/* Timer Digits */}

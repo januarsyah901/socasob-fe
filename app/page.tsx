@@ -4,6 +4,7 @@ import { DashboardLayout } from '@/components/dashboard-layout'
 import { TimerDisplay } from '@/components/timer-display'
 import { EyeMetrics } from '@/components/eye-metrics'
 import { ConnectionBanner } from '@/components/connection-banner'
+import { SystemStatus } from '@/components/system-status'
 import { DesktopAlertBanner } from '@/components/notifications/desktop-alert-banner'
 import { EyeExerciseCard } from '@/components/exercise/eye-exercise-card'
 import Link from 'next/link'
@@ -59,6 +60,11 @@ export default function HomePage() {
           <div className="flex flex-col justify-between gap-6">
             <EyeMetrics />
           </div>
+        </section>
+
+        {/* Status Sistem */}
+        <section>
+          <SystemStatus />
         </section>
 
         {/* Interactive Micro-Break Module (Senam Mata 20-20-20 & YouTube Embed) */}

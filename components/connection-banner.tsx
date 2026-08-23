@@ -14,7 +14,6 @@ export function ConnectionBanner() {
     return (
       <div className="flex items-center justify-between bg-warning/5 border border-warning/25 rounded-2xl px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <span className="w-2.5 h-2.5 rounded-full bg-warning animate-pulse" />
           <span className="text-sm font-semibold text-warning">
             Perangkat Belum Dipilih
           </span>

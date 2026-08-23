@@ -145,20 +145,6 @@ export function EyeMetrics() {
           </div>
         </div>
 
-        {/* Footer info ringan */}
-        <div className="mt-4 pt-4 border-t border-border/60 flex items-center justify-between text-[10px] text-text-muted font-bold">
-          <span className="uppercase tracking-wider">Status Kamera</span>
-          <span className={cn('flex items-center gap-1.5', isConnected ? 'text-success' : 'text-text-muted')}>
-            {isConnected ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-                AKTIF
-              </>
-            ) : (
-              'TERPUTUS'
-            )}
-          </span>
-        </div>
       </div>
     </div>
   )
