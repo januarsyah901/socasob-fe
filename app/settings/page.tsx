@@ -22,7 +22,6 @@ export default function SettingsPage() {
   const { isConnected, setRobotId, robotId: activeRobotId } = useSocket()
 
   const [robotIdInput, setRobotIdInput] = useState('')
-  const [robotIpInput, setRobotIpInput] = useState('')
   const [volume, setVolume] = useState(70)
   const [alertSoundEnabled, setAlertSoundEnabled] = useState(true)
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
@@ -42,7 +41,6 @@ export default function SettingsPage() {
         const data = await beApi('/api/settings')
         if (data.success && data.data) {
           setRobotIdInput(data.data.robotId || '')
-          setRobotIpInput(data.data.robotIp || '')
           setVolume(data.data.audioVolume ?? 70)
           setAlertSoundEnabled(data.data.audioEnabled !== false)
           setNotificationsEnabled(data.data.notificationEnabled !== false)
@@ -53,7 +51,6 @@ export default function SettingsPage() {
         if (saved) {
           const s = JSON.parse(saved)
           setRobotIdInput(s.robotId || '')
-          setRobotIpInput(s.robotIp || '')
           setVolume(s.volume ?? 70)
           setAlertSoundEnabled(s.alertSoundEnabled !== false)
           setNotificationsEnabled(s.notificationsEnabled !== false)
@@ -62,12 +59,6 @@ export default function SettingsPage() {
     }
     loadSettings()
   }, [])
-
-  const validateIp = (ip: string) => {
-    if (!ip.trim()) return true // ip opsional
-    const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
-    return regex.test(ip) || ip.toLowerCase() === 'localhost'
-  }
 
   const showMessage = (msg: string, isError = false) => {
     if (isError) {
@@ -86,17 +77,12 @@ export default function SettingsPage() {
       setInputError('Robot ID wajib diisi')
       return
     }
-    if (robotIpInput && !validateIp(robotIpInput)) {
-      setInputError('Format IP Address tidak valid')
-      return
-    }
     setInputError('')
     setIsSaving(true)
 
     try {
       const payload = {
         robotId: robotIdInput.trim(),
-        robotIp: robotIpInput.trim() || '192.168.1.100',
         audioVolume: volume,
         audioEnabled: alertSoundEnabled,
         notificationEnabled: notificationsEnabled,
@@ -111,7 +97,6 @@ export default function SettingsPage() {
         // Simpan ke localStorage sebagai cache
         localStorage.setItem('socasob-settings', JSON.stringify({
           robotId: payload.robotId,
-          robotIp: payload.robotIp,
           volume,
           alertSoundEnabled,
           notificationsEnabled,
@@ -203,7 +188,7 @@ export default function SettingsPage() {
                   : 'bg-surface-2 border-border text-text-muted'
               )}>
                 {isConnected
-                  ? <><span className="relative flex h-2 w-2"><span className="animate-ping absolute h-full w-full rounded-full bg-success opacity-75" /><span className="relative rounded-full h-2 w-2 bg-success" /></span> Backend Terhubung</>
+                  ? <><span className="h-2 w-2 rounded-full bg-success shrink-0" /> Backend Terhubung</>
                   : <><WifiOff className="w-4 h-4" /> Backend Tidak Terhubung</>
                 }
               </div>
@@ -215,14 +200,6 @@ export default function SettingsPage() {
                 placeholder="Contoh: fadfa566 atau A4CF12832E01"
                 error={inputError}
                 id="robot-id"
-              />
-
-              <Input
-                label="IP Address Robot (opsional)"
-                value={robotIpInput}
-                onChange={(e) => setRobotIpInput(e.target.value)}
-                placeholder="Contoh: 192.168.1.100"
-                id="robot-ip"
               />
 
               <div className="grid grid-cols-2 gap-4">
@@ -265,10 +242,6 @@ export default function SettingsPage() {
                       <p className="text-xs font-semibold text-text font-mono">{robotStatus.robotId}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-text-muted uppercase tracking-wider">IP Address</p>
-                      <p className="text-xs font-semibold text-text">{robotStatus.ipAddress}</p>
-                    </div>
-                    <div>
                       <p className="text-[10px] text-text-muted uppercase tracking-wider">Status Robot</p>
                       <p className={cn(
                         'text-xs font-bold',
@@ -277,7 +250,7 @@ export default function SettingsPage() {
                         {robotStatus.isOnline ? '🟢 Online (Mengirim Data)' : '⚫ Offline (Belum Mengirim)'}
                       </p>
                     </div>
-                    <div>
+                    <div className="col-span-2">
                       <p className="text-[10px] text-text-muted uppercase tracking-wider">Socket BE</p>
                       <p className={cn(
                         'text-xs font-bold',
