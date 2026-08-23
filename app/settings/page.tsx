@@ -34,13 +34,12 @@ export default function SettingsPage() {
   const [robotStatus, setRobotStatus] = useState<RobotStatus | null>(null)
   const [statusError, setStatusError] = useState('')
 
-  // Load settings dari BE saat mount
+  // Load settings dari BE saat mount (hanya audio preferences, bukan robotId)
   useEffect(() => {
     const loadSettings = async () => {
       try {
         const data = await beApi('/api/settings')
         if (data.success && data.data) {
-          setRobotIdInput(data.data.robotId || '')
           setVolume(data.data.audioVolume ?? 70)
           setAlertSoundEnabled(data.data.audioEnabled !== false)
           setNotificationsEnabled(data.data.notificationEnabled !== false)
@@ -50,7 +49,6 @@ export default function SettingsPage() {
         const saved = localStorage.getItem('socasob-settings')
         if (saved) {
           const s = JSON.parse(saved)
-          setRobotIdInput(s.robotId || '')
           setVolume(s.volume ?? 70)
           setAlertSoundEnabled(s.alertSoundEnabled !== false)
           setNotificationsEnabled(s.notificationsEnabled !== false)
@@ -81,8 +79,20 @@ export default function SettingsPage() {
     setIsSaving(true)
 
     try {
+      const cleanId = robotIdInput.trim()
+
+      // === VALIDASI: Cek apakah robot ID terdaftar di sistem ===
+      const validateRes = await beApi(`/api/robots/validate/${encodeURIComponent(cleanId)}`)
+      if (!validateRes.success || !validateRes.valid) {
+        setInputError(
+          `Robot ID "${cleanId}" belum terdaftar. Daftarkan dulu di halaman Perangkat.`
+        )
+        setIsSaving(false)
+        return
+      }
+
       const payload = {
-        robotId: robotIdInput.trim(),
+        robotId: cleanId,
         audioVolume: volume,
         audioEnabled: alertSoundEnabled,
         notificationEnabled: notificationsEnabled,
@@ -94,7 +104,6 @@ export default function SettingsPage() {
       })
 
       if (data.success) {
-        // Simpan ke localStorage sebagai cache
         localStorage.setItem('socasob-settings', JSON.stringify({
           robotId: payload.robotId,
           volume,
@@ -102,7 +111,7 @@ export default function SettingsPage() {
           notificationsEnabled,
         }))
 
-        // Subscribe socket ke room robot baru
+        // Sinkronisasi global: update robotId di socket-context & localStorage
         setRobotId(payload.robotId)
 
         showMessage('Pengaturan tersimpan & terhubung ke robot!')
@@ -136,7 +145,8 @@ export default function SettingsPage() {
     }
   }, [])
 
-  // Cek status robot jika sudah ada robotId aktif
+  // Sinkron dua arah: saat activeRobotId berubah (misal dari halaman /devices),
+  // update input field & fetch status terbaru secara otomatis
   useEffect(() => {
     if (activeRobotId) {
       setRobotIdInput(activeRobotId)
@@ -202,6 +212,13 @@ export default function SettingsPage() {
                 id="robot-id"
               />
 
+              <p className="text-xs text-text-muted leading-relaxed -mt-2">
+                Hanya Robot ID yang sudah terdaftar yang bisa dihubungkan.{' '}
+                <a href="/devices" className="text-signal-blue font-semibold hover:underline">
+                  Kelola perangkat →
+                </a>
+              </p>
+
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant="outline-blue"
@@ -211,7 +228,7 @@ export default function SettingsPage() {
                   {isSaving ? (
                     <span className="flex items-center gap-2">
                       <span className="w-3.5 h-3.5 border-2 border-signal-blue border-t-transparent rounded-full animate-spin" />
-                      Menyimpan…
+                      Memvalidasi…
                     </span>
                   ) : (
                     <span className="flex items-center gap-1.5">Simpan & Hubungkan <span>→</span></span>
