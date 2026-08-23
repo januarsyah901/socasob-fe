@@ -196,35 +196,37 @@
 
 /* ── Print Stylesheet for Medical PDF Export ── */
 @media print {
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
   .no-print { display: none !important; }
   .print-area {
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
-    padding: 2rem 3rem !important;
-    margin-top: 2rem !important;
+    padding: 0 !important;
+    margin: 0 !important;
     max-width: 100% !important;
   }
-  body {
+  body, html {
     background: #fff !important;
     color: #000 !important;
-    font-size: 11pt;
+    font-size: 10pt;
     line-height: 1.5;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   * {
-    color: #000 !important;
-    background: transparent !important;
     box-shadow: none !important;
     text-shadow: none !important;
   }
-  a { text-decoration: none !important; color: #000 !important; }
-  .print-area section { break-inside: avoid; page-break-inside: avoid; }
+  a { text-decoration: none !important; color: inherit !important; }
+  .print-area section { break-inside: avoid; page-break-inside: avoid; margin-bottom: 1.5rem; }
   .print-area header, .print-area footer { break-inside: avoid; }
-  h1 { font-size: 22pt; font-weight: 700; margin-bottom: 0.5rem; }
-  h2 { font-size: 13pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem; margin-top: 1.5rem; }
-  p, li { font-size: 11pt; orphans: 3; widows: 3; }
-  .print-area .grid { display: block !important; }
-  .print-area .grid > div { margin-bottom: 1rem; }
+  h1 { font-size: 18pt; font-weight: 800; margin-bottom: 0.25rem; }
+  h2 { font-size: 11pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; margin-top: 1rem; color: #475569 !important; }
+  p, li, span, div { orphans: 3; widows: 3; }
 }
 
 /* ── Reduced motion ── */
