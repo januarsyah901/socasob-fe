@@ -236,28 +236,36 @@ export default function SettingsPage() {
               {robotStatus && (
                 <div className="p-4 bg-surface-2 border border-border rounded-2xl space-y-3 animate-fade-in">
                   <p className="text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-3">Status Robot dari Server</p>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <p className="text-[10px] text-text-muted uppercase tracking-wider">Robot ID</p>
+                      <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Robot ID</p>
                       <p className="text-xs font-semibold text-text font-mono">{robotStatus.robotId}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-text-muted uppercase tracking-wider">Status Robot</p>
-                      <p className={cn(
-                        'text-xs font-bold',
+                      <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Status Robot</p>
+                      <div className={cn(
+                        'flex items-center gap-2 text-xs font-semibold',
                         robotStatus.isOnline ? 'text-success' : 'text-text-muted'
                       )}>
-                        {robotStatus.isOnline ? '🟢 Online (Mengirim Data)' : '⚫ Offline (Belum Mengirim)'}
-                      </p>
+                        <span className={cn(
+                          'w-2 h-2 rounded-full shrink-0',
+                          robotStatus.isOnline ? 'bg-success' : 'bg-text-muted'
+                        )} />
+                        <span>{robotStatus.isOnline ? 'Online (Mengirim Data)' : 'Offline (Belum Mengirim)'}</span>
+                      </div>
                     </div>
-                    <div className="col-span-2">
-                      <p className="text-[10px] text-text-muted uppercase tracking-wider">Socket BE</p>
-                      <p className={cn(
-                        'text-xs font-bold',
+                    <div className="sm:col-span-2">
+                      <p className="text-[10px] text-text-muted uppercase tracking-wider mb-1">Socket BE</p>
+                      <div className={cn(
+                        'flex items-center gap-2 text-xs font-semibold',
                         isConnected ? 'text-success' : 'text-error'
                       )}>
-                        {isConnected ? '🟢 Terhubung' : '🔴 Putus'}
-                      </p>
+                        <span className={cn(
+                          'w-2 h-2 rounded-full shrink-0',
+                          isConnected ? 'bg-success' : 'bg-error'
+                        )} />
+                        <span>{isConnected ? 'Terhubung' : 'Putus'}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
