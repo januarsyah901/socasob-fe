@@ -61,14 +61,14 @@ export function Sidebar() {
             className={cn(
               'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
               active
-                ? 'bg-ice-tint text-signal-blue dark:bg-surface-2 dark:text-white font-bold shadow-sm'
-                : 'text-text-muted hover:text-text hover:bg-surface-2'
+                ? 'bg-ice-tint text-signal-blue dark:bg-(--surface-2) dark:text-white font-bold shadow-sm'
+                : 'text-muted hover:text-body hover:bg-(--surface-2)'
             )}
           >
             <item.icon
               className={cn(
-                'w-4.5 h-4.5 shrink-0',
-                active ? 'text-signal-blue dark:text-white' : 'text-text-muted'
+                'size-4.5 shrink-0',
+                active ? 'text-signal-blue dark:text-white' : 'text-muted'
               )}
             />
             {item.label}
@@ -79,7 +79,7 @@ export function Sidebar() {
   )
 
   const footer = (
-    <div className="mt-auto space-y-3 pt-3 border-t border-border">
+    <div className="mt-auto space-y-3">
       <div className="flex items-center gap-3 px-1">
         <Link
           href="/settings"
@@ -87,31 +87,31 @@ export function Sidebar() {
           className="flex items-center gap-2.5 flex-1 min-w-0 group"
           title="Profil & pengaturan"
         >
-          <UserAvatar name="Bang Jan" className="w-9 h-9 shrink-0 text-sm" />
+          <UserAvatar name="Bang Jan" className="size-9 shrink-0 text-sm" />
           <span className="min-w-0">
-            <span className="block text-sm font-medium text-text truncate group-hover:underline">
+            <span className="block text-sm font-medium text-body truncate group-hover:underline">
               Bang Jan
             </span>
-            <span className="block text-xs text-text-muted truncate">Soca Care Explorer</span>
+            <span className="block text-xs text-muted truncate">Soca Care Explorer</span>
           </span>
         </Link>
         <button
           onClick={toggleTheme}
           aria-label="Ganti Tema"
-          className="p-2 rounded-lg text-text-muted hover:text-text hover:bg-surface-2 cursor-pointer transition-colors"
+          className="p-2 rounded-lg text-muted hover:text-body hover:bg-(--surface-2) cursor-pointer transition-colors"
         >
           {isDark ? (
-            <Sun className="w-4.5 h-4.5 text-amber-400" />
+            <Sun className="size-4.5 text-amber-400" />
           ) : (
-            <Moon className="w-4.5 h-4.5 text-slate-500" />
+            <Moon className="size-4.5 text-slate-500" />
           )}
         </button>
         <Link
           href="/settings"
           aria-label="Pengaturan"
-          className="p-2 rounded-lg text-text-muted hover:text-text hover:bg-surface-2 transition-colors"
+          className="p-2 rounded-lg text-muted hover:text-body hover:bg-(--surface-2) transition-colors"
         >
-          <Settings className="w-4.5 h-4.5" />
+          <Settings className="size-4.5" />
         </Link>
       </div>
     </div>
@@ -162,7 +162,7 @@ export function Sidebar() {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="no-print hidden lg:flex w-64 shrink-0 flex-col surface border-r border-border p-4 fixed left-0 top-0 h-screen overflow-y-auto bg-surface z-40">
+      <aside className="no-print hidden lg:flex w-64 shrink-0 flex-col surface border-r border-base p-4 sticky top-0 h-screen overflow-y-auto z-40">
         <Link href="/" className="flex items-center px-2 mb-6">
           <span className="font-extrabold text-2xl tracking-tighter text-signal-blue lowercase font-figtree">
             socasob

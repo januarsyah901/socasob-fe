@@ -1,68 +1,100 @@
-'use client'
+'use client';
 
-import { useEffect, useRef, useCallback } from 'react'
-import { createPortal } from 'react-dom'
-import { X } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
-interface ModalProps {
-  open: boolean
-  onClose: () => void
-  title?: string
-  children: React.ReactNode
-  className?: string
-}
-
-export function Modal({ open, onClose, title, children, className }: ModalProps) {
-  const overlayRef = useRef<HTMLDivElement>(null)
-
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    },
-    [onClose]
-  )
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  className,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (open) document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [open, handleKeyDown])
+    if (!open) return;
+    const dialog = ref.current;
 
-  useEffect(() => {
-    if (open) document.body.style.overflow = 'hidden'
-    else document.body.style.overflow = ''
-    return () => { document.body.style.overflow = '' }
-  }, [open])
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onClose();
+      }
+    };
 
-  if (!open) return null
+    function trapFocus(e: KeyboardEvent) {
+      if (e.key !== 'Tab') return;
+      const focusable = dialog?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable || focusable.length === 0) return;
 
-  return createPortal(
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first || document.activeElement === dialog) {
+          e.preventDefault();
+          last?.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    }
+
+    document.addEventListener('keydown', onKey, true);
+    dialog?.addEventListener('keydown', trapFocus);
+    document.body.style.overflow = 'hidden';
+    dialog?.focus();
+
+    return () => {
+      document.removeEventListener('keydown', onKey, true);
+      dialog?.removeEventListener('keydown', trapFocus);
+      document.body.style.overflow = '';
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
     <div
-      ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fade-in"
-      onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
     >
+      <div className="absolute inset-0 bg-midnight-harbor/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       <div
+        ref={ref}
+        tabIndex={-1}
         className={cn(
-          'card w-full max-w-lg mx-4 max-h-[85vh] overflow-y-auto animate-fade-up',
+          'relative card w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 animate-fade-up rounded-b-none sm:rounded-b-[20px]',
           className
         )}
-        role="dialog"
-        aria-modal="true"
       >
-        <div className="flex items-center justify-between p-6 pb-0">
-          {title && <h2 className="text-lg font-semibold text-text">{title}</h2>}
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-text">{title}</h2>
           <button
             onClick={onClose}
-            className="ml-auto p-1 rounded-full text-text-muted hover:text-text hover:bg-surface-2 transition-colors"
-            aria-label="Close"
+            aria-label="Tutup dialog"
+            className="rounded-lg p-1.5 text-text-muted hover:text-text hover:bg-surface-2 cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="size-5" />
           </button>
         </div>
-        <div className="p-6">{children}</div>
+        {children}
       </div>
-    </div>,
-    document.body
-  )
+    </div>
+  );
 }

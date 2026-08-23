@@ -1,28 +1,21 @@
-import { cn } from '@/lib/utils'
-
-interface PageHeaderProps {
-  eyebrow?: string
-  title: string
-  description?: string
-  action?: React.ReactNode
-  className?: string
-}
-
-export function PageHeader({ eyebrow, title, description, action, className }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: React.ReactNode;
+}) {
   return (
-    <div className={cn('flex flex-col sm:flex-row sm:items-end justify-between gap-4', className)}>
-      <div className="space-y-1.5">
-        {eyebrow && (
-          <span className="text-xs font-semibold text-signal-blue uppercase tracking-widest">
-            {eyebrow}
-          </span>
-        )}
-        <h1 className="text-3xl md:text-4xl font-bold text-text tracking-tight">{title}</h1>
-        {description && (
-          <p className="text-sm text-text-muted max-w-xl">{description}</p>
-        )}
+    <div className="flex flex-wrap items-start justify-between gap-3 mb-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-text" style={{ fontFamily: 'var(--font-figtree)' }}>
+          {title}
+        </h1>
+        {subtitle && <p className="text-sm text-text-muted mt-1 max-w-xl">{subtitle}</p>}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
+      {action && <div className="flex items-center gap-2">{action}</div>}
     </div>
-  )
+  );
 }

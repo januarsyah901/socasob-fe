@@ -34,7 +34,7 @@ export function DashboardLayout({ children, fullWidth }: DashboardLayoutProps) {
     <div className="min-h-screen bg-bg text-text flex flex-col lg:flex-row">
       <Sidebar />
 
-      <main className={cn('flex-1 lg:ml-64 pb-12')}>
+      <main className="flex-1 min-w-0 pb-12">
         <div
           className={cn(
             fullWidth ? 'px-4 md:px-6 py-6 md:py-8' : 'max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8'

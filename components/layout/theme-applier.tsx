@@ -1,19 +1,12 @@
-'use client'
+'use client';
 
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
+// Default light; if user chose dark (stored in localStorage), add `dark` class.
 export function ThemeApplier() {
   useEffect(() => {
-    const stored = localStorage.getItem('socasob-theme')
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    const isDark = stored === 'dark' || (!stored && prefersDark)
-
-    if (isDark) {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }, [])
-
-  return null
+    const theme = window.localStorage.getItem('socasob-theme') || 'light';
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, []);
+  return null;
 }

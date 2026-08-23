@@ -1,50 +1,55 @@
-'use client'
+import { cn } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
+import type { ButtonHTMLAttributes } from 'react';
 
-import { forwardRef } from 'react'
-import { cn } from '@/lib/utils'
-import { Loader2 } from 'lucide-react'
+type Variant = 'primary' | 'secondary' | 'danger' | 'ghost';
+type Size = 'sm' | 'md' | 'lg';
 
-const variants = {
-  primary: 'bg-signal-blue text-white hover:bg-signal-blue/90 active:bg-signal-blue/80 shadow-dreamy',
-  secondary: 'bg-surface-2 text-text border border-border hover:bg-border/50 active:bg-border',
-  ghost: 'text-text-muted hover:text-text hover:bg-surface-2 active:bg-border',
-  danger: 'bg-error/10 text-error hover:bg-error/20 active:bg-error/30 border border-error/20',
-  'outline-blue': 'border border-signal-blue text-signal-blue hover:bg-signal-blue/10 active:bg-signal-blue/20',
+const variants: Record<Variant, string> = {
+  primary:
+    'bg-signal-blue text-white hover:bg-signal-blue/90 active:bg-signal-blue/85 shadow-sm hover:shadow-md disabled:bg-light-mist disabled:text-slate-channel',
+  secondary:
+    'bg-transparent border border-sea-fog text-midnight-harbor hover:bg-ice-tint hover:border-sea-fog dark:border-slate-channel dark:text-slate-channel dark:hover:bg-surface-2 dark:hover:text-white dark:hover:border-slate-channel font-semibold',
+  danger:
+    'bg-rose-500 text-white hover:bg-rose-600 disabled:bg-rose-300',
+  ghost:
+    'text-midnight-harbor hover:bg-ice-tint dark:text-slate-channel dark:hover:bg-surface-2 dark:hover:text-white font-semibold',
+};
+
+const sizes: Record<Size, string> = {
+  sm: 'px-4 py-1.5 text-xs rounded-full gap-1.5',
+  md: 'px-5 py-2.5 text-sm rounded-full gap-2',
+  lg: 'px-6 py-3 text-base rounded-full gap-2',
+};
+
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: Variant;
+  size?: Size;
+  loading?: boolean;
 }
 
-const sizes = {
-  sm: 'h-8 px-3 text-xs gap-1.5',
-  md: 'h-10 px-4 text-sm gap-2',
-  lg: 'h-12 px-6 text-base gap-2.5',
-  icon: 'h-10 w-10 p-0',
-}
-
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: keyof typeof variants
-  size?: keyof typeof sizes
-  loading?: boolean
-}
-
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = 'primary', size = 'md', loading, disabled, children, ...props }, ref) => (
+export function Button({
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  disabled,
+  className,
+  children,
+  ...props
+}: ButtonProps) {
+  return (
     <button
-      ref={ref}
-      disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center rounded-3xl font-medium transition-all select-none',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal-blue focus-visible:ring-offset-2',
-        'disabled:pointer-events-none disabled:opacity-50',
+        'inline-flex items-center justify-center font-medium transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-70',
         variants[variant],
         sizes[size],
         className
       )}
+      disabled={disabled || loading}
       {...props}
     >
-      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+      {loading && <Loader2 className="size-4 animate-spin" aria-hidden />}
       {children}
     </button>
-  )
-)
-Button.displayName = 'Button'
-
-export { Button }
+  );
+}

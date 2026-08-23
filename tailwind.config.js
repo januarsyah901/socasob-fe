@@ -28,7 +28,31 @@ module.exports = {
         text: 'var(--text)',
         'text-muted': 'var(--text-muted)',
         'text-on-accent': 'var(--text-on-accent)',
+        // ── Reference compatibility aliases (night-* & dusk-* classes) ──
+        night: {
+          50: 'var(--color-canvas-white)',
+          100: 'var(--color-ice-tint)',
+          200: 'var(--color-sea-fog)',
+          300: 'var(--color-pale-steel)',
+          400: 'var(--color-slate-channel)',
+          500: 'var(--color-signal-blue)',
+          600: 'var(--color-signal-blue)',
+          700: 'var(--color-midnight-harbor)',
+          800: 'var(--color-midnight-harbor)',
+          900: 'var(--color-midnight-harbor)',
+          950: 'var(--color-midnight-harbor)',
+        },
+        dusk: {
+          50: 'var(--color-ice-tint)',
+          100: 'var(--color-ice-tint)',
+          200: 'var(--color-light-mist)',
+          300: 'var(--color-pale-steel)',
+          400: 'var(--color-slate-channel)',
+          500: 'var(--color-active-teal)',
+          600: 'var(--color-active-teal)',
+        },
       },
+
       fontFamily: {
         figtree: ['var(--font-figtree)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
         display: ['var(--font-figtree)', 'Georgia', 'serif'],
