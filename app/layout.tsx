@@ -1,4 +1,3 @@
-import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import { Figtree } from 'next/font/google'
 import './globals.css'
@@ -32,7 +31,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </SocketProvider>
         </ToastProvider>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )

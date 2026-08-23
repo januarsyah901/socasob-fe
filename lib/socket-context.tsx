@@ -143,7 +143,9 @@ export function useSocket() {
 
 /** Helper: fetch ke BE API dengan base URL yang benar */
 export async function beApi(path: string, options?: RequestInit) {
-  const url = `${BE_API}${path}`
+  const base = BE_API.replace(/\/+$/, '').replace(/\/api$/, '')
+  const cleanPath = path.startsWith('/') ? path : `/${path}`
+  const url = `${base}${cleanPath}`
   const res = await fetch(url, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
