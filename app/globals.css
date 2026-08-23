@@ -31,31 +31,36 @@
 }
 
 .dark {
-  /* Softer "Dim" Backgrounds (Slate scale) to reduce eye strain */
-  --bg: #0f172a;           /* slate-900 */
-  --surface: #1e293b;      /* slate-800 */
-  --surface-2: #334155;    /* slate-700 */
-  --border: #334155;       /* slate-700 */
+  /* Base & Surface */
+  --bg: #171717;           /* Abyss - Main background */
+  --surface: #1e1e1e;      /* Surface - Card background & elevated UI */
+  --surface-2: #262626;    /* Secondary elevated / hover state */
+  --border: #3f3f3f;       /* Graphite - Borders & dividers */
   
-  /* Dimmer text to avoid harsh glowing effect */
-  --text: #cbd5e1;         /* slate-300 (softer than f8fafc) */
-  --text-muted: #94a3b8;   /* slate-400 */
+  /* Text & Content */
+  --text: #eeeeee;         /* Bright Gray - Primary text & headings */
+  --text-muted: #bcbcbc;   /* Medium Gray - Secondary text */
   
-  /* Toned down accent colors */
-  --color-signal-blue: #3b82f6; /* blue-500 (less neon than 400) */
-  --color-active-teal: #14b8a6; /* teal-500 */
+  /* Accents & Brand */
+  --color-signal-blue: #7c3aed; /* Amethyst - Primary CTA & active states */
+  --color-active-teal: #a78bfa; /* Lavender - Links & active indicators */
+  
+  /* Status / Feedback */
+  --color-success: #4ade80;     /* Success Green */
+  --color-warning: #facc15;     /* Warning Yellow */
+  --color-error: #f87171;       /* Error Red */
   
   /* Internal theme mappings */
-  --color-midnight-harbor: #cbd5e1;
-  --color-slate-channel: #64748b;
-  --color-pale-steel: #475569;
-  --color-sea-fog: #334155;
-  --color-ice-tint: #1e293b;
-  --color-light-mist: #475569;
-  --color-canvas-white: #0f172a;
+  --color-midnight-harbor: #eeeeee; /* White-ish */
+  --color-slate-channel: #a3a3a3;   /* Muted Gray - Tertiary text */
+  --color-pale-steel: #8a5cf5;      /* Tag Background */
+  --color-sea-fog: #3f3f3f;         /* Graphite */
+  --color-ice-tint: #1e1e1e;        /* Surface */
+  --color-light-mist: #3f3f3f;      /* Graphite */
+  --color-canvas-white: #171717;    /* Abyss */
 
-  --shadow-dreamy: rgba(0, 0, 0, 0.2) 0px 4px 12px 0px;
-  --shadow-dreamy-lg: rgba(0, 0, 0, 0.4) 0px 12px 48px 0px;
+  --shadow-dreamy: rgba(0, 0, 0, 0.5) 0px 4px 12px 0px;
+  --shadow-dreamy-lg: rgba(0, 0, 0, 0.7) 0px 12px 48px 0px;
 
   color-scheme: dark;
 }
