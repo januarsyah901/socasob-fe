@@ -31,24 +31,31 @@
 }
 
 .dark {
-  --bg: #0a0e17;
-  --surface: #121b2d;
-  --surface-2: #1f2d47;
-  --border: #1e293b;
-  --text: #f8fafc;
-  --text-muted: #94a3b8;
-  --color-signal-blue: #60a5fa;
-  --color-midnight-harbor: #e2e8f0;
-  --color-slate-channel: #94a3b8;
-  --color-pale-steel: #64748b;
-  --color-sea-fog: #1e293b;
+  /* Softer "Dim" Backgrounds (Slate scale) to reduce eye strain */
+  --bg: #0f172a;           /* slate-900 */
+  --surface: #1e293b;      /* slate-800 */
+  --surface-2: #334155;    /* slate-700 */
+  --border: #334155;       /* slate-700 */
+  
+  /* Dimmer text to avoid harsh glowing effect */
+  --text: #cbd5e1;         /* slate-300 (softer than f8fafc) */
+  --text-muted: #94a3b8;   /* slate-400 */
+  
+  /* Toned down accent colors */
+  --color-signal-blue: #3b82f6; /* blue-500 (less neon than 400) */
+  --color-active-teal: #14b8a6; /* teal-500 */
+  
+  /* Internal theme mappings */
+  --color-midnight-harbor: #cbd5e1;
+  --color-slate-channel: #64748b;
+  --color-pale-steel: #475569;
+  --color-sea-fog: #334155;
   --color-ice-tint: #1e293b;
-  --color-light-mist: #334155;
+  --color-light-mist: #475569;
   --color-canvas-white: #0f172a;
-  --color-active-teal: #2dd4bf;
 
-  --shadow-dreamy: rgba(0, 0, 0, 0.3) 0px 4px 12px 0px;
-  --shadow-dreamy-lg: rgba(0, 0, 0, 0.5) 0px 12px 48px 0px;
+  --shadow-dreamy: rgba(0, 0, 0, 0.2) 0px 4px 12px 0px;
+  --shadow-dreamy-lg: rgba(0, 0, 0, 0.4) 0px 12px 48px 0px;
 
   color-scheme: dark;
 }
