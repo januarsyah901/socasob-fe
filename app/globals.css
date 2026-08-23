@@ -38,8 +38,8 @@
   --border: #3f3f3f;       /* Graphite - Borders & dividers */
   
   /* Text & Content */
-  --text: #eeeeee;         /* Bright Gray - Primary text & headings */
-  --text-muted: #bcbcbc;   /* Medium Gray - Secondary text */
+  --text: #f5f5f5;         /* Slightly brighter than #eeeeee for primary text */
+  --text-muted: #d4d4d4;   /* Slightly brighter than #bcbcbc for body/secondary text */
   
   /* Accents & Brand */
   --color-signal-blue: #7c3aed; /* Amethyst - Primary CTA & active states */
@@ -51,8 +51,8 @@
   --color-error: #f87171;       /* Error Red */
   
   /* Internal theme mappings */
-  --color-midnight-harbor: #eeeeee; /* White-ish */
-  --color-slate-channel: #a3a3a3;   /* Muted Gray - Tertiary text */
+  --color-midnight-harbor: #f5f5f5; /* Primary text */
+  --color-slate-channel: #bcbcbc;   /* Bumped up from #a3a3a3 to Medium Gray */
   --color-pale-steel: #8a5cf5;      /* Tag Background */
   --color-sea-fog: #3f3f3f;         /* Graphite */
   --color-ice-tint: #1e1e1e;        /* Surface */
