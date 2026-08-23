@@ -1,56 +1,35 @@
-import Image from 'next/image'
+'use client'
+
 import { cn } from '@/lib/utils'
 
-interface AvatarProps {
-  src?: string | null
-  alt?: string
-  name?: string
-  size?: 'sm' | 'md' | 'lg'
+export function UserAvatar({
+  name,
+  avatarPath,
+  className,
+}: {
+  name: string
+  avatarPath?: string | null
   className?: string
-}
-
-const sizeMap = {
-  sm: 'w-8 h-8 text-xs',
-  md: 'w-10 h-10 text-sm',
-  lg: 'w-12 h-12 text-base',
-}
-
-const gradientPresets = [
-  'from-signal-blue to-active-teal',
-  'from-midnight-harbor to-pale-steel',
-  'from-active-teal to-signal-blue',
-]
-
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-}
-
-export function Avatar({ src, alt = '', name = '', size = 'md', className }: AvatarProps) {
-  const gradient = gradientPresets[name.length % gradientPresets.length]
-
-  if (src) {
+}) {
+  if (avatarPath) {
     return (
-      <div className={cn('relative rounded-full overflow-hidden shrink-0', sizeMap[size], className)}>
-        <Image src={src} alt={alt || name} fill className="object-cover" />
-      </div>
+      <img
+        src={avatarPath}
+        alt={`Avatar ${name}`}
+        className={cn('rounded-full object-cover bg-surface-2', className)}
+      />
     )
   }
 
   return (
-    <div
+    <span
       className={cn(
-        'rounded-full bg-gradient-to-br shrink-0 flex items-center justify-center text-white font-semibold',
-        gradient,
-        sizeMap[size],
+        'rounded-full bg-gradient-to-br from-signal-blue to-midnight-harbor text-white grid place-items-center font-bold text-xs shadow-sm',
         className
       )}
+      aria-hidden
     >
-      {name ? getInitials(name) : '?'}
-    </div>
+      {name.slice(0, 1).toUpperCase()}
+    </span>
   )
 }

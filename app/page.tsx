@@ -12,8 +12,8 @@ import {
   ClipboardList,
   BarChart3,
   Bot,
+  MessagesSquare,
   ArrowRight,
-  Sparkles,
   ShieldCheck,
   Zap,
 } from 'lucide-react'
@@ -71,13 +71,26 @@ export default function HomePage() {
         </section>
 
         {/* Navigation / Analytics Quick Cards */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <Link
+            href="/companion"
+            className="card-sm p-5 flex items-center gap-3.5 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
+          >
+            <div className="w-10 h-10 rounded-2xl bg-signal-blue/10 border border-signal-blue/20 flex items-center justify-center shrink-0 group-hover:bg-signal-blue/20 transition-colors">
+              <MessagesSquare className="w-5 h-5 text-signal-blue" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-text">Teman Soca</p>
+              <p className="text-xs text-text-muted mt-0.5 truncate">Konsultan AI ergonomi</p>
+            </div>
+          </Link>
+
           <Link
             href="/reports"
-            className="card-sm p-5 flex items-center gap-4 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
+            className="card-sm p-5 flex items-center gap-3.5 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
           >
-            <div className="w-11 h-11 rounded-2xl bg-signal-blue/10 border border-signal-blue/20 flex items-center justify-center shrink-0 group-hover:bg-signal-blue/20 transition-colors">
-              <FileText className="w-5 h-5 text-signal-blue" />
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/20 transition-colors">
+              <FileText className="w-5 h-5 text-indigo-500" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-text">Laporan Medis</p>
@@ -87,9 +100,9 @@ export default function HomePage() {
 
           <Link
             href="/log"
-            className="card-sm p-5 flex items-center gap-4 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
+            className="card-sm p-5 flex items-center gap-3.5 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
           >
-            <div className="w-11 h-11 rounded-2xl bg-active-teal/10 border border-active-teal/20 flex items-center justify-center shrink-0 group-hover:bg-active-teal/20 transition-colors">
+            <div className="w-10 h-10 rounded-2xl bg-active-teal/10 border border-active-teal/20 flex items-center justify-center shrink-0 group-hover:bg-active-teal/20 transition-colors">
               <ClipboardList className="w-5 h-5 text-active-teal" />
             </div>
             <div className="min-w-0">
@@ -100,27 +113,27 @@ export default function HomePage() {
 
           <Link
             href="/resume"
-            className="card-sm p-5 flex items-center gap-4 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
+            className="card-sm p-5 flex items-center gap-3.5 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
           >
-            <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 group-hover:bg-amber-500/20 transition-colors">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0 group-hover:bg-amber-500/20 transition-colors">
               <BarChart3 className="w-5 h-5 text-amber-500" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-bold text-text">Resume Analitik</p>
-              <p className="text-xs text-text-muted mt-0.5 truncate">Tren 6 bulan & skor mata</p>
+              <p className="text-xs text-text-muted mt-0.5 truncate">Tren & skor mata</p>
             </div>
           </Link>
 
           <Link
             href="/devices"
-            className="card-sm p-5 flex items-center gap-4 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
+            className="card-sm p-5 flex items-center gap-3.5 hover:shadow-dreamy-lg hover:-translate-y-0.5 transition-all duration-200 group"
           >
-            <div className="w-11 h-11 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/20 transition-colors">
-              <Bot className="w-5 h-5 text-indigo-500" />
+            <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0 group-hover:bg-rose-500/20 transition-colors">
+              <Bot className="w-5 h-5 text-rose-500" />
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-bold text-text">Perangkat Robot</p>
-              <p className="text-xs text-text-muted mt-0.5 truncate">Kelola sensor ESP32-CAM</p>
+              <p className="text-sm font-bold text-text">Perangkat</p>
+              <p className="text-xs text-text-muted mt-0.5 truncate">Kelola sensor robot</p>
             </div>
           </Link>
         </section>
