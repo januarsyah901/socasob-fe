@@ -9,7 +9,6 @@ import {
   Bot,
   Plus,
   SendHorizontal,
-  Sparkles,
   Trash2,
   Eye,
   ShieldCheck,
@@ -364,10 +363,6 @@ export function CompanionChat() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 text-xs text-active-teal bg-active-teal/10 px-2.5 py-1 rounded-full font-semibold">
-            <span className="w-1.5 h-1.5 rounded-full bg-active-teal animate-pulse" />
-            <span>AI Aktif</span>
-          </div>
         </header>
 
         {/* Chat Messages */}
@@ -391,7 +386,6 @@ export function CompanionChat() {
                     onClick={() => send(s)}
                     className="text-xs bg-surface-2 border border-border rounded-full px-3.5 py-1.5 text-text-muted hover:text-text hover:border-signal-blue/50 transition-all cursor-pointer shadow-xs"
                   >
-                    <Sparkles className="w-3 h-3 inline mr-1 text-signal-blue" />
                     {s}
                   </button>
                 ))}
