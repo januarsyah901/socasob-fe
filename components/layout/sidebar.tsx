@@ -98,13 +98,20 @@ export function Sidebar() {
         <button
           onClick={toggleTheme}
           aria-label="Ganti Tema"
-          className="p-2 rounded-lg text-muted hover:text-body hover:bg-(--surface-2) cursor-pointer transition-colors"
+          className="relative p-2 rounded-lg text-muted hover:text-body hover:bg-(--surface-2) cursor-pointer transition-colors overflow-hidden flex items-center justify-center w-8 h-8"
         >
-          {isDark ? (
-            <Sun className="size-4.5 text-amber-400" />
-          ) : (
-            <Moon className="size-4.5 text-slate-500" />
-          )}
+          <Sun 
+            className={cn(
+              "absolute size-4.5 text-amber-400 transition-all duration-500",
+              isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+            )} 
+          />
+          <Moon 
+            className={cn(
+              "absolute size-4.5 text-slate-500 transition-all duration-500",
+              isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+            )} 
+          />
         </button>
         <Link
           href="/settings"
