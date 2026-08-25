@@ -49,12 +49,10 @@ export function GenerateReportModal({ open, onClose, onSuccess }: GenerateReport
       // Fallback client route if backend gave error
       setErrorMsg(res.error || 'Gagal membuat laporan dari server.')
       setIsGenerating(false)
-    } catch (err: any) {
-      console.warn('[Report] Backend error, generating fallback document', err)
+      } catch (err: any) {
+      console.warn('[Report] Backend error', err)
+      setErrorMsg('Gagal membuat laporan dari server.')
       setIsGenerating(false)
-      onClose()
-      const fallbackId = `SOCA-${Date.now().toString().slice(-6)}`
-      router.push(`/reports/${fallbackId}?period=${period}&name=${encodeURIComponent(patientName)}`)
     }
   }
 

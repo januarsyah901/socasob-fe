@@ -101,19 +101,7 @@ export default function ResumePage() {
 
   useEffect(() => {
     if (!robotId) {
-      // Default fallback mock data if no robot is connected so dashboard remains interactive
-      setResumeData({
-        robotId: 'ESP32-CAM-DEMO',
-        myopiaRisk: 'Rendah',
-        fatigueRisk: 'Sedang',
-        avgDistance: 38,
-        restCompliance: 84,
-        nearPercent: 24,
-        farPercent: 76,
-        eyeHealthScore: 86,
-        totalHours: 12.5,
-        totalDaysMonitored: 7,
-      })
+      setError('Belum ada robot yang terhubung. Pilih robot di halaman Pengaturan.')
       return
     }
 
@@ -125,19 +113,7 @@ export default function ResumePage() {
         if (data.success && data.data) {
           setResumeData(data.data)
         } else {
-          // fallback mock with active robot ID
-          setResumeData({
-            robotId,
-            myopiaRisk: 'Rendah',
-            fatigueRisk: 'Sedang',
-            avgDistance: 38,
-            restCompliance: 84,
-            nearPercent: 24,
-            farPercent: 76,
-            eyeHealthScore: 86,
-            totalHours: 12.5,
-            totalDaysMonitored: 7,
-          })
+          setError(data.error || 'Belum ada data monitoring 6 bulan terakhir untuk robot ini.')
         }
       } catch {
         setError('Gagal mengambil data dari server backend')
@@ -181,8 +157,16 @@ export default function ResumePage() {
           </div>
         )}
 
+        {/* Error state */}
+        {!isLoading && error && (
+          <div className="card-sm p-10 flex flex-col items-center justify-center gap-3 text-sm text-text-muted">
+            <AlertTriangle className="w-8 h-8 text-warning mb-2" />
+            <p className="font-semibold text-text">{error}</p>
+          </div>
+        )}
+
         {/* Data Display */}
-        {!isLoading && resumeData && (() => {
+        {!isLoading && !error && resumeData && (() => {
           const myopiaColors = riskColor(resumeData.myopiaRisk)
           const fatigueColors = riskColor(resumeData.fatigueRisk)
 

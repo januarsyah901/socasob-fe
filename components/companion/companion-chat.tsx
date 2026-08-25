@@ -142,21 +142,27 @@ export function CompanionChat() {
   const loadConversations = useCallback(async () => {
     try {
       const res = await beApi('/api/companion/conversations')
-      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
-        const formatted: FullConversation[] = res.data.map((c: any) => ({
-          id: c.conversationId || c._id,
-          title: c.title,
-          updatedAt: c.updatedAt || new Date().toISOString(),
-          messages: (c.messages || []).map((m: any) => ({
-            id: m.id || m._id || `msg-${Math.random()}`,
-            role: m.role,
-            content: m.content,
-          })),
-        }))
-        setConversations(formatted)
-        setActiveId((prev) => prev || formatted[0].id)
-        const currentTarget = formatted.find((c) => c.id === (activeId || formatted[0].id))
-        if (currentTarget) setMessages(currentTarget.messages)
+      if (res.success && Array.isArray(res.data)) {
+        if (res.data.length > 0) {
+          const formatted: FullConversation[] = res.data.map((c: any) => ({
+            id: c.conversationId || c._id,
+            title: c.title,
+            updatedAt: c.updatedAt || new Date().toISOString(),
+            messages: (c.messages || []).map((m: any) => ({
+              id: m.id || m._id || `msg-${Math.random()}`,
+              role: m.role,
+              content: m.content,
+            })),
+          }))
+          setConversations(formatted)
+          setActiveId((prev) => prev || formatted[0].id)
+          const currentTarget = formatted.find((c) => c.id === (activeId || formatted[0].id))
+          if (currentTarget) setMessages(currentTarget.messages)
+        } else {
+          setConversations([])
+          setActiveId(null)
+          setMessages([])
+        }
         return
       }
     } catch {
@@ -167,14 +173,21 @@ export function CompanionChat() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setConversations(parsed)
-          setActiveId(parsed[0].id)
-          setMessages(parsed[0].messages)
+        if (Array.isArray(parsed)) {
+          if (parsed.length > 0) {
+            setConversations(parsed)
+            setActiveId(parsed[0].id)
+            setMessages(parsed[0].messages)
+          } else {
+            setConversations([])
+            setActiveId(null)
+            setMessages([])
+          }
           return
         }
       } catch {}
     }
+    
     setConversations(INITIAL_CONVERSATIONS)
     setActiveId(INITIAL_CONVERSATIONS[0].id)
     setMessages(INITIAL_CONVERSATIONS[0].messages)

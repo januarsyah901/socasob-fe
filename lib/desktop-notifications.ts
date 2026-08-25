@@ -35,13 +35,13 @@ interface DesktopNotificationOptions {
 let lastNotificationTime = 0
 const THROTTLE_MS = 8000 // Minimal jeda 8 detik antar notifikasi agar tidak spam
 
-export function sendDesktopNotification({
+export async function sendDesktopNotification({
   title,
   body,
   icon = '/images/Logo Socasob.png',
   tag,
   requireInteraction = false,
-}: DesktopNotificationOptions): boolean {
+}: DesktopNotificationOptions): Promise<boolean> {
   if (!isNotificationSupported() || Notification.permission !== 'granted') {
     return false
   }
@@ -51,6 +51,24 @@ export function sendDesktopNotification({
     return false
   }
   lastNotificationTime = now
+
+  try {
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      if (registration) {
+        registration.showNotification(title, { 
+          body, 
+          icon, 
+          tag: tag || 'socasob-eye-alert', 
+          requireInteraction,
+          vibrate: [200, 100, 200]
+        });
+        return true;
+      }
+    }
+  } catch (err) {
+    console.warn('[Notification] SW showNotification failed, fallback to standard Notification', err);
+  }
 
   try {
     const notification = new Notification(title, {

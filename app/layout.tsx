@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Figtree } from 'next/font/google'
 import './globals.css'
 import { ThemeApplier } from '@/components/layout/theme-applier'
+import { PwaRegistrar } from '@/components/layout/pwa-registrar'
 import { SocketProvider } from '@/lib/socket-context'
 import { ToastProvider } from '@/components/ui/toast'
 
@@ -27,6 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className={fontFigtree.variable} suppressHydrationWarning>
       <body className="font-figtree antialiased bg-bg text-text">
+        <PwaRegistrar />
         <ThemeApplier />
         <ToastProvider>
           <SocketProvider>{children}</SocketProvider>

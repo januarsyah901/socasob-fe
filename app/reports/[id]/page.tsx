@@ -82,72 +82,10 @@ export default function ReportDetailPage() {
           setReport(formatted)
           return
         }
-
-        // Fallback demo report if ID not in DB (e.g. static mock ID)
-        setReport({
-          id,
-          title: `Laporan Evaluasi Ergonomi & Risiko Miopia (${periodLabel})`,
-          patientName: nameParam,
-          robotId: robotId || 'ESP32-CAM-SOCA01',
-          generatedAt: new Date().toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          }),
-          period: periodLabel,
-          dateRange: '17 Agustus 2026 – 23 Agustus 2026',
-          eyeHealthScore: 86,
-          myopiaRisk: 'Rendah',
-          fatigueRisk: 'Sedang',
-          cvsRisk: 'Rendah',
-          restCompliance: 84,
-          nearDurationMin: 112,
-          farDurationMin: 428,
-          totalHours: 9.0,
-          avgDistanceCm: 38.5,
-          blinkRatePerMin: 14.8,
-          clinicalNotes: [
-            'Jarak rata-rata mata terhadap layar monitor berada pada batas aman yang dianjurkan (38.5 cm ≥ 30 cm).',
-            'Frekuensi berkedip tercatat 14.8 kedipan/menit, cukup baik dalam menjaga kelembapan kornea mata.',
-            'Ditemukan 2 episode tatap dekat berlebih pada rentang kerja sore hari. Disarankan menerapkan micro-break 20-20-20 secara konsisten.',
-            'Tingkat kepatuhan istirahat mencapai 84%. Sangat efektif dalam menekan risiko progresi miopia dan Computer Vision Syndrome (CVS).',
-          ],
-          examinerNotes:
-            'Pasien menunjukkan kebiasaan kerja ergonomis yang membaik. Lanjutkan pemantauan dengan perangkat SocaSob.',
-        })
+        setError('Laporan tidak ditemukan.')
       } catch (err: any) {
-        console.warn('[ReportDetail] Fallback mock report', err)
-        setReport({
-          id,
-          title: `Laporan Evaluasi Ergonomi & Risiko Miopia (${periodLabel})`,
-          patientName: nameParam,
-          robotId: robotId || 'ESP32-CAM-SOCA01',
-          generatedAt: new Date().toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric',
-          }),
-          period: periodLabel,
-          dateRange: '17 Agustus 2026 – 23 Agustus 2026',
-          eyeHealthScore: 86,
-          myopiaRisk: 'Rendah',
-          fatigueRisk: 'Sedang',
-          cvsRisk: 'Rendah',
-          restCompliance: 84,
-          nearDurationMin: 112,
-          farDurationMin: 428,
-          totalHours: 9.0,
-          avgDistanceCm: 38.5,
-          blinkRatePerMin: 14.8,
-          clinicalNotes: [
-            'Jarak rata-rata mata terhadap layar monitor berada pada batas aman yang dianjurkan (38.5 cm ≥ 30 cm).',
-            'Frekuensi berkedip tercatat 14.8 kedipan/menit, cukup baik dalam menjaga kelembapan kornea mata.',
-            'Ditemukan 2 episode tatap dekat berlebih pada rentang kerja sore hari. Disarankan menerapkan micro-break 20-20-20 secara konsisten.',
-            'Tingkat kepatuhan istirahat mencapai 84%. Sangat efektif dalam menekan risiko progresi miopia dan Computer Vision Syndrome (CVS).',
-          ],
-          examinerNotes:
-            'Pasien menunjukkan kebiasaan kerja ergonomis yang membaik. Lanjutkan pemantauan dengan perangkat SocaSob.',
-        })
+        console.warn('[ReportDetail] Error fetching report', err)
+        setError('Gagal memuat laporan medis dari server.')
       } finally {
         setIsLoading(false)
       }
@@ -176,7 +114,14 @@ export default function ReportDetailPage() {
           </div>
         )}
 
-        {!isLoading && report && <MedicalReportView report={report} />}
+        {!isLoading && error && (
+          <div className="card p-12 flex flex-col items-center justify-center gap-3 text-sm text-text-muted">
+            <AlertCircle className="w-8 h-8 text-error mb-2" />
+            <p className="font-semibold text-text">{error}</p>
+          </div>
+        )}
+
+        {!isLoading && !error && report && <MedicalReportView report={report} />}
       </div>
     </DashboardLayout>
   )
