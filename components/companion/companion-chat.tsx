@@ -14,8 +14,9 @@ import {
   ShieldCheck,
   Zap,
   Info,
+  Sparkles,
 } from 'lucide-react'
-import Link from 'next/link'
+import { useSocket, beApi } from '@/lib/socket-context'
 
 interface ConversationSummary {
   id: string
@@ -34,11 +35,11 @@ interface FullConversation extends ConversationSummary {
 }
 
 const DEFAULT_SUGGESTIONS = [
+  'Bagaimana kondisi kesehatan mata dan durasi layarku hari ini?',
   'Bagaimana cara mencegah Computer Vision Syndrome (CVS)?',
   'Jelaskan cara kerja aturan 20-20-20 untuk relaksasi mata.',
   'Berapa jarak ideal antara mata dan layar monitor?',
   'Mengapa frekuensi berkedip berkurang saat menatap layar?',
-  'Bagaimana kaitan antara pencahayaan ruangan dan kelelahan mata?',
   'Apa tanda-tanda awal terjadinya progresi miopia (rabun jauh)?',
 ]
 
@@ -57,13 +58,13 @@ function TypewriterText({ text, onDone }: { text: string; onDone: () => void }) 
   return <>{text.slice(0, shown)}</>
 }
 
-/** Built-in intelligent ophthalmology & ergonomic response engine */
-function generateEyeCareResponse(query: string): string {
+/** Built-in fallback intelligent ophthalmology response engine */
+function generateFallbackResponse(query: string, patientName = 'Bang Jan'): string {
   const q = query.toLowerCase()
 
-  if (q.includes('20-20-20') || q.includes('aturan 20')) {
+  if (q.includes('20-20-20') || q.includes('aturan 20') || q.includes('istirahat')) {
     return (
-      `🌿 **Aturan 20-20-20 (Gold Standard Ergonomi Penglihatan):**\n\n` +
+      `🌿 **Panduan Aturan 20-20-20 (Gold Standard Ergonomi Visual):**\n\n` +
       `Setiap **20 menit** Anda menatap layar monitor, alihkan pandangan ke suatu objek berjarak minimal **20 kaki (sekitar 6 meter)** selama minimal **20 detik**.\n\n` +
       `**Mengapa ini sangat krusial?**\n` +
       `• Mengistirahatkan otot siliaris mata yang terus menegang saat akomodasi jarak dekat.\n` +
@@ -76,8 +77,8 @@ function generateEyeCareResponse(query: string): string {
     return (
       `📏 **Standar Jarak Aman Layar & Posisi Ergonomis:**\n\n` +
       `1. **Jarak Ideal:** Minimal **30–50 cm** (kira-kira sepanjang satu rentangan lengan Anda).\n` +
-      `2. **Tinggi Monitor:** Bagian atas layar sejajar atau sedikit di bawah garis horizontal mata (10–15 derajat ke bawah). Ini mengurangi luas permukaan mata yang terbuka sehingga mengurangi penguapan air mata.\n` +
-      `3. **Peringatan SocaSob:** Jika kamera sensor ESP32-CAM mendeteksi jarak Anda < 30 cm, sistem akan langsung memberikan sinyal suara & visual untuk memundurkan posisi.`
+      `2. **Tinggi Monitor:** Bagian atas layar sejajar atau sedikit di bawah garis horizontal mata (10–15 derajat ke bawah).\n` +
+      `3. **Peringatan SocaSob:** Jika kamera sensor mendeteksi jarak Anda < 30 cm, sistem akan langsung memberikan sinyal suara & visual untuk memundurkan posisi.`
     )
   }
 
@@ -85,48 +86,12 @@ function generateEyeCareResponse(query: string): string {
     return (
       `💧 **Frekuensi Berkedip & Kesehatan Air Mata:**\n\n` +
       `Dalam kondisi santai, manusia berkedip sekitar **15–20 kali per menit**. Namun saat fokus menatap layar komputer/HP, frekuensi kedipan turun drastis hingga **5–7 kali per menit** (penurunan >60%)!\n\n` +
-      `**Dampaknya:**\n` +
-      `• Lapisan film air mata (*tear film*) cepat menguap, memicu rasa perih, sensasi berpasir, dan mata merah.\n` +
-      `• **Solusi:** Lakukan latihan *conscious blinking* (berkedip penuh dan rapat setiap kali berganti jendela kerja) atau gunakan tetes mata *artificial tears* tanpa pengawet jika terasa sangat kering.`
-    )
-  }
-
-  if (q.includes('cvs') || q.includes('lelah') || q.includes('pusing') || q.includes('fatigue')) {
-    return (
-      `👁️ **Computer Vision Syndrome (CVS) & Penanganannya:**\n\n` +
-      `CVS adalah sekumpulan gejala kelelahan okular dan muskuloskeletal akibat paparan layar berlebih. Gejala umumnya:\n` +
-      `• Penglihatan kabur (*blurred vision*) sementara.\n` +
-      `• Sakit kepala di area dahi atau belakang mata.\n` +
-      `• Leher kaku dan bahu tegang.\n\n` +
-      `**Langkah Pencegahan Cepat:**\n` +
-      `1. Atur kontras dan kecerahan layar agar seimbang dengan cahaya sekitar ruangan.\n` +
-      `2. Gunakan teknik *palming* (menempelkan kedua telapak tangan hangat di atas mata terpejam selama 30 detik).\n` +
-      `3. Periksa skor *Eye Health Score* Anda di menu **Resume** untuk mengevaluasi akumulasi kelelahan hari ini.`
-    )
-  }
-
-  if (q.includes('miopia') || q.includes('rabun') || q.includes('minus') || q.includes('anak')) {
-    return (
-      `🔍 **Pencegahan Progresi Miopia (Rabun Jauh):**\n\n` +
-      `Miopia dipicu oleh pemanjangan sumbu bola mata (*axial elongation*) akibat aktivitas tatap dekat (*near-work*) yang berdurasi lama tanpa jeda.\n\n` +
-      `**Rekomendasi Klinis:**\n` +
-      `• Batasi sesi tatap dekat terus-menerus maksimal 45 menit sebelum jeda 5 menit.\n` +
-      `• Luangkan waktu beraktivitas di bawah pencahayaan alami di luar ruangan minimal 1–2 jam per hari.\n` +
-      `• Manfaatkan fitur **Ekspor Laporan Medis (PDF)** di SocaSob untuk membawa data telemetri jarak mata Anda saat konsultasi dengan dokter spesialis mata (Sp.M).`
-    )
-  }
-
-  if (q.includes('cahaya') || q.includes('lampu') || q.includes('gelap') || q.includes('silau')) {
-    return (
-      `💡 **Ergonomi Pencahayaan Ruangan Kerja:**\n\n` +
-      `• **Hindari Bekerja di Ruang Gelap:** Kontras tajam antara layar yang terang benderang dan ruangan gelap memaksa pupil mata terus berkontraksi, mempercepat kelelahan okular.\n` +
-      `• **Atur Posisi Terhadap Jendela:** Jangan posisikan monitor langsung menghadap jendela atau membelakangi jendela tanpa tirai untuk mencegah pantulan silau (*glare*).\n` +
-      `• **Gunakan Lampu Ambient:** Lampu meja dengan pencahayaan tidak langsung (*diffused light*) dengan temperatur warna netral (4000K) sangat ideal untuk fokus kerja.`
+      `**Solusi:** Lakukan latihan *conscious blinking* atau gunakan tetes mata *artificial tears* tanpa pengawet jika terasa sangat kering.`
     )
   }
 
   return (
-    `Halo Bang Jan! Terima kasih telah berkonsultasi dengan **Teman Soca**.\n\n` +
+    `Halo ${patientName}! Terima kasih telah berkonsultasi dengan **Teman Soca**.\n\n` +
     `Mengenai pertanyaan Anda: *" ${query} "*\n\n` +
     `Kesehatan mata saat menatap layar komputer bergantung pada 3 pilar utama:\n` +
     `1. **Jarak Aman:** Pertahankan jarak monitor minimal **30–50 cm**.\n` +
@@ -163,6 +128,7 @@ const INITIAL_CONVERSATIONS: FullConversation[] = [
 
 export function CompanionChat() {
   const toast = useToast()
+  const { robotId } = useSocket()
   const [conversations, setConversations] = useState<FullConversation[]>([])
   const [activeId, setActiveId] = useState<string | null>('conv-init-1')
   const [messages, setMessages] = useState<Message[]>([])
@@ -172,8 +138,31 @@ export function CompanionChat() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const stopAnimating = useCallback(() => setAnimatingId(null), [])
 
-  // Load conversations from localStorage
-  useEffect(() => {
+  // Load conversations from backend or fallback to localStorage
+  const loadConversations = useCallback(async () => {
+    try {
+      const res = await beApi('/api/companion/conversations')
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        const formatted: FullConversation[] = res.data.map((c: any) => ({
+          id: c.conversationId || c._id,
+          title: c.title,
+          updatedAt: c.updatedAt || new Date().toISOString(),
+          messages: (c.messages || []).map((m: any) => ({
+            id: m.id || m._id || `msg-${Math.random()}`,
+            role: m.role,
+            content: m.content,
+          })),
+        }))
+        setConversations(formatted)
+        setActiveId((prev) => prev || formatted[0].id)
+        const currentTarget = formatted.find((c) => c.id === (activeId || formatted[0].id))
+        if (currentTarget) setMessages(currentTarget.messages)
+        return
+      }
+    } catch {
+      console.warn('[Companion] Fallback to localStorage')
+    }
+
     const saved = localStorage.getItem('socasob-companion-conversations')
     if (saved) {
       try {
@@ -189,9 +178,13 @@ export function CompanionChat() {
     setConversations(INITIAL_CONVERSATIONS)
     setActiveId(INITIAL_CONVERSATIONS[0].id)
     setMessages(INITIAL_CONVERSATIONS[0].messages)
+  }, [activeId])
+
+  useEffect(() => {
+    loadConversations()
   }, [])
 
-  // Save to localStorage
+  // Sync to localStorage
   useEffect(() => {
     if (conversations.length > 0) {
       localStorage.setItem('socasob-companion-conversations', JSON.stringify(conversations))
@@ -219,7 +212,13 @@ export function CompanionChat() {
     setAnimatingId(null)
   }
 
-  function removeConversation(id: string) {
+  async function removeConversation(id: string) {
+    try {
+      await beApi(`/api/companion/conversations/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      })
+    } catch {}
+
     const updated = conversations.filter((c) => c.id !== id)
     setConversations(updated)
     localStorage.setItem('socasob-companion-conversations', JSON.stringify(updated))
@@ -245,9 +244,62 @@ export function CompanionChat() {
     const updatedMessages = [...messages, userMsg]
     setMessages(updatedMessages)
 
-    // Simulate AI thinking and response
+    try {
+      const res = await beApi('/api/companion/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: content,
+          conversationId: activeId || undefined,
+          robotId: robotId || 'fadfa566',
+          patientName: 'Bang Jan',
+        }),
+      })
+
+      if (res.success && res.data) {
+        const assistantMsg: Message = {
+          id: `msg-${Date.now() + 1}`,
+          role: 'assistant',
+          content: res.data.reply,
+        }
+        const finalMessages = [...updatedMessages, assistantMsg]
+        setMessages(finalMessages)
+        setAnimatingId(assistantMsg.id)
+
+        const targetConvId = res.data.conversationId || activeId || `conv-${Date.now()}`
+        const newTitle =
+          res.data.title || (content.length > 32 ? content.slice(0, 32) + '…' : content)
+
+        setActiveId(targetConvId)
+        setConversations((prev) => {
+          const exists = prev.find((c) => c.id === targetConvId)
+          if (exists) {
+            return prev.map((c) =>
+              c.id === targetConvId
+                ? { ...c, updatedAt: new Date().toISOString(), messages: finalMessages }
+                : c
+            )
+          }
+          return [
+            {
+              id: targetConvId,
+              title: newTitle,
+              updatedAt: new Date().toISOString(),
+              messages: finalMessages,
+            },
+            ...prev,
+          ]
+        })
+        setSending(false)
+        return
+      }
+    } catch (err) {
+      console.warn('[Companion] Backend chat error, using offline fallback engine', err)
+    }
+
+    // Offline fallback
     setTimeout(() => {
-      const responseText = generateEyeCareResponse(content)
+      const responseText = generateFallbackResponse(content, 'Bang Jan')
       const assistantMsg: Message = {
         id: `msg-${Date.now() + 1}`,
         role: 'assistant',
@@ -278,7 +330,7 @@ export function CompanionChat() {
         )
       }
       setSending(false)
-    }, 450)
+    }, 400)
   }
 
   return (
@@ -356,13 +408,18 @@ export function CompanionChat() {
               <MessagesSquare className="w-4.5 h-4.5" />
             </div>
             <div>
-              <h1 className="font-bold text-sm text-text leading-tight">Teman Soca</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="font-bold text-sm text-text leading-tight">Teman Soca AI</h1>
+                <span className="flex items-center gap-1 text-[9px] font-bold text-signal-blue bg-signal-blue/10 px-2 py-0.5 rounded-full">
+                  <Sparkles className="w-2.5 h-2.5" />
+                  Telemetri Aktif
+                </span>
+              </div>
               <p className="text-[10px] text-text-muted font-medium">
                 Konsultan AI Ergonomi & Kesehatan Penglihatan
               </p>
             </div>
           </div>
-
         </header>
 
         {/* Chat Messages */}
@@ -374,8 +431,8 @@ export function CompanionChat() {
               </span>
               <h2 className="font-bold text-base text-text">Tanya Seputar Kesehatan Matamu</h2>
               <p className="mt-1.5 text-xs text-text-muted max-w-md leading-relaxed">
-                Teman Soca memahami aturan ergonomi 20-20-20, pencegahan Computer Vision Syndrome (CVS),
-                pencahayaan monitor ideal, dan cara menjaga kelembapan kornea mata.
+                Teman Soca memahami data monitoring harianmu, aturan ergonomi 20-20-20, pencegahan CVS,
+                pencahayaan monitor ideal, dan teknik relaksasi mata.
               </p>
 
               {/* Suggestions chips */}
@@ -418,7 +475,7 @@ export function CompanionChat() {
           {sending && (
             <div className="flex justify-start" aria-label="Teman Soca sedang menyusun saran">
               <div className="bg-surface-2 border border-border rounded-2xl rounded-bl-xs px-4 py-3 flex gap-1.5 items-center">
-                <span className="text-xs text-text-muted mr-1 font-medium">Teman Soca mengetik</span>
+                <span className="text-xs text-text-muted mr-1 font-medium">Teman Soca menganalisis</span>
                 {[0, 1, 2].map((i) => (
                   <span
                     key={i}
@@ -444,7 +501,7 @@ export function CompanionChat() {
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Tanya seputar aturan 20-20-20, mata kering, jarak layar ideal…"
+            placeholder="Tanya seputar telemetri hari ini, aturan 20-20-20, mata lelah…"
             aria-label="Pesan untuk teman soca"
             maxLength={2000}
             className="input-base flex-1 text-xs md:text-sm py-2.5"

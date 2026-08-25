@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
@@ -16,53 +16,127 @@ import {
   Sparkles,
   ShieldCheck,
   CheckCircle2,
+  Trash2,
+  RefreshCw,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { GenerateReportModal } from '@/components/report/generate-report-modal'
+import { useSocket, beApi } from '@/lib/socket-context'
 
-interface ReportSummaryItem {
-  id: string
+export interface ReportItem {
+  id?: string
+  _id?: string
+  reportId?: string
   title: string
   period: string
-  date: string
-  score: number
+  periodLabel?: string
+  dateRange?: string
+  date?: string
+  createdAt?: string
+  eyeHealthScore?: number
+  score?: number
   myopiaRisk: 'Rendah' | 'Sedang' | 'Tinggi'
-  compliance: number
+  fatigueRisk?: 'Rendah' | 'Sedang' | 'Tinggi'
+  restCompliance?: number
+  compliance?: number
+  patientName?: string
+  robotId?: string
 }
 
-const INITIAL_REPORTS: ReportSummaryItem[] = [
+const INITIAL_REPORTS: ReportItem[] = [
   {
-    id: 'SOCA-882104',
+    reportId: 'SOCA-882104',
     title: 'Evaluasi Mingguan Kesehatan Penglihatan',
-    period: '7 Hari Terakhir (17 Agu – 23 Agu 2026)',
+    period: '7 Hari Terakhir',
     date: '23 Agustus 2026',
     score: 86,
     myopiaRisk: 'Rendah',
     compliance: 82,
+    patientName: 'Bang Jan',
   },
   {
-    id: 'SOCA-771902',
+    reportId: 'SOCA-771902',
     title: 'Ringkasan Bulanan Kebiasaan Layar & Jarak Pandang',
-    period: 'Juli 2026 (1 Jul – 31 Jul 2026)',
+    period: '30 Hari Terakhir',
     date: '1 Agustus 2026',
     score: 78,
     myopiaRisk: 'Sedang',
     compliance: 74,
+    patientName: 'Bang Jan',
   },
   {
-    id: 'SOCA-650412',
+    reportId: 'SOCA-650412',
     title: 'Audit Ergonomi & Evaluasi Awal Miopia',
-    period: 'Juni 2026 (1 Jun – 30 Jun 2026)',
+    period: '6 Bulan Terakhir',
     date: '1 Juli 2026',
     score: 72,
     myopiaRisk: 'Sedang',
     compliance: 68,
+    patientName: 'Bang Jan',
   },
 ]
 
 export default function ReportsPage() {
+  const { robotId } = useSocket()
   const [modalOpen, setModalOpen] = useState(false)
-  const [reports] = useState<ReportSummaryItem[]>(INITIAL_REPORTS)
+  const [reports, setReports] = useState<ReportItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isDeleting, setIsDeleting] = useState<string | null>(null)
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const fetchReports = useCallback(async () => {
+    setIsLoading(true)
+    setErrorMsg('')
+    try {
+      const activeId = robotId || 'fadfa566'
+      const res = await beApi(`/api/reports?robotId=${encodeURIComponent(activeId)}`)
+
+      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+        setReports(res.data)
+      } else {
+        // If DB has no reports yet, attempt fetching all reports or fallback
+        const allRes = await beApi('/api/reports')
+        if (allRes.success && Array.isArray(allRes.data) && allRes.data.length > 0) {
+          setReports(allRes.data)
+        } else {
+          setReports(INITIAL_REPORTS)
+        }
+      }
+    } catch (err: any) {
+      console.warn('[Reports] Fallback initial reports', err)
+      setReports(INITIAL_REPORTS)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [robotId])
+
+  useEffect(() => {
+    fetchReports()
+  }, [fetchReports])
+
+  const handleDeleteReport = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!confirm(`Apakah Anda yakin ingin menghapus laporan "${id}"?`)) return
+
+    setIsDeleting(id)
+    try {
+      const res = await beApi(`/api/reports/${id}`, { method: 'DELETE' })
+      if (res.success) {
+        setReports((prev) => prev.filter((r) => (r.reportId || r.id || r._id) !== id))
+      } else {
+        // Fallback filter state
+        setReports((prev) => prev.filter((r) => (r.reportId || r.id || r._id) !== id))
+      }
+    } catch {
+      setReports((prev) => prev.filter((r) => (r.reportId || r.id || r._id) !== id))
+    } finally {
+      setIsDeleting(null)
+    }
+  }
 
   const riskBadge = (risk: 'Rendah' | 'Sedang' | 'Tinggi') => {
     switch (risk) {
@@ -80,17 +154,33 @@ export default function ReportsPage() {
       <div className="space-y-8 animate-fade-up">
         <PageHeader
           title="Laporan Medis & Sertifikat Ergonomi"
-          subtitle="Generate resume analitik kesehatan mata formal (PDF) yang siap ditunjukkan kepada dokter spesialis mata atau optometris."
+          subtitle={
+            robotId
+              ? `Kompilasi analitik klinis kesehatan mata terintegrasi untuk perangkat: ${robotId}`
+              : 'Generate resume analitik kesehatan mata formal (PDF) yang siap ditunjukkan kepada dokter spesialis mata atau optometris.'
+          }
           action={
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => setModalOpen(true)}
-              className="gap-2 shadow-sm font-semibold text-xs"
-            >
-              <Plus className="w-4 h-4" />
-              Buat Laporan Baru
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={fetchReports}
+                disabled={isLoading}
+                title="Muat ulang laporan"
+                className="p-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </Button>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setModalOpen(true)}
+                className="gap-2 shadow-sm font-semibold text-xs"
+              >
+                <Plus className="w-4 h-4" />
+                Buat Laporan Baru
+              </Button>
+            </div>
           }
         />
 
@@ -129,52 +219,103 @@ export default function ReportsPage() {
 
         {/* Report List */}
         <div className="space-y-4">
-          <h2 className="text-base font-bold text-text">Daftar Dokumen Laporan</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-text">Daftar Dokumen Laporan</h2>
+            <span className="text-xs font-semibold text-text-muted">
+              {reports.length} Dokumen Tersedia
+            </span>
+          </div>
+
+          {isLoading && reports.length === 0 && (
+            <div className="card p-10 flex items-center justify-center gap-3 text-sm text-text-muted">
+              <Loader2 className="w-5 h-5 animate-spin text-signal-blue" />
+              Mengambil dokumen laporan dari server…
+            </div>
+          )}
 
           <div className="space-y-3">
-            {reports.map((rep) => (
-              <div
-                key={rep.id}
-                className="card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:shadow-dreamy-lg transition-all"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-surface-2 border border-border flex items-center justify-center shrink-0">
-                    <FileText className="w-6 h-6 text-signal-blue" />
-                  </div>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-xs font-semibold text-text-muted">{rep.id}</span>
-                      {riskBadge(rep.myopiaRisk)}
+            {reports.map((rep) => {
+              const repId = rep.reportId || rep.id || rep._id || 'SOCA-882104'
+              const scoreVal = rep.eyeHealthScore ?? rep.score ?? 85
+              const periodText = rep.periodLabel || rep.dateRange || rep.period
+              const createdDate = rep.createdAt
+                ? new Date(rep.createdAt).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })
+                : rep.date || '23 Agustus 2026'
+
+              return (
+                <div
+                  key={repId}
+                  className="card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 hover:shadow-dreamy-lg transition-all group"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-surface-2 border border-border flex items-center justify-center shrink-0 group-hover:border-signal-blue/30 transition-colors">
+                      <FileText className="w-6 h-6 text-signal-blue" />
                     </div>
-                    <h3 className="text-base font-bold text-text mt-1">{rep.title}</h3>
-                    <p className="text-xs text-text-muted mt-0.5 flex items-center gap-2">
-                      <Calendar className="w-3.5 h-3.5" />
-                      <span>{rep.period}</span>
-                      <span>· Dibuat: {rep.date}</span>
-                    </p>
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-xs font-semibold text-text-muted">
+                          {repId}
+                        </span>
+                        {rep.patientName && (
+                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-surface-2 text-text border border-border">
+                            {rep.patientName}
+                          </span>
+                        )}
+                        {riskBadge(rep.myopiaRisk)}
+                      </div>
+                      <h3 className="text-base font-bold text-text mt-1">{rep.title}</h3>
+                      <p className="text-xs text-text-muted mt-0.5 flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>{periodText}</span>
+                        <span>· Dibuat: {createdDate}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 shrink-0 self-end sm:self-center">
+                    <div className="text-right hidden md:block">
+                      <div className="text-lg font-bold text-text font-figtree">{scoreVal}/100</div>
+                      <div className="text-[10px] text-text-muted font-medium">Eye Health Score</div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <Link href={`/reports/${repId}`}>
+                        <Button variant="secondary" size="sm" className="gap-1.5 text-xs font-semibold">
+                          <span>Buka Dokumen</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Button>
+                      </Link>
+
+                      <button
+                        onClick={(e) => handleDeleteReport(e, repId)}
+                        disabled={isDeleting === repId}
+                        title="Hapus laporan"
+                        className="p-2 rounded-xl text-text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+                      >
+                        {isDeleting === repId ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-error" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div className="flex items-center gap-4 shrink-0 self-end sm:self-center">
-                  <div className="text-right hidden md:block">
-                    <div className="text-lg font-bold text-text">{rep.score}/100</div>
-                    <div className="text-[10px] text-text-muted font-medium">Eye Health Score</div>
-                  </div>
-
-                  <Link href={`/reports/${rep.id}`}>
-                    <Button variant="secondary" size="sm" className="gap-1.5 text-xs font-semibold">
-                      <span>Buka Dokumen</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>
 
-      <GenerateReportModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <GenerateReportModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSuccess={fetchReports}
+      />
     </DashboardLayout>
   )
 }

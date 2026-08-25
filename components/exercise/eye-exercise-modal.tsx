@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { playGentleChime } from '@/lib/desktop-notifications'
+import { useSocket, beApi } from '@/lib/socket-context'
 
 function YoutubeIcon({ className = 'w-4 h-4' }: { className?: string }) {
   return (
@@ -62,6 +63,7 @@ const STEPS = [
 ]
 
 export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: EyeExerciseModalProps) {
+  const { robotId } = useSocket()
   const [activeTab, setActiveTab] = useState<'youtube' | 'animated'>(initialMode)
   const [currentStepIdx, setCurrentStepIdx] = useState(0)
   const [timeLeft, setTimeLeft] = useState(STEPS[0].duration)
@@ -73,6 +75,19 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
   const [showUrlInput, setShowUrlInput] = useState(false)
 
   const currentStep = STEPS[currentStepIdx]
+
+  const recordBreakToBackend = async () => {
+    try {
+      const activeId = robotId || 'fadfa566'
+      await beApi('/api/log/break', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ robotId: activeId, duration: 20 }),
+      })
+    } catch (e) {
+      console.warn('[Exercise] Failed to record break to backend', e)
+    }
+  }
 
   // Read / save completed breaks from localStorage
   useEffect(() => {
@@ -99,12 +114,13 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
         const newCount = completedBreaks + 1
         setCompletedBreaks(newCount)
         localStorage.setItem('socasob-completed-breaks', String(newCount))
+        recordBreakToBackend()
       }
     }
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [isRunning, timeLeft, currentStepIdx, completedBreaks])
+  }, [isRunning, timeLeft, currentStepIdx, completedBreaks, robotId])
 
   const handleStart = () => {
     setIsRunning(true)
