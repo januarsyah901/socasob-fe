@@ -33,6 +33,7 @@ export function DesktopAlertBanner() {
       sendDesktopNotification({
         title: '🔔 Notifikasi SocaSob Aktif!',
         body: 'Sistem akan memberi peringatan pintar jika jarak mata Anda terlalu dekat atau saat butuh istirahat.',
+        bypassThrottle: true
       })
     } else {
       setPermission('denied')

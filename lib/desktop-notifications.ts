@@ -38,25 +38,26 @@ const THROTTLE_MS = 8000 // Minimal jeda 8 detik antar notifikasi agar tidak spa
 export async function sendDesktopNotification({
   title,
   body,
-  icon = '/images/Logo Socasob.png',
+  icon = '/images/logo-socasob.png',
   tag,
   requireInteraction = false,
-}: DesktopNotificationOptions): Promise<boolean> {
+  bypassThrottle = false,
+}: DesktopNotificationOptions & { bypassThrottle?: boolean }): Promise<boolean> {
   if (!isNotificationSupported() || Notification.permission !== 'granted') {
     return false
   }
 
   const now = Date.now()
-  if (now - lastNotificationTime < THROTTLE_MS) {
+  if (!bypassThrottle && now - lastNotificationTime < THROTTLE_MS) {
     return false
   }
   lastNotificationTime = now
 
   try {
     if ('serviceWorker' in navigator) {
-      const registration = await navigator.serviceWorker.ready;
-      if (registration) {
-        registration.showNotification(title, { 
+      const registration = await navigator.serviceWorker.getRegistration();
+      if (registration && registration.active) {
+        await registration.showNotification(title, { 
           body, 
           icon, 
           tag: tag || 'socasob-eye-alert', 

@@ -1,10 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { UserAvatar } from '@/components/layout/avatar'
+import { useAuth } from '@/lib/auth-context'
 import {
   LayoutDashboard,
   ClipboardList,
@@ -17,6 +18,7 @@ import {
   X,
   Sun,
   Moon,
+  LogOut,
 } from 'lucide-react'
 
 const NAV = [
@@ -30,8 +32,18 @@ const NAV = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const { user, logout } = useAuth()
   const [open, setOpen] = useState(false)
   const [isDark, setIsDark] = useState(false)
+
+  const displayName = user?.fullName || 'Pengguna'
+
+  const handleLogout = () => {
+    logout()
+    setOpen(false)
+    router.push('/login')
+  }
 
   useEffect(() => {
     const stored = localStorage.getItem('socasob-theme')
@@ -87,12 +99,12 @@ export function Sidebar() {
           className="flex items-center gap-2.5 flex-1 min-w-0 group"
           title="Profil & pengaturan"
         >
-          <UserAvatar name="Bang Jan" className="size-9 shrink-0 text-sm" />
+          <UserAvatar name={displayName} className="size-9 shrink-0 text-sm" />
           <span className="min-w-0">
             <span className="block text-sm font-medium text-body truncate group-hover:underline">
-              Bang Jan
+              {displayName}
             </span>
-            <span className="block text-xs text-muted truncate">Soca Care Explorer</span>
+            <span className="block text-xs text-muted truncate">{user?.email || 'Soca Care Explorer'}</span>
           </span>
         </Link>
         <button
@@ -120,6 +132,14 @@ export function Sidebar() {
         >
           <Settings className="size-4.5" />
         </Link>
+        <button
+          onClick={handleLogout}
+          aria-label="Keluar"
+          title="Keluar dari akun"
+          className="p-2 rounded-lg text-muted hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+        >
+          <LogOut className="size-4.5" />
+        </button>
       </div>
     </div>
   )

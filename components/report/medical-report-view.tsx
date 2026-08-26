@@ -86,7 +86,7 @@ export function MedicalReportView({ report }: { report: MedicalReportData }) {
         
         {/* Background watermark (visible slightly) */}
         <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none no-print">
-          <img src="/images/Logo Socasob.png" alt="" className="w-96 h-96 object-contain grayscale" />
+          <img src="/images/logo-socasob.png" alt="" className="w-96 h-96 object-contain grayscale" />
         </div>
 
         <div className="p-8 md:p-12 relative z-10">
@@ -94,7 +94,7 @@ export function MedicalReportView({ report }: { report: MedicalReportData }) {
           <header className="border-b-[3px] border-slate-900 pb-6 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="flex items-start gap-4">
               <div className="size-16 shrink-0 flex items-center justify-center">
-                <img src="/images/Logo Socasob.png" alt="SocaSob Logo" className="w-full h-full object-contain" />
+                <img src="/images/logo-socasob.png" alt="SocaSob Logo" className="w-full h-full object-contain" />
               </div>
               <div>
                 <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight uppercase" style={{ fontFamily: 'var(--font-figtree)' }}>

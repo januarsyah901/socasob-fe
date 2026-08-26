@@ -6,6 +6,7 @@ import { PwaRegistrar } from '@/components/layout/pwa-registrar'
 import { SocketProvider } from '@/lib/socket-context'
 import { ToastProvider } from '@/components/ui/toast'
 import { SplashScreen } from '@/components/layout/splash-screen'
+import { AuthProvider } from '@/lib/auth-context'
 
 const fontFigtree = Figtree({
   variable: '--font-figtree',
@@ -20,8 +21,8 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   themeColor: '#4e9ad9',
   icons: {
-    icon: '/images/Logo Socasob.png',
-    apple: '/images/Logo Socasob.png',
+    icon: '/images/logo-socasob.png',
+    apple: '/images/logo-socasob.png',
   },
 }
 
@@ -32,10 +33,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SplashScreen />
         <PwaRegistrar />
         <ThemeApplier />
-        <ToastProvider>
-          <SocketProvider>{children}</SocketProvider>
-        </ToastProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <SocketProvider>{children}</SocketProvider>
+          </ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   )
 }
+

@@ -2,6 +2,7 @@
 
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { useState, useEffect, useCallback } from 'react'
+import { useAuth } from '@/lib/auth-context'
 import {
   Volume2,
   Bell,
@@ -13,6 +14,9 @@ import {
   Smartphone,
   CheckCircle2,
   Play,
+  User,
+  Link2,
+  Loader2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PageHeader } from '@/components/layout/page-header'
@@ -35,12 +39,19 @@ interface RobotStatus {
 
 export default function SettingsPage() {
   const { isConnected, setRobotId, robotId: activeRobotId } = useSocket()
+  const { user, getToken } = useAuth()
 
   const [robotIdInput, setRobotIdInput] = useState('')
   const [volume, setVolume] = useState(70)
   const [alertSoundEnabled, setAlertSoundEnabled] = useState(true)
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [notificationPerm, setNotificationPerm] = useState<NotificationPermission>('default')
+
+  // State pair robot
+  const [serialInput, setSerialInput] = useState('')
+  const [isPairing, setIsPairing] = useState(false)
+  const [pairMessage, setPairMessage] = useState('')
+  const [pairError, setPairError] = useState('')
 
   const [savedMessage, setSavedMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
@@ -197,6 +208,36 @@ export default function SettingsPage() {
     }
   }
 
+  const handlePairRobot = async () => {
+    if (!serialInput.trim()) {
+      setPairError('Serial Number wajib diisi.')
+      return
+    }
+    setPairError('')
+    setPairMessage('')
+    setIsPairing(true)
+    try {
+      const token = getToken()
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://be-socasob.hallojanu.xyz'
+      const res = await fetch(`${API_BASE}/api/auth/pair-robot`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ serialNumber: serialInput.trim() })
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Pairing gagal')
+      setPairMessage(json.message)
+      setSerialInput('')
+    } catch (err: unknown) {
+      setPairError(err instanceof Error ? err.message : 'Pairing gagal')
+    } finally {
+      setIsPairing(false)
+    }
+  }
+
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-fade-up">
@@ -204,6 +245,78 @@ export default function SettingsPage() {
           title="Pengaturan Sistem & Ergonomi"
           subtitle="Hubungkan perangkat kamera detektor ESP32-CAM SocaSob dan atur preferensi peringatan audio & desktop push."
         />
+
+        {/* ─── Card: Profil Akun ─── */}
+        <div className="bg-surface border border-border rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <User className="w-4.5 h-4.5 text-signal-blue" />
+            <h2 className="text-sm font-bold text-text">Profil Akun</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-xs text-text-muted mb-0.5">Nama Lengkap</p>
+              <p className="font-semibold text-text">{user?.fullName || '-'}</p>
+            </div>
+            <div>
+              <p className="text-xs text-text-muted mb-0.5">Email</p>
+              <p className="font-semibold text-text">{user?.email || '-'}</p>
+            </div>
+            {user?.phoneNumber && (
+              <div>
+                <p className="text-xs text-text-muted mb-0.5">Nomor Telepon</p>
+                <p className="font-semibold text-text">{user.phoneNumber}</p>
+              </div>
+            )}
+            {user?.dateOfBirth && (
+              <div>
+                <p className="text-xs text-text-muted mb-0.5">Tanggal Lahir</p>
+                <p className="font-semibold text-text">
+                  {new Date(user.dateOfBirth).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ─── Card: Pairing Robot via Serial Number ─── */}
+        <div className="bg-surface border border-border rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Link2 className="w-4.5 h-4.5 text-signal-blue" />
+            <h2 className="text-sm font-bold text-text">Hubungkan Robot</h2>
+          </div>
+          <p className="text-xs text-text-muted mb-4">
+            Masukkan Serial Number yang tertera di bawah badan robot atau di buku panduan (contoh: SOCA-X7B9).
+          </p>
+          {pairMessage && (
+            <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700 rounded-xl p-3 mb-3 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <p className="text-emerald-800 dark:text-emerald-300 text-xs font-semibold">{pairMessage}</p>
+            </div>
+          )}
+          {pairError && (
+            <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-700 rounded-xl p-3 mb-3 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <p className="text-rose-800 dark:text-rose-300 text-xs font-semibold">{pairError}</p>
+            </div>
+          )}
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={serialInput}
+              onChange={e => { setSerialInput(e.target.value.toUpperCase()); setPairError(''); setPairMessage('') }}
+              placeholder="Contoh: SOCA-X7B9"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition uppercase tracking-widest"
+            />
+            <button
+              onClick={handlePairRobot}
+              disabled={isPairing}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-signal-blue hover:bg-signal-blue/90 disabled:opacity-60 text-white font-semibold text-sm transition shrink-0"
+            >
+              {isPairing ? <Loader2 size={14} className="animate-spin" /> : <Link2 size={14} />}
+              {isPairing ? 'Menghubungkan...' : 'Hubungkan'}
+            </button>
+          </div>
+        </div>
 
         {/* Success Toast */}
         {savedMessage && (
