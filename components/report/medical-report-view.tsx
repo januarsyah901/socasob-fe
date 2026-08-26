@@ -28,7 +28,6 @@ export interface MedicalReportData {
   generatedAt: string
   period: string
   dateRange: string
-  eyeHealthScore: number
   myopiaRisk: 'Rendah' | 'Sedang' | 'Tinggi'
   fatigueRisk: 'Rendah' | 'Sedang' | 'Tinggi'
   cvsRisk: 'Rendah' | 'Sedang' | 'Tinggi'
@@ -146,14 +145,8 @@ export function MedicalReportView({ report }: { report: MedicalReportData }) {
               <Activity className="size-4" /> 1. Parameter Utama
             </div>
             
-            <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 bg-slate-50">
-              <div className="p-4 flex flex-col items-center justify-center text-center">
-                <span className="text-[10px] font-bold text-slate-500 uppercase mb-2">Eye Health Score</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-slate-900 font-figtree">{report.eyeHealthScore}</span>
-                  <span className="text-xs text-slate-500 font-bold">/ 100</span>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 bg-slate-50">
+              
               <div className="p-4 flex flex-col items-center justify-center text-center">
                 <span className="text-[10px] font-bold text-slate-500 uppercase mb-2">Risiko Miopia</span>
                 <span className={cn('px-3 py-1 rounded-md text-xs font-bold border uppercase', riskBadge(report.myopiaRisk))}>

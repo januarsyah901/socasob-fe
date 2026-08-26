@@ -6,6 +6,38 @@ import { sendDesktopNotification, playGentleChime } from './desktop-notification
 
 const BE_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
 const BE_API = process.env.NEXT_PUBLIC_API_URL || BE_URL
+const ML_WS_URL = process.env.NEXT_PUBLIC_ML_WS_URL || 'ws://localhost:8765'
+
+export type LcdCommand = 'normal' | 'fatigue_5m' | 'fatigue_10m' | 'break_20m' | 'dry_eye'
+export type SpeakerCommand = 'cling' | 'bip-bip' | 'ting-tong' | 'pop-pop' | 'ta-da' | 'none'
+
+export interface HardwareState {
+  lcdCommand: LcdCommand
+  speakerCommand: SpeakerCommand
+  fatigueDurationSec: number
+  breakRemainingSec: number
+  workElapsedSec: number
+}
+
+export interface FatigueData {
+  status?: string
+  dataQuality?: string
+  recommendation?: string
+}
+
+export interface DryEyeData {
+  perclos?: number
+  avgBlinkDuration?: number
+  incompleteBlinkRatio?: number
+  riskFactors?: string[]
+}
+
+export interface MyopiaRiskData {
+  distanceCm?: number
+  distanceWarning?: boolean
+  breakState?: string
+  screenTimeMinutes?: number
+}
 
 interface SocketContextType {
   socket: Socket | null
@@ -20,7 +52,13 @@ interface SocketContextType {
   eyeDistance: string
   eyeStatus: 'normal' | 'risk_myopia' | 'risk_fatigue' | 'disconnected'
   confidence: number
-  eyeScore: number
+  hardware: HardwareState
+  fatigueData: FatigueData
+  dryEyeData: DryEyeData
+  myopiaRiskData: MyopiaRiskData
+  mlWsConnected: boolean
+  queryMlHistory: (type: 'fatigue' | 'dry_eye' | 'myopia_risk', days?: number) => void
+  queryMlSummary: (days?: number) => void
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined)
@@ -33,7 +71,24 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [eyeDistance, setEyeDistance] = useState('Jauh')
   const [eyeStatus, setEyeStatus] = useState<SocketContextType['eyeStatus']>('disconnected')
   const [confidence, setConfidence] = useState(0)
-  const [eyeScore, setEyeScore] = useState(0)
+
+  // State Hardware Aktuator & Monitoring Waktu
+  const [hardware, setHardware] = useState<HardwareState>({
+    lcdCommand: 'normal',
+    speakerCommand: 'none',
+    fatigueDurationSec: 0,
+    breakRemainingSec: 0,
+    workElapsedSec: 0,
+  })
+
+  // State Detail Payload WebSocket ML
+  const [fatigueData, setFatigueData] = useState<FatigueData>({})
+  const [dryEyeData, setDryEyeData] = useState<DryEyeData>({})
+  const [myopiaRiskData, setMyopiaRiskData] = useState<MyopiaRiskData>({})
+
+  // State Native ML WebSocket (Port 8765)
+  const [mlWs, setMlWs] = useState<WebSocket | null>(null)
+  const [mlWsConnected, setMlWsConnected] = useState(false)
 
   // Baca robotId dari localStorage saat mount
   useEffect(() => {
@@ -41,7 +96,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     if (saved) setRobotIdState(saved)
   }, [])
 
-  // Inisialisasi socket
+  // Inisialisasi Socket.IO Client (Backend)
   useEffect(() => {
     const socketInstance = io(BE_URL, {
       reconnection: true,
@@ -55,7 +110,6 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       setIsConnected(true)
       setEyeStatus('normal')
 
-      // Join room robot jika robotId sudah ada
       const savedRobotId = localStorage.getItem('socasob-robot-id')
       if (savedRobotId) {
         socketInstance.emit('subscribe-robot', { robot_id: savedRobotId })
@@ -81,12 +135,22 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       })
     })
 
+    socketInstance.on('hardware-status', (data: any) => {
+      if (!data) return
+      setHardware((prev) => ({
+        lcdCommand: data.lcd_command || prev.lcdCommand,
+        speakerCommand: data.speaker_command || prev.speakerCommand,
+        fatigueDurationSec: data.fatigue_duration_sec ?? prev.fatigueDurationSec,
+        breakRemainingSec: data.break_remaining_sec ?? prev.breakRemainingSec,
+        workElapsedSec: data.work_elapsed_sec ?? prev.workElapsedSec,
+      }))
+    })
+
     socketInstance.on('eye-distance', (data) => {
       const dist = data.distance || 'Jauh'
       setEyeDistance(dist)
       if (data.confidence !== undefined) setConfidence(Math.round(data.confidence))
 
-      // Trigger desktop notification & chime jika terlalu dekat
       if (dist === 'Dekat') {
         const settingsStr = localStorage.getItem('socasob-settings')
         let soundEnabled = true
@@ -113,14 +177,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     socketInstance.on('eye-status', (data) => {
       if (data.status === 'disconnected') {
         setEyeStatus('disconnected')
-        setEyeScore(0)
         return
       }
       const st = data.status || 'normal'
       setEyeStatus(st)
-      if (data.score !== undefined) setEyeScore(data.score)
 
-      // Jika kelelahan ekstrem, beri notifikasi istirahat 20-20-20
       if (st === 'risk_fatigue') {
         sendDesktopNotification({
           title: '🌿 Waktunya Istirahat Mata (20-20-20)',
@@ -137,6 +198,96 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  // Inisialisasi Native WebSocket Client (Native ML WS - Port 8765)
+  useEffect(() => {
+    let ws: WebSocket | null = null
+    let reconnectTimer: NodeJS.Timeout
+
+    const connectNativeWs = () => {
+      try {
+        ws = new WebSocket(ML_WS_URL)
+
+        ws.onopen = () => {
+          console.log('[ML-WS] Connected to ML Native WebSocket server:', ML_WS_URL)
+          setMlWsConnected(true)
+        }
+
+        ws.onmessage = (event) => {
+          try {
+            const payload = JSON.parse(event.data)
+
+            // Handle Tipe Payload ML Broadcast:
+            if (payload.target === 'hardware') {
+              setHardware({
+                lcdCommand: payload.lcd_command || 'normal',
+                speakerCommand: payload.speaker_command || 'none',
+                fatigueDurationSec: payload.fatigue_duration_sec ?? 0,
+                breakRemainingSec: payload.break_remaining_sec ?? 0,
+                workElapsedSec: payload.work_elapsed_sec ?? 0,
+              })
+            } else if (payload.type === 'fatigue') {
+              setFatigueData({
+                status: payload.status,
+                dataQuality: payload.data_quality,
+                recommendation: payload.recommendation,
+              })
+            } else if (payload.type === 'dry_eye') {
+              setDryEyeData({
+                perclos: payload.perclos,
+                avgBlinkDuration: payload.avg_blink_duration,
+                incompleteBlinkRatio: payload.incomplete_blink_ratio,
+                riskFactors: payload.risk_factors,
+              })
+            } else if (payload.type === 'myopia_risk') {
+              setMyopiaRiskData({
+                distanceCm: payload.distance_cm,
+                distanceWarning: payload.distance_warning,
+                breakState: payload.break_state,
+                screenTimeMinutes: payload.screen_time_minutes,
+              })
+            }
+          } catch (e) {
+            console.error('[ML-WS] Error parsing message:', e)
+          }
+        }
+
+        ws.onclose = () => {
+          setMlWsConnected(false)
+          reconnectTimer = setTimeout(connectNativeWs, 3000)
+        }
+
+        ws.onerror = () => {
+          setMlWsConnected(false)
+        }
+
+        setMlWs(ws)
+      } catch (e) {
+        setMlWsConnected(false)
+        reconnectTimer = setTimeout(connectNativeWs, 5000)
+      }
+    }
+
+    connectNativeWs()
+
+    return () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer)
+      if (ws) ws.close()
+    }
+  }, [])
+
+  // Helper untuk query histori & summary via Native ML WebSocket
+  const queryMlHistory = useCallback((type: 'fatigue' | 'dry_eye' | 'myopia_risk', days = 7) => {
+    if (mlWs && mlWs.readyState === WebSocket.OPEN) {
+      mlWs.send(JSON.stringify({ action: 'get_history', type, days }))
+    }
+  }, [mlWs])
+
+  const queryMlSummary = useCallback((days = 1) => {
+    if (mlWs && mlWs.readyState === WebSocket.OPEN) {
+      mlWs.send(JSON.stringify({ action: 'get_summary', days }))
+    }
+  }, [mlWs])
+
   // Fungsi untuk set robotId dan langsung subscribe ke room
   const setRobotId = useCallback((id: string) => {
     setRobotIdState(id)
@@ -144,12 +295,17 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     if (socket?.connected && id) {
       socket.emit('subscribe-robot', { robot_id: id })
       console.log(`[SocaSob] Subscribed to robot:${id}`)
-      // Reset timer & status saat pindah robot
       setTimer({ hours: 0, minutes: 0, seconds: 0 })
       setEyeDistance('Jauh')
       setEyeStatus('disconnected')
       setConfidence(0)
-      setEyeScore(0)
+      setHardware({
+        lcdCommand: 'normal',
+        speakerCommand: 'none',
+        fatigueDurationSec: 0,
+        breakRemainingSec: 0,
+        workElapsedSec: 0,
+      })
     }
   }, [socket])
 
@@ -162,7 +318,13 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     eyeDistance,
     eyeStatus,
     confidence,
-    eyeScore,
+    hardware,
+    fatigueData,
+    dryEyeData,
+    myopiaRiskData,
+    mlWsConnected,
+    queryMlHistory,
+    queryMlSummary,
   }
 
   return <SocketContext.Provider value={value}>{children}</SocketContext.Provider>
@@ -187,3 +349,4 @@ export async function beApi(path: string, options?: RequestInit) {
   })
   return res.json()
 }
+

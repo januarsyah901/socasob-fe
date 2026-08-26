@@ -35,7 +35,6 @@ interface ResumeData {
   restCompliance: number
   nearPercent: number
   farPercent: number
-  eyeHealthScore: number
   totalHours: number
   totalDaysMonitored: number
 }
@@ -60,36 +59,6 @@ const riskRecommendation = (level: 'Rendah' | 'Sedang' | 'Tinggi', type: 'myopia
   if (level === 'Rendah') return 'Pola istirahat 20-20-20 terpelihara dengan teratur.'
   if (level === 'Sedang') return 'Tingkatkan frekuensi jeda istirahat mata setiap 20 menit kerja.'
   return 'Kelelahan ekstrem terdeteksi. Lakukan senam mata dan relaksasi palming segera.'
-}
-
-function ScoreRing({ score }: { score: number }) {
-  const radius = 52
-  const circumference = 2 * Math.PI * radius
-  const filled = (score / 100) * circumference
-  const color = score >= 80 ? '#16a34a' : score >= 60 ? '#d97706' : '#dc2626'
-
-  return (
-    <div className="relative flex flex-col items-center justify-center">
-      <svg width="140" height="140" viewBox="0 0 140 140" className="-rotate-90">
-        <circle cx="70" cy="70" r={radius} fill="none" stroke="var(--border)" strokeWidth="10" />
-        <circle
-          cx="70"
-          cy="70"
-          r={radius}
-          fill="none"
-          stroke={color}
-          strokeWidth="10"
-          strokeLinecap="round"
-          strokeDasharray={`${filled} ${circumference}`}
-          style={{ transition: 'stroke-dasharray 1s ease' }}
-        />
-      </svg>
-      <div className="absolute flex flex-col items-center justify-center">
-        <span className="text-3xl font-black text-text font-figtree leading-none">{score}</span>
-        <span className="text-[10px] font-semibold text-text-muted mt-1">/ 100</span>
-      </div>
-    </div>
-  )
 }
 
 export default function ResumePage() {
@@ -178,7 +147,7 @@ export default function ResumePage() {
                   <div className="flex items-center gap-2.5">
                     <Award className="w-5 h-5 text-signal-blue" />
                     <h2 className="text-lg font-bold text-text tracking-tight">
-                      Indeks Kesehatan Mata (Eye Health Score)
+                      Ringkasan Kesehatan Mata
                     </h2>
                   </div>
                   <span className="text-xs font-semibold text-text-muted bg-surface-2 px-3 py-1 rounded-full border border-border">
@@ -187,9 +156,7 @@ export default function ResumePage() {
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-8">
-                  <div className="shrink-0">
-                    <ScoreRing score={resumeData.eyeHealthScore} />
-                  </div>
+                  
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 flex-1 w-full">
                     {[

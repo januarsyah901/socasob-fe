@@ -35,8 +35,6 @@ export interface ReportItem {
   dateRange?: string
   date?: string
   createdAt?: string
-  eyeHealthScore?: number
-  score?: number
   myopiaRisk: 'Rendah' | 'Sedang' | 'Tinggi'
   fatigueRisk?: 'Rendah' | 'Sedang' | 'Tinggi'
   restCompliance?: number
@@ -51,7 +49,6 @@ const INITIAL_REPORTS: ReportItem[] = [
     title: 'Evaluasi Mingguan Kesehatan Penglihatan',
     period: '7 Hari Terakhir',
     date: '23 Agustus 2026',
-    score: 86,
     myopiaRisk: 'Rendah',
     compliance: 82,
     patientName: 'Bang Jan',
@@ -61,7 +58,6 @@ const INITIAL_REPORTS: ReportItem[] = [
     title: 'Ringkasan Bulanan Kebiasaan Layar & Jarak Pandang',
     period: '30 Hari Terakhir',
     date: '1 Agustus 2026',
-    score: 78,
     myopiaRisk: 'Sedang',
     compliance: 74,
     patientName: 'Bang Jan',
@@ -71,7 +67,6 @@ const INITIAL_REPORTS: ReportItem[] = [
     title: 'Audit Ergonomi & Evaluasi Awal Miopia',
     period: '6 Bulan Terakhir',
     date: '1 Juli 2026',
-    score: 72,
     myopiaRisk: 'Sedang',
     compliance: 68,
     patientName: 'Bang Jan',
@@ -236,7 +231,7 @@ export default function ReportsPage() {
           <div className="space-y-3">
             {reports.map((rep) => {
               const repId = rep.reportId || rep.id || rep._id || 'SOCA-882104'
-              const scoreVal = rep.eyeHealthScore ?? rep.score ?? 85
+              
               const periodText = rep.periodLabel || rep.dateRange || rep.period
               const createdDate = rep.createdAt
                 ? new Date(rep.createdAt).toLocaleDateString('id-ID', {
@@ -277,10 +272,7 @@ export default function ReportsPage() {
                   </div>
 
                   <div className="flex items-center gap-4 shrink-0 self-end sm:self-center">
-                    <div className="text-right hidden md:block">
-                      <div className="text-lg font-bold text-text font-figtree">{scoreVal}/100</div>
-                      <div className="text-[10px] text-text-muted font-medium">Eye Health Score</div>
-                    </div>
+                    
 
                     <div className="flex items-center gap-2">
                       <Link href={`/reports/${repId}`}>

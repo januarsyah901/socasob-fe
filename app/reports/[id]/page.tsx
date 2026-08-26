@@ -56,7 +56,6 @@ export default function ReportDetailPage() {
                 }),
             period: data.periodLabel || data.period || periodLabel,
             dateRange: data.dateRange || '17 Agustus 2026 – 23 Agustus 2026',
-            eyeHealthScore: data.eyeHealthScore ?? 86,
             myopiaRisk: data.myopiaRisk || 'Rendah',
             fatigueRisk: data.fatigueRisk || 'Sedang',
             cvsRisk: data.cvsRisk || 'Rendah',

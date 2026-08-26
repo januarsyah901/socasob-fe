@@ -7,12 +7,19 @@ import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
 
 export function TimerDisplay() {
-  const { timer, eyeStatus, isConnected, robotId } = useSocket()
+  const { timer, eyeStatus, isConnected, robotId, hardware } = useSocket()
   const [localTimer, setLocalTimer] = useState({ hours: 0, minutes: 0, seconds: 0 })
 
   useEffect(() => {
-    if (timer) setLocalTimer(timer)
-  }, [timer])
+    if (timer && (timer.hours > 0 || timer.minutes > 0 || timer.seconds > 0)) {
+      setLocalTimer(timer)
+    } else if (hardware.workElapsedSec > 0) {
+      const h = Math.floor(hardware.workElapsedSec / 3600)
+      const m = Math.floor((hardware.workElapsedSec % 3600) / 60)
+      const s = hardware.workElapsedSec % 60
+      setLocalTimer({ hours: h, minutes: m, seconds: s })
+    }
+  }, [timer, hardware.workElapsedSec])
 
   // Jika socket disconnect atau robot tidak aktif, reset timer display
   useEffect(() => {
@@ -35,19 +42,24 @@ export function TimerDisplay() {
   }
 
   return (
-    <div className="card-sm p-6 md:p-8 flex flex-col h-full">
+    <div className="card-sm p-6 md:p-8 flex flex-col h-full justify-between space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <Clock className="w-5 h-5 text-signal-blue" />
           <h2 className="text-lg font-semibold text-text tracking-tight">
-            Durasi Monitoring
+            Durasi Monitoring Real-Time
           </h2>
         </div>
+        {hardware.breakRemainingSec > 0 && (
+          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 animate-pulse">
+            Istirahat 20s: Sisa {hardware.breakRemainingSec}s
+          </span>
+        )}
       </div>
 
       {/* Timer Digits */}
-      <div className="flex gap-2 justify-center items-center my-4">
+      <div className="flex gap-2 justify-center items-center my-2">
         {[
           { value: fmt(localTimer.hours), label: 'Jam' },
           { value: fmt(localTimer.minutes), label: 'Menit' },
@@ -71,10 +83,10 @@ export function TimerDisplay() {
       </div>
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 gap-3 mt-auto pt-4 border-t border-border">
+      <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
         <div className="bg-surface-2 border border-border rounded-xl p-3.5">
           <div className="flex items-center gap-1.5 text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">
-            <Activity className="w-3 h-3" />
+            <Activity className="w-3 h-3 text-signal-blue" />
             Total Menit
           </div>
           <div className="text-xl font-bold text-text leading-tight">
@@ -83,7 +95,7 @@ export function TimerDisplay() {
         </div>
         <div className="bg-surface-2 border border-border rounded-xl p-3.5">
           <div className="flex items-center gap-1.5 text-[10px] font-semibold text-text-muted uppercase tracking-wider mb-1.5">
-            <Zap className="w-3 h-3" />
+            <Zap className="w-3 h-3 text-amber-500" />
             Status Mata
           </div>
           <div className="leading-tight">

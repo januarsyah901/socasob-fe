@@ -5,6 +5,7 @@ import { ThemeApplier } from '@/components/layout/theme-applier'
 import { PwaRegistrar } from '@/components/layout/pwa-registrar'
 import { SocketProvider } from '@/lib/socket-context'
 import { ToastProvider } from '@/components/ui/toast'
+import { SplashScreen } from '@/components/layout/splash-screen'
 
 const fontFigtree = Figtree({
   variable: '--font-figtree',
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id" className={fontFigtree.variable} suppressHydrationWarning>
       <body className="font-figtree antialiased bg-bg text-text">
+        <SplashScreen />
         <PwaRegistrar />
         <ThemeApplier />
         <ToastProvider>
