@@ -4,9 +4,7 @@ import { DashboardLayout } from '@/components/dashboard-layout'
 import { useState, useEffect, useCallback } from 'react'
 import {
   Bot,
-  Plus,
   Trash2,
-  Edit3,
   Wifi,
   WifiOff,
   Radio,
@@ -15,292 +13,211 @@ import {
   RefreshCw,
   AlertCircle,
   Clock,
-  Info,
+  Link2,
   ShieldCheck,
   CheckCircle2,
+  Info,
+  Loader2,
+  Unlink,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PageHeader } from '@/components/layout/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Modal } from '@/components/ui/modal'
 import { useSocket, beApi } from '@/lib/socket-context'
+import { useAuth } from '@/lib/auth-context'
+import Link from 'next/link'
 
 interface RobotDevice {
   _id?: string
   robotId: string
+  serialNumber?: string
   name: string
   status: 'active' | 'inactive'
   ipAddress?: string
   description?: string
-  apiKey?: string
   lastSeenAt?: string | null
   isOnline?: boolean
   createdAt?: string
+  ownerId?: string
 }
 
 export default function DevicesPage() {
   const { robotId: activeRobotId, setRobotId } = useSocket()
+  const { user, getToken } = useAuth()
+
   const [robots, setRobots] = useState<RobotDevice[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
 
-  // Modal State: Tambah
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
-  const [newRobotId, setNewRobotId] = useState('')
-  const [newName, setNewName] = useState('')
-  const [newIp, setNewIp] = useState('')
-  const [newDesc, setNewDesc] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [formError, setFormError] = useState('')
+  // State: Pair robot
+  const [serialInput, setSerialInput] = useState('')
+  const [isPairing, setIsPairing] = useState(false)
+  const [pairError, setPairError] = useState('')
 
-  // Modal State: Edit
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [editingRobot, setEditingRobot] = useState<RobotDevice | null>(null)
-  const [editName, setEditName] = useState('')
-  const [editIp, setEditIp] = useState('')
-  const [editDesc, setEditDesc] = useState('')
-  const [editStatus, setEditStatus] = useState<'active' | 'inactive'>('active')
-
-  // Modal State: Hapus
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [deletingRobot, setDeletingRobot] = useState<RobotDevice | null>(null)
+  // Modal: Unpair
+  const [isUnpairModalOpen, setIsUnpairModalOpen] = useState(false)
+  const [unpairingRobot, setUnpairingRobot] = useState<RobotDevice | null>(null)
+  const [isUnpairing, setIsUnpairing] = useState(false)
 
   const showSuccess = (msg: string) => {
     setSuccessMsg(msg)
     setTimeout(() => setSuccessMsg(''), 4000)
   }
 
-  const fetchRobots = useCallback(async () => {
+  // Fetch hanya robot milik user yang sedang login
+  const fetchMyRobots = useCallback(async () => {
     setIsLoading(true)
     setErrorMsg('')
     try {
+      // GET /api/robots → sudah inject token via beApi, backend filter by ownerId
       const res = await beApi('/api/robots')
       if (res.success && Array.isArray(res.data)) {
-        setRobots(res.data)
-        // Jika belum ada robot aktif yang dipilih, pilih robot pertama
-        if (!activeRobotId && res.data.length > 0) {
-          setRobotId(res.data[0].robotId)
+        // Filter hanya robot milik user ini
+        const myRobots = res.data.filter(
+          (r: RobotDevice) => r.ownerId && r.ownerId === user?._id
+        )
+        setRobots(myRobots)
+        // Auto-pilih robot pertama jika belum ada yang aktif
+        if (!activeRobotId && myRobots.length > 0) {
+          setRobotId(myRobots[0].robotId)
         }
       } else {
         setErrorMsg(res.error || 'Gagal memuat daftar perangkat.')
       }
-    } catch (err: any) {
-      setErrorMsg('Gagal terhubung ke server Backend: ' + (err.message || err))
+    } catch (err: unknown) {
+      setErrorMsg('Gagal terhubung ke server: ' + (err instanceof Error ? err.message : err))
     } finally {
       setIsLoading(false)
     }
-  }, [activeRobotId, setRobotId])
+  }, [activeRobotId, setRobotId, user?._id])
 
   useEffect(() => {
-    fetchRobots()
-    // Poll status online tiap 15 detik
-    const interval = setInterval(fetchRobots, 15000)
+    fetchMyRobots()
+    const interval = setInterval(fetchMyRobots, 15000)
     return () => clearInterval(interval)
-  }, [fetchRobots])
+  }, [fetchMyRobots])
 
-  // Handle Tambah Robot
-  const handleAddRobot = async (e: React.FormEvent) => {
+  // Pair robot via Serial Number
+  const handlePairRobot = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newRobotId.trim()) {
-      setFormError('ID Robot wajib diisi.')
+    if (!serialInput.trim()) {
+      setPairError('Serial Number wajib diisi.')
       return
     }
-    if (!newName.trim()) {
-      setFormError('Nama Robot wajib diisi.')
-      return
-    }
-
-    setFormError('')
-    setIsSubmitting(true)
-
+    setPairError('')
+    setIsPairing(true)
     try {
-      const res = await beApi('/api/robots', {
+      const token = getToken()
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://be-socasob.hallojanu.xyz'
+      const res = await fetch(`${API_BASE}/api/auth/pair-robot`, {
         method: 'POST',
-        body: JSON.stringify({
-          robotId: newRobotId.trim(),
-          name: newName.trim(),
-          ipAddress: newIp.trim(),
-          description: newDesc.trim(),
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ serialNumber: serialInput.trim() }),
       })
-
-      if (res.success) {
-        showSuccess(`Robot '${res.data.name}' (${res.data.robotId}) berhasil didaftarkan!`)
-        setIsAddModalOpen(false)
-        setNewRobotId('')
-        setNewName('')
-        setNewIp('')
-        setNewDesc('')
-        fetchRobots()
-        // Otomatis aktifkan jika belum ada yang aktif
-        if (!activeRobotId) {
-          setRobotId(res.data.robotId)
-        }
-      } else {
-        setFormError(res.error || 'Gagal mendaftarkan robot.')
-      }
-    } catch (err: any) {
-      setFormError('Terjadi kesalahan jaringan: ' + err.message)
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Pairing gagal')
+      showSuccess(json.message)
+      setSerialInput('')
+      fetchMyRobots()
+    } catch (err: unknown) {
+      setPairError(err instanceof Error ? err.message : 'Pairing gagal')
     } finally {
-      setIsSubmitting(false)
+      setIsPairing(false)
     }
   }
 
-  // Handle Edit Robot
-  const handleOpenEdit = (robot: RobotDevice) => {
-    setEditingRobot(robot)
-    setEditName(robot.name)
-    setEditIp(robot.ipAddress || '')
-    setEditDesc(robot.description || '')
-    setEditStatus(robot.status)
-    setFormError('')
-    setIsEditModalOpen(true)
-  }
-
-  const handleSaveEdit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!editingRobot) return
-    if (!editName.trim()) {
-      setFormError('Nama Robot tidak boleh kosong.')
-      return
-    }
-
-    setIsSubmitting(true)
-    setFormError('')
-
+  // Unpair robot
+  const handleConfirmUnpair = async () => {
+    if (!unpairingRobot) return
+    setIsUnpairing(true)
     try {
-      const res = await beApi(`/api/robots/${editingRobot.robotId}`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          name: editName.trim(),
-          ipAddress: editIp.trim(),
-          description: editDesc.trim(),
-          status: editStatus,
-        }),
-      })
-
-      if (res.success) {
-        showSuccess(`Data robot '${editingRobot.robotId}' berhasil diperbarui!`)
-        setIsEditModalOpen(false)
-        fetchRobots()
-      } else {
-        setFormError(res.error || 'Gagal memperbarui robot.')
-      }
-    } catch (err: any) {
-      setFormError('Kesalahan jaringan: ' + err.message)
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  // Handle Hapus Robot
-  const handleConfirmDelete = async () => {
-    if (!deletingRobot) return
-    setIsSubmitting(true)
-
-    try {
-      const res = await beApi(`/api/robots/${deletingRobot.robotId}`, {
+      const token = getToken()
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://be-socasob.hallojanu.xyz'
+      const res = await fetch(`${API_BASE}/api/auth/unpair-robot`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ serialNumber: unpairingRobot.serialNumber }),
       })
-
-      if (res.success) {
-        showSuccess(`Robot '${deletingRobot.robotId}' berhasil dihapus.`)
-        setIsDeleteModalOpen(false)
-        if (activeRobotId === deletingRobot.robotId) {
-          const remaining = robots.filter((r) => r.robotId !== deletingRobot.robotId)
-          if (remaining.length > 0) {
-            setRobotId(remaining[0].robotId)
-          } else {
-            setRobotId('')
-          }
-        }
-        fetchRobots()
-      } else {
-        alert(res.error || 'Gagal menghapus robot.')
-      }
-    } catch (err: any) {
-      alert('Kesalahan jaringan: ' + err.message)
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Unpair gagal')
+      showSuccess(json.message)
+      setIsUnpairModalOpen(false)
+      // Reset robot aktif jika yang di-unpair adalah yang sedang dipantau
+      if (activeRobotId === unpairingRobot.robotId) setRobotId('')
+      fetchMyRobots()
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : 'Unpair gagal')
     } finally {
-      setIsSubmitting(false)
+      setIsUnpairing(false)
     }
   }
 
   const onlineCount = robots.filter((r) => r.isOnline).length
-  const totalCount = robots.length
 
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-fade-up">
+
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <PageHeader
-            eyebrow="Device Provisioning"
-            title="Kelola Perangkat"
-            description="Daftarkan ID robot ESP32-CAM yang diizinkan untuk mengirim data deteksi mata ke sistem."
+            title="Perangkat Robot Saya"
+            subtitle="Robot yang terhubung ke akun Anda akan tampil di sini. Gunakan Serial Number untuk menghubungkan robot baru."
           />
-          <div className="flex items-center gap-3">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={fetchRobots}
-              disabled={isLoading}
-              className="gap-1.5 shrink-0"
-            >
-              <RefreshCw className={cn('w-3.5 h-3.5', isLoading && 'animate-spin')} />
-              <span>Refresh</span>
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => {
-                setFormError('')
-                setIsAddModalOpen(true)
-              }}
-              className="gap-1.5 shrink-0"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Tambah Robot</span>
-            </Button>
-          </div>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={fetchMyRobots}
+            disabled={isLoading}
+            className="gap-1.5 shrink-0 self-start"
+          >
+            <RefreshCw className={cn('w-3.5 h-3.5', isLoading && 'animate-spin')} />
+            <span>Refresh</span>
+          </Button>
         </div>
 
         {/* Notifications */}
         {successMsg && (
-          <div className="bg-success/10 border border-success/25 rounded-2xl p-4 animate-fade-in flex items-center gap-3">
-            <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
-            <p className="text-success text-sm font-semibold">{successMsg}</p>
+          <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-300 dark:border-emerald-700 rounded-2xl p-4 animate-fade-in flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <p className="text-emerald-800 dark:text-emerald-300 text-sm font-semibold">{successMsg}</p>
           </div>
         )}
-
         {errorMsg && (
-          <div className="bg-error/10 border border-error/25 rounded-2xl p-4 animate-fade-in flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-error shrink-0" />
-            <p className="text-error text-sm font-semibold">{errorMsg}</p>
+          <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-700 rounded-2xl p-4 animate-fade-in flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />
+            <p className="text-rose-800 dark:text-rose-300 text-sm font-semibold">{errorMsg}</p>
           </div>
         )}
 
-        {/* Stats Grid */}
+        {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="bg-surface border border-border rounded-2xl p-5 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-signal-blue/10 flex items-center justify-center shrink-0">
               <Bot className="w-6 h-6 text-signal-blue" />
             </div>
             <div>
-              <p className="text-xs text-text-muted font-medium">Total Robot Terdaftar</p>
-              <p className="text-2xl font-bold text-text leading-tight mt-0.5">{totalCount}</p>
+              <p className="text-xs text-text-muted font-medium">Total Robot Terhubung</p>
+              <p className="text-2xl font-bold text-text leading-tight mt-0.5">{robots.length}</p>
             </div>
           </div>
 
           <div className="bg-surface border border-border rounded-2xl p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
-              <Activity className="w-6 h-6 text-success" />
+            <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Activity className="w-6 h-6 text-emerald-500" />
             </div>
             <div>
               <p className="text-xs text-text-muted font-medium">Robot Online (Live)</p>
-              <p className="text-2xl font-bold text-success leading-tight mt-0.5">{onlineCount}</p>
+              <p className="text-2xl font-bold text-emerald-500 leading-tight mt-0.5">{onlineCount}</p>
             </div>
           </div>
 
@@ -321,22 +238,54 @@ export default function DevicesPage() {
           </div>
         </div>
 
-        {/* Device Table / List */}
+        {/* Card: Hubungkan Robot Baru */}
+        <div className="bg-surface border border-border rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <Link2 className="w-4.5 h-4.5 text-signal-blue" />
+            <h2 className="text-sm font-bold text-text">Hubungkan Robot Baru</h2>
+          </div>
+          <p className="text-xs text-text-muted mb-4">
+            Masukkan Serial Number yang tertera di bawah badan robot atau di buku panduan (contoh: <span className="font-mono font-semibold">SOCA-TEST</span>).
+          </p>
+          {pairError && (
+            <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-700 rounded-xl p-3 mb-3 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <p className="text-rose-800 dark:text-rose-300 text-xs font-semibold">{pairError}</p>
+            </div>
+          )}
+          <form onSubmit={handlePairRobot} className="flex gap-3">
+            <input
+              type="text"
+              value={serialInput}
+              onChange={(e) => { setSerialInput(e.target.value.toUpperCase()); setPairError('') }}
+              placeholder="Contoh: SOCA-X7B9"
+              className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition uppercase tracking-widest font-mono"
+            />
+            <button
+              type="submit"
+              disabled={isPairing}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-signal-blue hover:bg-signal-blue/90 disabled:opacity-60 text-white font-semibold text-sm transition shrink-0"
+            >
+              {isPairing ? <Loader2 size={14} className="animate-spin" /> : <Link2 size={14} />}
+              {isPairing ? 'Menghubungkan...' : 'Hubungkan'}
+            </button>
+          </form>
+        </div>
+
+        {/* Daftar Robot Milik User */}
         <div className="card-sm overflow-hidden">
           <div className="p-5 md:p-6 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <ShieldCheck className="w-5 h-5 text-signal-blue" />
-              <h2 className="text-base font-semibold text-text">Daftar Perangkat Terverifikasi</h2>
+              <h2 className="text-base font-semibold text-text">Robot Milik Saya</h2>
             </div>
-            <span className="text-xs text-text-muted">
-              {robots.length} perangkat dikonfigurasi
-            </span>
+            <span className="text-xs text-text-muted">{robots.length} robot terhubung</span>
           </div>
 
           {isLoading && robots.length === 0 ? (
             <div className="p-12 text-center text-text-muted">
               <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-3 text-signal-blue" />
-              <p className="text-sm">Memuat data perangkat...</p>
+              <p className="text-sm">Memuat perangkat...</p>
             </div>
           ) : robots.length === 0 ? (
             <div className="p-12 text-center space-y-4">
@@ -344,20 +293,11 @@ export default function DevicesPage() {
                 <Bot className="w-7 h-7" />
               </div>
               <div>
-                <p className="text-base font-semibold text-text">Belum ada robot yang terdaftar</p>
+                <p className="text-base font-semibold text-text">Belum ada robot yang terhubung</p>
                 <p className="text-xs text-text-muted mt-1 max-w-sm mx-auto">
-                  Daftarkan ID robot ESP32-CAM Anda agar data deteksi mata dapat diproses dan ditampilkan di dashboard.
+                  Masukkan Serial Number robot di form di atas untuk menghubungkan robot pertama Anda.
                 </p>
               </div>
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={() => setIsAddModalOpen(true)}
-                className="gap-1.5"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Daftarkan Robot Pertama</span>
-              </Button>
             </div>
           ) : (
             <div className="divide-y divide-border">
@@ -376,9 +316,7 @@ export default function DevicesPage() {
                       <div
                         className={cn(
                           'w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5',
-                          robot.isOnline
-                            ? 'bg-success/10 text-success'
-                            : 'bg-surface-2 text-text-muted'
+                          robot.isOnline ? 'bg-emerald-500/10 text-emerald-500' : 'bg-surface-2 text-text-muted'
                         )}
                       >
                         <Bot className="w-5 h-5" />
@@ -390,10 +328,15 @@ export default function DevicesPage() {
                           <span className="font-mono text-xs px-2 py-0.5 rounded-lg bg-surface-2 border border-border text-text-muted">
                             ID: {robot.robotId}
                           </span>
+                          {robot.serialNumber && (
+                            <span className="font-mono text-xs px-2 py-0.5 rounded-lg bg-signal-blue/10 border border-signal-blue/20 text-signal-blue">
+                              SN: {robot.serialNumber}
+                            </span>
+                          )}
                           {isSelected && (
-                            <Badge variant="primary" className="gap-1">
+                            <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-lg bg-signal-blue text-white font-semibold">
                               <Check className="w-3 h-3" /> Aktif Dipantau
-                            </Badge>
+                            </span>
                           )}
                         </div>
 
@@ -405,8 +348,8 @@ export default function DevicesPage() {
                           <div className="flex items-center gap-1.5">
                             {robot.isOnline ? (
                               <>
-                                <span className="w-2 h-2 rounded-full bg-success" />
-                                <span className="text-success font-medium">Online</span>
+                                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                <span className="text-emerald-500 font-medium">Online</span>
                               </>
                             ) : (
                               <>
@@ -424,7 +367,9 @@ export default function DevicesPage() {
                           )}
 
                           {robot.status === 'inactive' && (
-                            <Badge variant="error">Nonaktif</Badge>
+                            <span className="px-2 py-0.5 rounded-lg bg-rose-500/10 text-rose-500 font-semibold text-xs">
+                              Nonaktif
+                            </span>
                           )}
 
                           {robot.lastSeenAt && (
@@ -442,17 +387,15 @@ export default function DevicesPage() {
                     {/* Right Actions */}
                     <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                       {!isSelected ? (
-                        <Button
-                          variant="secondary"
-                          size="sm"
+                        <button
                           onClick={() => {
                             setRobotId(robot.robotId)
-                            showSuccess(`Sekarang memantau '${robot.name}' (${robot.robotId})`)
+                            showSuccess(`Sekarang memantau '${robot.name}'`)
                           }}
-                          className="text-xs font-semibold"
+                          className="px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-text hover:bg-surface-2 transition-colors"
                         >
                           Pilih untuk Dipantau
-                        </Button>
+                        </button>
                       ) : (
                         <div className="px-3 py-1.5 rounded-xl bg-signal-blue/10 text-signal-blue text-xs font-semibold flex items-center gap-1.5">
                           <Check className="w-3.5 h-3.5" /> Sedang Dipantau
@@ -460,22 +403,14 @@ export default function DevicesPage() {
                       )}
 
                       <button
-                        onClick={() => handleOpenEdit(robot)}
-                        className="p-2 rounded-xl text-text-muted hover:text-text hover:bg-surface-2 transition-colors"
-                        title="Edit Perangkat"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-
-                      <button
                         onClick={() => {
-                          setDeletingRobot(robot)
-                          setIsDeleteModalOpen(true)
+                          setUnpairingRobot(robot)
+                          setIsUnpairModalOpen(true)
                         }}
-                        className="p-2 rounded-xl text-text-muted hover:text-error hover:bg-error/10 transition-colors"
-                        title="Hapus Perangkat"
+                        className="p-2 rounded-xl text-text-muted hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
+                        title="Lepas koneksi robot"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Unlink className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -485,200 +420,56 @@ export default function DevicesPage() {
           )}
         </div>
 
-        {/* Info Box */}
+        {/* Info box */}
         <div className="bg-surface-2 border border-border rounded-2xl p-5 flex gap-4 items-start">
           <Info className="w-5 h-5 text-signal-blue shrink-0 mt-0.5" />
           <div className="text-sm text-text-muted leading-relaxed">
-            <strong className="text-text">Keamanan Koneksi:</strong> Hanya robot dengan ID yang
-            terdaftar di halaman ini yang diizinkan mengirim frame ke server Machine Learning dan
-            menyimpan riwayat ke database SocaSob.
+            <strong className="text-text">Serial Number</strong> adalah kode unik yang tertera di
+            bawah badan robot atau di buku panduan (contoh: <span className="font-mono">SOCA-TEST</span>).
+            Untuk menambah robot ke akun, masukkan Serial Number di form di atas.{' '}
+            <Link href="/settings" className="text-signal-blue hover:underline font-medium">
+              Kelola juga di halaman Pengaturan →
+            </Link>
           </div>
         </div>
 
-        {/* === Modal Tambah Robot === */}
+        {/* Modal: Konfirmasi Unpair */}
         <Modal
-          open={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          title="Daftarkan Robot ESP32 Baru"
-        >
-          <form onSubmit={handleAddRobot} className="space-y-4 pt-2">
-            {formError && (
-              <div className="p-3 bg-error/10 border border-error/25 rounded-xl text-xs text-error font-medium">
-                {formError}
-              </div>
-            )}
-
-            <Input
-              label="ID Robot (Hardware ID / Kode Unik)"
-              placeholder="Contoh: fadfa566 atau robot-kamar-01"
-              value={newRobotId}
-              onChange={(e) => setNewRobotId(e.target.value)}
-              required
-            />
-
-            <Input
-              label="Nama Perangkat"
-              placeholder="Contoh: SocaSob Meja Belajar"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              required
-            />
-
-            <Input
-              label="Alamat IP Robot (Opsional)"
-              placeholder="Contoh: 192.168.1.105"
-              value={newIp}
-              onChange={(e) => setNewIp(e.target.value)}
-            />
-
-            <Input
-              label="Deskripsi / Lokasi (Opsional)"
-              placeholder="Contoh: Terpasang di laptop meja kerja"
-              value={newDesc}
-              onChange={(e) => setNewDesc(e.target.value)}
-            />
-
-            <div className="pt-3 flex items-center justify-end gap-3">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setIsAddModalOpen(false)}
-                disabled={isSubmitting}
-              >
-                Batal
-              </Button>
-              <Button type="submit" variant="primary" disabled={isSubmitting}>
-                {isSubmitting ? 'Mendaftarkan...' : 'Daftarkan Perangkat'}
-              </Button>
-            </div>
-          </form>
-        </Modal>
-
-        {/* === Modal Edit Robot === */}
-        <Modal
-          open={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          title="Edit Data Robot"
-        >
-          <form onSubmit={handleSaveEdit} className="space-y-4 pt-2">
-            {formError && (
-              <div className="p-3 bg-error/10 border border-error/25 rounded-xl text-xs text-error font-medium">
-                {formError}
-              </div>
-            )}
-
-            <div>
-              <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5">
-                ID Robot (Permanen)
-              </label>
-              <div className="px-4 py-2.5 rounded-2xl bg-surface-2 border border-border text-sm font-mono text-text-muted">
-                {editingRobot?.robotId}
-              </div>
-            </div>
-
-            <Input
-              label="Nama Perangkat"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              required
-            />
-
-            <Input
-              label="Alamat IP Robot"
-              value={editIp}
-              onChange={(e) => setEditIp(e.target.value)}
-            />
-
-            <Input
-              label="Deskripsi"
-              value={editDesc}
-              onChange={(e) => setEditDesc(e.target.value)}
-            />
-
-            <div>
-              <label className="block text-xs font-semibold text-text-muted uppercase tracking-wider mb-1.5">
-                Status Perangkat
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setEditStatus('active')}
-                  className={cn(
-                    'px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all',
-                    editStatus === 'active'
-                      ? 'bg-success/10 border-success text-success'
-                      : 'bg-surface-2 border-border text-text-muted hover:text-text'
-                  )}
-                >
-                  ✓ Aktif
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditStatus('inactive')}
-                  className={cn(
-                    'px-4 py-2.5 rounded-xl text-sm font-semibold border transition-all',
-                    editStatus === 'inactive'
-                      ? 'bg-error/10 border-error text-error'
-                      : 'bg-surface-2 border-border text-text-muted hover:text-text'
-                  )}
-                >
-                  ✕ Nonaktif
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-3 flex items-center justify-end gap-3">
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={() => setIsEditModalOpen(false)}
-                disabled={isSubmitting}
-              >
-                Batal
-              </Button>
-              <Button type="submit" variant="primary" disabled={isSubmitting}>
-                {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
-              </Button>
-            </div>
-          </form>
-        </Modal>
-
-        {/* === Modal Hapus Robot === */}
-        <Modal
-          open={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-          title="Hapus Perangkat Robot"
+          open={isUnpairModalOpen}
+          onClose={() => setIsUnpairModalOpen(false)}
+          title="Lepas Koneksi Robot"
         >
           <div className="space-y-4 pt-2">
             <p className="text-sm text-text-muted leading-relaxed">
-              Apakah Anda yakin ingin menghapus robot{' '}
-              <strong className="text-text">{deletingRobot?.name}</strong> (
-              <span className="font-mono">{deletingRobot?.robotId}</span>)?
+              Apakah Anda yakin ingin melepas robot{' '}
+              <strong className="text-text">{unpairingRobot?.name}</strong>{' '}
+              (<span className="font-mono text-xs">{unpairingRobot?.serialNumber}</span>) dari akun Anda?
             </p>
-            <p className="text-xs text-error">
-              Setelah dihapus, robot ini tidak akan dapat mengirim data deteksi ke sistem sebelum didaftarkan kembali.
+            <p className="text-xs text-rose-500">
+              Robot tidak akan mengirim data ke akun Anda setelah dilepas. Anda bisa menghubungkannya lagi kapan saja.
             </p>
             <div className="pt-3 flex items-center justify-end gap-3">
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => setIsDeleteModalOpen(false)}
-                disabled={isSubmitting}
+                onClick={() => setIsUnpairModalOpen(false)}
+                disabled={isUnpairing}
               >
                 Batal
               </Button>
-              <Button
+              <button
                 type="button"
-                variant="primary"
-                onClick={handleConfirmDelete}
-                disabled={isSubmitting}
-                className="bg-error hover:bg-error/90"
+                onClick={handleConfirmUnpair}
+                disabled={isUnpairing}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-600 disabled:opacity-60 text-white font-semibold text-sm transition"
               >
-                {isSubmitting ? 'Menghapus...' : 'Ya, Hapus Robot'}
-              </Button>
+                {isUnpairing ? <Loader2 size={14} className="animate-spin" /> : <Unlink size={14} />}
+                {isUnpairing ? 'Melepas...' : 'Ya, Lepas Robot'}
+              </button>
             </div>
           </div>
         </Modal>
+
       </div>
     </DashboardLayout>
   )

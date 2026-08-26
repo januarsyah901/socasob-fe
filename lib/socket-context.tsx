@@ -338,15 +338,41 @@ export function useSocket() {
   return context
 }
 
-/** Helper: fetch ke BE API dengan base URL yang benar */
+/**
+ * Helper: fetch ke BE API dengan base URL yang benar.
+ * - Otomatis inject JWT token dari localStorage ke Authorization header
+ * - Jika server balas 401, session dianggap expired → auto logout & redirect /login
+ */
 export async function beApi(path: string, options?: RequestInit) {
   const base = BE_API.replace(/\/+$/, '').replace(/\/api$/, '')
   const cleanPath = path.startsWith('/') ? path : `/${path}`
   const url = `${base}${cleanPath}`
-  const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  })
+
+  // Inject JWT token jika tersedia
+  const token = typeof window !== 'undefined'
+    ? localStorage.getItem('socasob_token')
+    : null
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options?.headers as Record<string, string> || {}),
+  }
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+  }
+
+  const res = await fetch(url, { ...options, headers })
+
+  // Handle 401 — token expired atau tidak valid
+  if (res.status === 401) {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('socasob_token')
+      localStorage.removeItem('socasob_user')
+      window.location.href = '/login'
+    }
+    return { success: false, error: 'Sesi berakhir. Silakan login ulang.' }
+  }
+
   return res.json()
 }
 
