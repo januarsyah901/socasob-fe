@@ -4,9 +4,11 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { io, Socket } from 'socket.io-client'
 import { sendDesktopNotification, playGentleChime } from './desktop-notifications'
 
-const BE_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001'
+const getIsProd = () => typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+
+const BE_URL = process.env.NEXT_PUBLIC_SOCKET_URL || (getIsProd() ? 'https://be-socasob.hallojanu.xyz' : 'http://localhost:3001')
 const BE_API = process.env.NEXT_PUBLIC_API_URL || BE_URL
-const ML_WS_URL = process.env.NEXT_PUBLIC_ML_WS_URL || 'ws://localhost:8765'
+const ML_WS_URL = process.env.NEXT_PUBLIC_ML_WS_URL || (getIsProd() ? 'wss://socasob-ml.hallojanu.xyz/ws' : 'ws://localhost:5000/ws')
 
 export type LcdCommand = 'normal' | 'fatigue_5m' | 'fatigue_10m' | 'break_20m' | 'dry_eye'
 export type SpeakerCommand = 'cling' | 'bip-bip' | 'ting-tong' | 'pop-pop' | 'ta-da' | 'none'
