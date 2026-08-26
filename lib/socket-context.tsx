@@ -215,6 +215,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
         }
 
         ws.onmessage = (event) => {
+          // Ignore non-JSON handshakes from ML Server (e.g., 'READY', 'OK')
+          if (typeof event.data === 'string' && (event.data === 'READY' || event.data === 'OK' || event.data === 'pong')) {
+            return;
+          }
+
           try {
             const payload = JSON.parse(event.data)
 
