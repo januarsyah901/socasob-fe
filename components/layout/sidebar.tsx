@@ -119,9 +119,9 @@ export function Sidebar() {
           className="flex-1 flex items-center justify-center gap-2.5 p-3 rounded-xl bg-transparent hover:bg-(--surface-2) text-sm font-bold text-muted hover:text-body transition-all duration-300 cursor-pointer group hover:-translate-y-0.5"
         >
           <div className="flex items-center justify-center transition-transform duration-700 group-hover:rotate-[360deg]">
-            {isDark ? <Sun className="w-4.5 h-4.5 text-amber-500" /> : <Moon className="w-4.5 h-4.5 text-slate-500" />}
+            {isDark ? <Moon className="w-4.5 h-4.5 text-slate-500" /> : <Sun className="w-4.5 h-4.5 text-amber-500" />}
           </div>
-          {isDark ? 'Terang' : 'Gelap'}
+          {isDark ? 'Gelap' : 'Terang'}
         </button>
 
         <button
