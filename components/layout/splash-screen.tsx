@@ -57,7 +57,7 @@ export function SplashScreen() {
           <div className="w-24 h-24 sm:w-28 sm:h-28 mb-4 animate-bounce">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img 
-              src="/images/logo-socasob.png" 
+              src="/images/logo-socasob.webp" 
               alt="SocaSob Logo" 
               className="w-full h-full object-contain drop-shadow-md"
             />
