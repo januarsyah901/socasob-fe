@@ -10,6 +10,7 @@ export interface User {
   _id: string;
   fullName: string;
   email: string;
+  role?: 'user' | 'admin';
   phoneNumber?: string;
   dateOfBirth?: string;
   emergencyContact?: { name: string; phone: string };

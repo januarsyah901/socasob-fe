@@ -18,6 +18,7 @@ import {
   Sun,
   Moon,
   LogOut,
+  ShieldCheck,
 } from 'lucide-react'
 
 const NAV = [
@@ -27,6 +28,10 @@ const NAV = [
   { href: '/reports', label: 'Laporan Medis', icon: ScrollText },
   { href: '/companion', label: 'Teman Soca', icon: MessagesSquare },
   { href: '/devices', label: 'Perangkat Robot', icon: Bot },
+]
+
+const ADMIN_NAV = [
+  { href: '/admin', label: 'Admin Panel', icon: ShieldCheck },
 ]
 
 export function Sidebar() {
@@ -86,6 +91,39 @@ export function Sidebar() {
           </Link>
         )
       })}
+
+      {/* Admin-only section */}
+      {(user as any)?.role === 'admin' && (
+        <>
+          <div className="mt-3 mb-1 px-3">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-500/70">
+              Admin
+            </span>
+          </div>
+          {ADMIN_NAV.map((item) => {
+            const active = pathname === item.href || pathname.startsWith(item.href + '/')
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setOpen(false)}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                  active
+                    ? 'bg-amber-500/10 text-amber-600 font-bold shadow-sm'
+                    : 'text-muted hover:text-body hover:bg-(--surface-2)'
+                )}
+              >
+                <item.icon
+                  className={cn('size-4.5 shrink-0', active ? 'text-amber-500' : 'text-muted')}
+                />
+                {item.label}
+              </Link>
+            )
+          })}
+        </>
+      )}
     </nav>
   )
 
