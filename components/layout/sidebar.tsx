@@ -61,43 +61,15 @@ export function Sidebar() {
     document.documentElement.classList.toggle('dark', next)
   }
 
+  const isAdmin = (user as any)?.role === 'admin'
+
   const nav = (
     <nav className="flex flex-col gap-1 flex-1" aria-label="Main navigation">
-      {NAV.map((item) => {
-        const active =
-          item.href === '/'
-            ? pathname === '/'
-            : pathname === item.href || pathname.startsWith(item.href + '/')
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            onClick={() => setOpen(false)}
-            aria-current={active ? 'page' : undefined}
-            className={cn(
-              'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
-              active
-                ? 'bg-ice-tint text-signal-blue dark:bg-(--surface-2) dark:text-white font-bold shadow-sm'
-                : 'text-muted hover:text-body hover:bg-(--surface-2)'
-            )}
-          >
-            <item.icon
-              className={cn(
-                'size-4.5 shrink-0',
-                active ? 'text-signal-blue dark:text-white' : 'text-muted'
-              )}
-            />
-            {item.label}
-          </Link>
-        )
-      })}
-
-      {/* Admin-only section */}
-      {(user as any)?.role === 'admin' && (
+      {isAdmin ? (
         <>
-          <div className="mt-3 mb-1 px-3">
+          <div className="mb-1 px-3 mt-2">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-500/70">
-              Admin
+              Admin Menu
             </span>
           </div>
           {ADMIN_NAV.map((item) => {
@@ -123,6 +95,35 @@ export function Sidebar() {
             )
           })}
         </>
+      ) : (
+        NAV.map((item) => {
+          const active =
+            item.href === '/'
+              ? pathname === '/'
+              : pathname === item.href || pathname.startsWith(item.href + '/')
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setOpen(false)}
+              aria-current={active ? 'page' : undefined}
+              className={cn(
+                'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors',
+                active
+                  ? 'bg-ice-tint text-signal-blue dark:bg-(--surface-2) dark:text-white font-bold shadow-sm'
+                  : 'text-muted hover:text-body hover:bg-(--surface-2)'
+              )}
+            >
+              <item.icon
+                className={cn(
+                  'size-4.5 shrink-0',
+                  active ? 'text-signal-blue dark:text-white' : 'text-muted'
+                )}
+              />
+              {item.label}
+            </Link>
+          )
+        })
       )}
     </nav>
   )

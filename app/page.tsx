@@ -20,7 +20,22 @@ import {
   Zap,
 } from 'lucide-react'
 
+import { useAuth } from '@/lib/auth-context'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+
 export default function HomePage() {
+  const { user, isLoading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!isLoading && (user as any)?.role === 'admin') {
+      router.replace('/admin')
+    }
+  }, [user, isLoading, router])
+
+  if ((user as any)?.role === 'admin') return null
+
   return (
     <DashboardLayout>
       <div className="space-y-8 md:space-y-10 animate-fade-up">
