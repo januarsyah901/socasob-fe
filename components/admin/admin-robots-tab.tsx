@@ -334,12 +334,33 @@ export function AdminRobotsTab() {
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="Serial Number"
-              value={form.serialNumber}
-              onChange={(e) => setForm((f) => ({ ...f, serialNumber: e.target.value }))}
-              placeholder="cth: SOCA-X7B9 (auto jika kosong)"
-            />
+            <div>
+              <label className="block text-xs font-semibold text-text-muted mb-1.5">
+                Serial Number
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={form.serialNumber}
+                  onChange={(e) => setForm((f) => ({ ...f, serialNumber: e.target.value }))}
+                  placeholder="cth: SOCA-X7B9 (auto)"
+                  className="flex-1 w-full min-w-0 px-3 py-2.5 rounded-xl border border-border bg-surface text-text text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 placeholder:text-text-muted/50"
+                />
+                <button
+                  onClick={() => {
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let result = '';
+                    for (let i = 0; i < 4; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+                    setForm(f => ({ ...f, serialNumber: `SOCA-${result}` }));
+                  }}
+                  className="px-3 py-2.5 rounded-xl bg-surface-2 hover:bg-surface-2/80 text-text-muted border border-border text-sm font-semibold transition-colors flex items-center justify-center cursor-pointer shrink-0"
+                  title="Generate Auto"
+                  type="button"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
             <Input
               label="IP Address"
               value={form.ipAddress}
