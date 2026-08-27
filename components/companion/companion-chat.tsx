@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ChatMarkdown } from '@/components/ui/chat-markdown'
 import { useToast } from '@/components/ui/toast'
 import { cn, timeAgo } from '@/lib/utils'
 import {
@@ -56,7 +57,7 @@ function TypewriterText({ text, onDone }: { text: string; onDone: () => void }) 
     const t = setTimeout(() => setShown((s) => Math.min(text.length, s + step)), 18)
     return () => clearTimeout(t)
   }, [shown, text, onDone])
-  return <>{text.slice(0, shown)}</>
+  return <ChatMarkdown content={text.slice(0, shown)} isUser={false} />
 }
 
 /** Built-in fallback intelligent ophthalmology response engine */
@@ -451,14 +452,18 @@ export function CompanionChat() {
             >
               <div
                 className={cn(
-                  'max-w-[85%] rounded-2xl px-4 py-3 text-xs md:text-sm leading-relaxed whitespace-pre-line shadow-xs',
+                  'max-w-[88%] md:max-w-[80%] rounded-2xl px-4.5 py-3.5 shadow-xs transition-all',
                   m.role === 'user'
-                    ? 'bg-signal-blue text-white rounded-br-xs font-medium'
+                    ? 'bg-signal-blue text-white rounded-br-xs font-medium text-xs md:text-sm whitespace-pre-line'
                     : 'bg-surface-2 border border-border text-text rounded-bl-xs'
                 )}
               >
-                {m.role === 'assistant' && m.id === animatingId ? (
-                  <TypewriterText text={m.content} onDone={stopAnimating} />
+                {m.role === 'assistant' ? (
+                  m.id === animatingId ? (
+                    <TypewriterText text={m.content} onDone={stopAnimating} />
+                  ) : (
+                    <ChatMarkdown content={m.content} isUser={false} />
+                  )
                 ) : (
                   m.content
                 )}
