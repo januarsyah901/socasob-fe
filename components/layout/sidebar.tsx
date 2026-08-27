@@ -112,22 +112,24 @@ export function Sidebar() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-2 px-1">
+      <div className="flex items-center gap-1 mt-2">
         <button
           onClick={toggleTheme}
           aria-label="Ganti Tema"
-          className="flex-1 flex items-center justify-center gap-2 p-2 rounded-xl bg-(--surface-2) hover:bg-border/40 border border-border/50 text-xs font-bold text-muted hover:text-body transition-colors cursor-pointer"
+          className="flex-1 flex items-center justify-center gap-2.5 p-3 rounded-xl bg-transparent hover:bg-(--surface-2) text-sm font-bold text-muted hover:text-body transition-all duration-300 cursor-pointer group hover:-translate-y-0.5"
         >
-          {isDark ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-slate-500" />}
-          {isDark ? 'Terang' : 'Gelap'}
+          <div className="flex items-center justify-center transition-transform duration-700 group-hover:rotate-[360deg]">
+            {isDark ? <Sun className="w-4.5 h-4.5 text-amber-500" /> : <Moon className="w-4.5 h-4.5 text-slate-500" />}
+          </div>
+          {isDark ? 'Mode Terang' : 'Mode Gelap'}
         </button>
 
         <button
           onClick={handleLogout}
           aria-label="Keluar"
-          className="flex-1 flex items-center justify-center gap-2 p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-xs font-bold text-red-500 transition-colors cursor-pointer"
+          className="flex-1 flex items-center justify-center gap-2.5 p-3 rounded-xl bg-transparent hover:bg-red-500/10 text-sm font-bold text-red-500/80 hover:text-red-500 transition-all duration-300 cursor-pointer group hover:-translate-y-0.5"
         >
-          <LogOut className="w-3.5 h-3.5" />
+          <LogOut className="w-4.5 h-4.5 transition-transform duration-300 group-hover:translate-x-1" />
           Keluar
         </button>
       </div>
