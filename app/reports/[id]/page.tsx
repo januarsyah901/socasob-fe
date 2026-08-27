@@ -13,9 +13,9 @@ export default function ReportDetailPage() {
   const searchParams = useSearchParams()
   const { robotId } = useSocket()
 
-  const id = (params?.id as string) || 'SOCA-882104'
+  const id = (params?.id as string) || 'SOCA-UNKNOWN'
   const periodParam = searchParams.get('period') || '7days'
-  const nameParam = searchParams.get('name') || 'Bang Jan'
+  const nameParam = searchParams.get('name') || 'Pengguna'
 
   const periodLabel =
     periodParam === 'today'
@@ -42,7 +42,7 @@ export default function ReportDetailPage() {
             id: data.reportId || data._id || id,
             title: data.title || `Laporan Evaluasi Ergonomi & Risiko Miopia (${periodLabel})`,
             patientName: data.patientName || nameParam,
-            robotId: data.robotId || robotId || 'fadfa566',
+            robotId: data.robotId || robotId || undefined,
             generatedAt: data.createdAt
               ? new Date(data.createdAt).toLocaleDateString('id-ID', {
                   day: 'numeric',
@@ -55,28 +55,23 @@ export default function ReportDetailPage() {
                   year: 'numeric',
                 }),
             period: data.periodLabel || data.period || periodLabel,
-            dateRange: data.dateRange || '17 Agustus 2026 – 23 Agustus 2026',
+            dateRange: data.dateRange || '-',
             myopiaRisk: data.myopiaRisk || 'Rendah',
             fatigueRisk: data.fatigueRisk || 'Sedang',
             cvsRisk: data.cvsRisk || 'Rendah',
-            restCompliance: data.restCompliance ?? 84,
-            nearDurationMin: data.nearDurationMin ?? 112,
-            farDurationMin: data.farDurationMin ?? 428,
-            totalHours: data.totalHours ?? 9.0,
-            avgDistanceCm: data.avgDistanceCm ?? 38.5,
-            blinkRatePerMin: data.blinkRatePerMin ?? 14.8,
+            restCompliance: data.restCompliance ?? 0,
+            nearDurationMin: data.nearDurationMin ?? 0,
+            farDurationMin: data.farDurationMin ?? 0,
+            totalHours: data.totalHours ?? 0,
+            avgDistanceCm: data.avgDistanceCm ?? 0,
+            blinkRatePerMin: data.blinkRatePerMin ?? 0,
             clinicalNotes:
               data.clinicalNotes && data.clinicalNotes.length > 0
                 ? data.clinicalNotes
-                : [
-                    'Jarak rata-rata mata terhadap layar monitor berada pada batas aman yang dianjurkan (38.5 cm ≥ 30 cm).',
-                    'Frekuensi berkedip tercatat 14.8 kedipan/menit, cukup baik dalam menjaga kelembapan kornea mata.',
-                    'Ditemukan episode tatap dekat berlebih pada rentang kerja harian. Disarankan menerapkan micro-break 20-20-20 secara konsisten.',
-                    'Tingkat kepatuhan istirahat mencapai target klinis. Efektif dalam menekan risiko progresi miopia dan Computer Vision Syndrome (CVS).',
-                  ],
+                : ['Tidak ada catatan klinis'],
             examinerNotes:
               data.examinerNotes ||
-              'Pasien menunjukkan kebiasaan kerja ergonomis yang membaik. Lanjutkan pemantauan dengan perangkat SocaSob.',
+              '-',
           }
           setReport(formatted)
           return

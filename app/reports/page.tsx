@@ -43,36 +43,6 @@ export interface ReportItem {
   robotId?: string
 }
 
-const INITIAL_REPORTS: ReportItem[] = [
-  {
-    reportId: 'SOCA-882104',
-    title: 'Evaluasi Mingguan Kesehatan Penglihatan',
-    period: '7 Hari Terakhir',
-    date: '23 Agustus 2026',
-    myopiaRisk: 'Rendah',
-    compliance: 82,
-    patientName: 'Bang Jan',
-  },
-  {
-    reportId: 'SOCA-771902',
-    title: 'Ringkasan Bulanan Kebiasaan Layar & Jarak Pandang',
-    period: '30 Hari Terakhir',
-    date: '1 Agustus 2026',
-    myopiaRisk: 'Sedang',
-    compliance: 74,
-    patientName: 'Bang Jan',
-  },
-  {
-    reportId: 'SOCA-650412',
-    title: 'Audit Ergonomi & Evaluasi Awal Miopia',
-    period: '6 Bulan Terakhir',
-    date: '1 Juli 2026',
-    myopiaRisk: 'Sedang',
-    compliance: 68,
-    patientName: 'Bang Jan',
-  },
-]
-
 export default function ReportsPage() {
   const { robotId } = useSocket()
   const [modalOpen, setModalOpen] = useState(false)
@@ -85,23 +55,22 @@ export default function ReportsPage() {
     setIsLoading(true)
     setErrorMsg('')
     try {
-      const activeId = robotId || 'fadfa566'
-      const res = await beApi(`/api/reports?robotId=${encodeURIComponent(activeId)}`)
+      if (!robotId) {
+        setReports([])
+        setIsLoading(false)
+        return
+      }
 
-      if (res.success && Array.isArray(res.data) && res.data.length > 0) {
+      const res = await beApi(`/api/reports?robotId=${encodeURIComponent(robotId)}`)
+
+      if (res.success && Array.isArray(res.data)) {
         setReports(res.data)
       } else {
-        // If DB has no reports yet, attempt fetching all reports or fallback
-        const allRes = await beApi('/api/reports')
-        if (allRes.success && Array.isArray(allRes.data) && allRes.data.length > 0) {
-          setReports(allRes.data)
-        } else {
-          setReports(INITIAL_REPORTS)
-        }
+        setReports([])
       }
     } catch (err: any) {
-      console.warn('[Reports] Fallback initial reports', err)
-      setReports(INITIAL_REPORTS)
+      console.warn('[Reports] Error fetching reports', err)
+      setReports([])
     } finally {
       setIsLoading(false)
     }
@@ -230,7 +199,7 @@ export default function ReportsPage() {
 
           <div className="space-y-3">
             {reports.map((rep) => {
-              const repId = rep.reportId || rep.id || rep._id || 'SOCA-882104'
+              const repId = rep.reportId || rep.id || rep._id || 'SOCA-UNKNOWN'
               
               const periodText = rep.periodLabel || rep.dateRange || rep.period
               const createdDate = rep.createdAt
@@ -239,7 +208,7 @@ export default function ReportsPage() {
                     month: 'long',
                     year: 'numeric',
                   })
-                : rep.date || '23 Agustus 2026'
+                : rep.date || '-'
 
               return (
                 <div

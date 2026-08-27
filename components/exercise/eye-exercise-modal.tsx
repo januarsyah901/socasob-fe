@@ -78,7 +78,7 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
 
   const recordBreakToBackend = async () => {
     try {
-      const activeId = robotId || 'fadfa566'
+      const activeId = robotId || undefined
       await beApi('/api/log/break', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

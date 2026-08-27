@@ -59,7 +59,7 @@ function TypewriterText({ text, onDone }: { text: string; onDone: () => void }) 
 }
 
 /** Built-in fallback intelligent ophthalmology response engine */
-function generateFallbackResponse(query: string, patientName = 'Bang Jan'): string {
+function generateFallbackResponse(query: string, patientName = 'Pengguna'): string {
   const q = query.toLowerCase()
 
   if (q.includes('20-20-20') || q.includes('aturan 20') || q.includes('istirahat')) {
@@ -101,30 +101,7 @@ function generateFallbackResponse(query: string, patientName = 'Bang Jan'): stri
   )
 }
 
-const INITIAL_CONVERSATIONS: FullConversation[] = [
-  {
-    id: 'conv-init-1',
-    title: 'Tips Mencegah Kelelahan Mata Layar',
-    updatedAt: new Date(Date.now() - 3600000).toISOString(),
-    messages: [
-      {
-        id: 'msg-1',
-        role: 'user',
-        content: 'Bagaimana cara mencegah mata cepat lelah saat bekerja seharian di laptop?',
-      },
-      {
-        id: 'msg-2',
-        role: 'assistant',
-        content:
-          'Halo Bang Jan! Untuk menjaga mata tetap prima saat bekerja seharian:\n\n' +
-          '1. **Terapkan Aturan 20-20-20:** Setiap 20 menit menatap layar, pandang objek berjarak 6 meter selama 20 detik.\n' +
-          '2. **Jaga Jarak Layar:** Pastikan posisi wajah berjarak minimal 30–50 cm dari monitor.\n' +
-          '3. **Latihan Berkedip:** Jangan lupa berkedip secara teratur untuk menjaga kelembapan kornea mata.\n' +
-          '4. **Manfaatkan SocaSob:** Pantau metrik jarak di dashboard dan ikuti panduan Senam Mata interaktif!',
-      },
-    ],
-  },
-]
+const INITIAL_CONVERSATIONS: FullConversation[] = []
 
 export function CompanionChat() {
   const toast = useToast()
@@ -264,8 +241,8 @@ export function CompanionChat() {
         body: JSON.stringify({
           message: content,
           conversationId: activeId || undefined,
-          robotId: robotId || 'fadfa566',
-          patientName: 'Bang Jan',
+          robotId: robotId || undefined,
+          patientName: 'Pengguna',
         }),
       })
 
@@ -312,7 +289,7 @@ export function CompanionChat() {
 
     // Offline fallback
     setTimeout(() => {
-      const responseText = generateFallbackResponse(content, 'Bang Jan')
+      const responseText = generateFallbackResponse(content, 'Pengguna')
       const assistantMsg: Message = {
         id: `msg-${Date.now() + 1}`,
         role: 'assistant',

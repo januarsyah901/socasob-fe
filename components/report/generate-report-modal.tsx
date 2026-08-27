@@ -17,7 +17,7 @@ export function GenerateReportModal({ open, onClose, onSuccess }: GenerateReport
   const router = useRouter()
   const { robotId } = useSocket()
   const [period, setPeriod] = useState<'today' | '7days' | '30days' | '6months'>('7days')
-  const [patientName, setPatientName] = useState('Bang Jan')
+  const [patientName, setPatientName] = useState('Pengguna')
   const [isGenerating, setIsGenerating] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -25,7 +25,7 @@ export function GenerateReportModal({ open, onClose, onSuccess }: GenerateReport
     setIsGenerating(true)
     setErrorMsg('')
 
-    const activeId = robotId || 'fadfa566'
+    const activeId = robotId || undefined
 
     try {
       const res = await beApi('/api/reports', {
@@ -33,7 +33,7 @@ export function GenerateReportModal({ open, onClose, onSuccess }: GenerateReport
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           robotId: activeId,
-          patientName: patientName.trim() || 'Bang Jan',
+          patientName: patientName.trim() || 'Pengguna',
           period,
         }),
       })
