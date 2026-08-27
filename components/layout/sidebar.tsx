@@ -121,7 +121,7 @@ export function Sidebar() {
           <div className="flex items-center justify-center transition-transform duration-700 group-hover:rotate-[360deg]">
             {isDark ? <Sun className="w-4.5 h-4.5 text-amber-500" /> : <Moon className="w-4.5 h-4.5 text-slate-500" />}
           </div>
-          {isDark ? 'Mode Terang' : 'Mode Gelap'}
+          {isDark ? 'Terang' : 'Gelap'}
         </button>
 
         <button
