@@ -16,7 +16,7 @@ import {
   Minus,
   Loader2,
   FileText,
-  Sparkles,
+
   Printer,
 } from 'lucide-react'
 import { PageHeader } from '@/components/layout/page-header'

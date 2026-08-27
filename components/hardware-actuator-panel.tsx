@@ -1,7 +1,7 @@
 'use client'
 
 import { useSocket, LcdCommand, SpeakerCommand } from '@/lib/socket-context'
-import { Bot, Volume2, VolumeX, Clock, AlertCircle, Sparkles, Timer } from 'lucide-react'
+import { Bot, Volume2, VolumeX, Clock, AlertCircle, Timer } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function HardwareActuatorPanel() {
@@ -122,7 +122,7 @@ export function HardwareActuatorPanel() {
         <div className={cn('p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4', lcd.faceBg)}>
           <div className="flex items-start justify-between">
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-signal-blue" />
+
               STATUS EKSPRESI LCD
             </span>
             <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border', lcd.badgeColor)}>

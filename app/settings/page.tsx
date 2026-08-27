@@ -10,7 +10,7 @@ import {
   Info,
   WifiOff,
   AlertCircle,
-  Sparkles,
+
   Smartphone,
   CheckCircle2,
   Play,
@@ -559,7 +559,7 @@ export default function SettingsPage() {
                 onClick={testDesktopNotification}
                 className="text-xs shrink-0 font-semibold gap-1.5"
               >
-                <Sparkles className="w-3.5 h-3.5" />
+
                 Uji Notifikasi Desktop
               </Button>
             </div>

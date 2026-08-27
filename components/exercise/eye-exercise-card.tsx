@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Sparkles, Play, Eye, Flame } from 'lucide-react'
+import { Play, Eye, Flame } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { EyeExerciseModal } from './eye-exercise-modal'
 

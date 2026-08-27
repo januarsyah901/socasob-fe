@@ -7,7 +7,7 @@ import {
   Play,
   Pause,
   RotateCcw,
-  Sparkles,
+
   Tv,
   Eye,
   CheckCircle2,
@@ -317,7 +317,7 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
                 {currentStep.targetPos === 'moving' && (
                   <div className="flex flex-col items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-active-teal border-2 border-white shadow-[0_0_20px_rgba(66,179,177,0.5)] animate-drift flex items-center justify-center">
-                      <Sparkles className="w-6 h-6 text-white animate-spin" style={{ animationDuration: '8s' }} />
+
                     </div>
                     <span className="text-xs font-semibold text-text">Ikuti Gerakan Objek dengan Bola Mata</span>
                   </div>

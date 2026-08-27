@@ -13,7 +13,7 @@ import {
   Eye,
   Activity,
   ArrowRight,
-  Sparkles,
+
   ShieldCheck,
   CheckCircle2,
   Trash2,

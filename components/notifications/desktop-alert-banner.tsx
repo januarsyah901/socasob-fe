@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, BellOff, CheckCircle2, ShieldAlert, Sparkles, X } from 'lucide-react'
+import { Bell, BellOff, CheckCircle2, ShieldAlert, X } from 'lucide-react'
 import {
   isNotificationSupported,
   getNotificationPermission,
@@ -66,7 +66,7 @@ export function DesktopAlertBanner() {
           onClick={handleEnable}
           className="gap-1.5 text-xs font-semibold"
         >
-          <Sparkles className="w-3.5 h-3.5" />
+
           Aktifkan Sekarang
         </Button>
         <button

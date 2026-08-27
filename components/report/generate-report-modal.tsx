@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Loader2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useSocket, beApi } from '@/lib/socket-context'
 
@@ -124,9 +124,7 @@ export function GenerateReportModal({ open, onClose, onSuccess }: GenerateReport
           >
             {isGenerating ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Sparkles className="w-3.5 h-3.5" />
-            )}
+            ) : null}
             Generate Dokumen PDF
           </Button>
         </div>

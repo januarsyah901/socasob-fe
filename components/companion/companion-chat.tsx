@@ -14,7 +14,7 @@ import {
   ShieldCheck,
   Zap,
   Info,
-  Sparkles,
+
 } from 'lucide-react'
 import { useSocket, beApi } from '@/lib/socket-context'
 
@@ -401,7 +401,7 @@ export function CompanionChat() {
               <div className="flex items-center gap-2">
                 <h1 className="font-bold text-sm text-text leading-tight">Teman Soca AI</h1>
                 <span className="flex items-center gap-1 text-[9px] font-bold text-signal-blue bg-signal-blue/10 px-2 py-0.5 rounded-full">
-                  <Sparkles className="w-2.5 h-2.5" />
+
                   Telemetri Aktif
                 </span>
               </div>

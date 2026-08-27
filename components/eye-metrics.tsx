@@ -1,7 +1,7 @@
 'use client'
 
 import { useSocket } from '@/lib/socket-context'
-import { Eye, Shield, AlertTriangle, CheckCircle2, Sparkles, Gauge } from 'lucide-react'
+import { Eye, Shield, AlertTriangle, CheckCircle2, Gauge } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function EyeMetrics() {
