@@ -199,7 +199,9 @@ export default function LogPage() {
 
               {robotId && !isLoadingToday && todayError && (
                 <div className="card p-10 flex flex-col items-center justify-center gap-3 text-center border-dashed border-border/60 bg-transparent shadow-none">
-                  <Clock className="w-12 h-12 text-text-muted/30 mb-2" />
+                  <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-border flex items-center justify-center mb-2">
+                    <Clock className="w-8 h-8 text-text-muted/50" />
+                  </div>
                   <h3 className="text-base font-bold text-text">Belum Ada Sesi Hari Ini</h3>
                   <p className="text-sm text-text-muted max-w-sm leading-relaxed">
                     Data histori tatap layar akan muncul otomatis setelah robot <strong>{robotId}</strong> mulai mendeteksi mata Anda hari ini.
@@ -290,7 +292,9 @@ export default function LogPage() {
 
               {robotId && !isLoadingWeekly && weeklyLogs.length === 0 && (
                 <div className="card p-10 flex flex-col items-center justify-center gap-3 text-center border-dashed border-border/60 bg-transparent shadow-none">
-                  <Calendar className="w-12 h-12 text-text-muted/30 mb-2" />
+                  <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-border flex items-center justify-center mb-2">
+                    <Calendar className="w-8 h-8 text-text-muted/50" />
+                  </div>
                   <h3 className="text-base font-bold text-text">Riwayat Mingguan Kosong</h3>
                   <p className="text-sm text-text-muted max-w-sm leading-relaxed">
                     Belum ada rekaman histori selama 7 hari terakhir untuk perangkat <strong>{robotId}</strong>.
