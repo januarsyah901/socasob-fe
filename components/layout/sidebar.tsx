@@ -13,7 +13,6 @@ import {
   ScrollText,
   MessagesSquare,
   Bot,
-  Settings,
   Menu,
   X,
   Sun,
@@ -91,54 +90,45 @@ export function Sidebar() {
   )
 
   const footer = (
-    <div className="mt-auto space-y-3">
-      <div className="flex items-center gap-3 px-1">
+    <div className="mt-auto pt-4 space-y-4 border-t border-border/50">
+      {/* Profile Section */}
+      <div className="px-1">
         <Link
           href="/settings"
           onClick={() => setOpen(false)}
-          className="flex items-center gap-2.5 flex-1 min-w-0 group"
+          className="flex items-center gap-3 flex-1 min-w-0 group"
           title="Profil & pengaturan"
         >
-          <UserAvatar name={displayName} className="size-9 shrink-0 text-sm" />
-          <span className="min-w-0">
-            <span className="block text-sm font-medium text-body truncate group-hover:underline">
+          <UserAvatar name={displayName} className="size-9 shrink-0 text-sm shadow-sm" />
+          <div className="min-w-0 flex-1">
+            <span className="block text-sm font-bold text-body truncate group-hover:text-signal-blue transition-colors">
               {displayName}
             </span>
-            <span className="block text-xs text-muted truncate">{user?.email || 'Soca Care Explorer'}</span>
-          </span>
+            <span className="block text-[11px] font-medium text-muted truncate">
+              {user?.email || 'Soca Care Explorer'}
+            </span>
+          </div>
         </Link>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-2 px-1">
         <button
           onClick={toggleTheme}
           aria-label="Ganti Tema"
-          className="relative p-2 rounded-lg text-muted hover:text-body hover:bg-(--surface-2) cursor-pointer transition-colors overflow-hidden flex items-center justify-center w-8 h-8"
+          className="flex-1 flex items-center justify-center gap-2 p-2 rounded-xl bg-(--surface-2) hover:bg-border/40 border border-border/50 text-xs font-bold text-muted hover:text-body transition-colors cursor-pointer"
         >
-          <Sun 
-            className={cn(
-              "absolute size-4.5 text-amber-400 transition-all duration-500",
-              isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
-            )} 
-          />
-          <Moon 
-            className={cn(
-              "absolute size-4.5 text-slate-500 transition-all duration-500",
-              isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
-            )} 
-          />
+          {isDark ? <Sun className="w-3.5 h-3.5 text-amber-500" /> : <Moon className="w-3.5 h-3.5 text-slate-500" />}
+          {isDark ? 'Terang' : 'Gelap'}
         </button>
-        <Link
-          href="/settings"
-          aria-label="Pengaturan"
-          className="p-2 rounded-lg text-muted hover:text-body hover:bg-(--surface-2) transition-colors"
-        >
-          <Settings className="size-4.5" />
-        </Link>
+
         <button
           onClick={handleLogout}
           aria-label="Keluar"
-          title="Keluar dari akun"
-          className="p-2 rounded-lg text-muted hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+          className="flex-1 flex items-center justify-center gap-2 p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-xs font-bold text-red-500 transition-colors cursor-pointer"
         >
-          <LogOut className="size-4.5" />
+          <LogOut className="w-3.5 h-3.5" />
+          Keluar
         </button>
       </div>
     </div>
