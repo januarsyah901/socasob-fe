@@ -452,9 +452,9 @@ export function CompanionChat() {
             >
               <div
                 className={cn(
-                  'max-w-[88%] md:max-w-[80%] rounded-2xl px-4.5 py-3.5 shadow-xs transition-all',
+                  'max-w-[92%] sm:max-w-[85%] md:max-w-[80%] rounded-2xl p-4 sm:p-5 md:px-6 md:py-4 shadow-xs transition-all',
                   m.role === 'user'
-                    ? 'bg-signal-blue text-white rounded-br-xs font-medium text-xs md:text-sm whitespace-pre-line'
+                    ? 'bg-signal-blue text-white rounded-br-xs font-medium text-xs sm:text-sm leading-relaxed whitespace-pre-line'
                     : 'bg-surface-2 border border-border text-text rounded-bl-xs'
                 )}
               >
