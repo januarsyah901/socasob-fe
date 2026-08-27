@@ -126,11 +126,16 @@ export default function ResumePage() {
           </div>
         )}
 
-        {/* Error state */}
+        {/* Error / Empty state */}
         {!isLoading && error && (
-          <div className="card-sm p-10 flex flex-col items-center justify-center gap-3 text-sm text-text-muted">
-            <AlertTriangle className="w-8 h-8 text-warning mb-2" />
-            <p className="font-semibold text-text">{error}</p>
+          <div className="card p-12 flex flex-col items-center justify-center gap-3 text-center border-dashed border-border/80">
+            <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-border flex items-center justify-center mb-2">
+              <AlertTriangle className="w-8 h-8 text-text-muted/50" />
+            </div>
+            <h3 className="text-base font-bold text-text">Resume Data Belum Tersedia</h3>
+            <p className="text-sm text-text-muted max-w-sm leading-relaxed">
+              {error}
+            </p>
           </div>
         )}
 
