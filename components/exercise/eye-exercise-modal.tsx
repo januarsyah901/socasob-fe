@@ -306,7 +306,7 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
               {/* Center Animation Target */}
               <div className="relative z-10 my-auto flex flex-col items-center justify-center">
                 {currentStep.targetPos === 'center' && (
-                  <div className="flex flex-col items-center gap-2 animate-pulse">
+                  <div className="flex flex-col items-center gap-2">
                     <div className="w-16 h-16 rounded-full bg-signal-blue/20 border-2 border-signal-blue flex items-center justify-center shadow-lg">
                       <Eye className="w-8 h-8 text-signal-blue" />
                     </div>

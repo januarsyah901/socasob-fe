@@ -359,7 +359,7 @@ export default function SettingsPage() {
               >
                 {isConnected ? (
                   <>
-                    <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
                     <span>Socket Backend Terhubung & Aktif</span>
                   </>
                 ) : (
@@ -423,7 +423,7 @@ export default function SettingsPage() {
                         <span
                           className={cn(
                             'w-1.5 h-1.5 rounded-full',
-                            robotStatus.isOnline ? 'bg-success animate-pulse' : 'bg-text-muted'
+                            robotStatus.isOnline ? 'bg-success' : 'bg-text-muted'
                           )}
                         />
                         {robotStatus.isOnline ? 'Online (Aktif)' : 'Offline'}

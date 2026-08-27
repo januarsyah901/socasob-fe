@@ -52,7 +52,7 @@ export function TimerDisplay() {
           </h2>
         </div>
         {hardware.breakRemainingSec > 0 && (
-          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 animate-pulse">
+          <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
             Istirahat 20s: Sisa {hardware.breakRemainingSec}s
           </span>
         )}

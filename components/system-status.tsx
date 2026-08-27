@@ -20,7 +20,7 @@ export function SystemStatus() {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className={cn("w-2 h-2 rounded-full", isConnected ? "bg-active-teal animate-pulse" : "bg-text-muted")} />
+          <span className={cn("w-2 h-2 rounded-full", isConnected ? "bg-active-teal" : "bg-text-muted")} />
         </div>
       </div>
 
@@ -35,7 +35,7 @@ export function SystemStatus() {
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className={cn("w-2 h-2 rounded-full", isConnected ? "bg-success animate-pulse" : "bg-text-muted")} />
+          <span className={cn("w-2 h-2 rounded-full", isConnected ? "bg-success" : "bg-text-muted")} />
         </div>
       </div>
     </div>

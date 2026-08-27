@@ -469,7 +469,7 @@ export function CompanionChat() {
                 {[0, 1, 2].map((i) => (
                   <span
                     key={i}
-                    className="w-1.5 h-1.5 rounded-full bg-signal-blue animate-pulse"
+                    className="w-1.5 h-1.5 rounded-full bg-signal-blue"
                     style={{ animationDelay: `${i * 0.2}s` }}
                   />
                 ))}

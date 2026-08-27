@@ -44,7 +44,7 @@ export function DesktopAlertBanner() {
     <div className="mb-6 rounded-2xl border border-signal-blue/30 bg-ice-tint/80 dark:bg-midnight-harbor/40 backdrop-blur-md p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between shadow-dreamy animate-fade-up">
       <div className="flex items-center gap-3.5">
         <span className="shrink-0 rounded-xl bg-signal-blue/15 text-signal-blue p-2.5">
-          <Bell className="w-5 h-5 animate-pulse" />
+          <Bell className="w-5 h-5" />
         </span>
         <div>
           <p className="text-sm font-semibold text-text flex items-center gap-2">

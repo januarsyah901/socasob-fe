@@ -32,7 +32,7 @@ export function ConnectionBanner() {
     return (
       <div className="flex items-center justify-between bg-error/5 border border-error/25 rounded-2xl px-5 py-3.5">
         <div className="flex items-center gap-3">
-          <span className="w-2.5 h-2.5 rounded-full bg-error animate-pulse" />
+          <span className="w-2.5 h-2.5 rounded-full bg-error" />
           <span className="text-sm font-semibold text-error">
             Backend Tidak Terhubung
           </span>

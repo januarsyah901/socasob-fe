@@ -155,7 +155,7 @@ export function HardwareActuatorPanel() {
 
           <div className="space-y-2 py-1">
             <div className="flex items-center gap-2">
-              <div className={cn('w-2.5 h-2.5 rounded-full shrink-0', speakerCommand !== 'none' ? 'bg-signal-blue animate-pulse' : 'bg-border')} />
+              <div className={cn('w-2.5 h-2.5 rounded-full shrink-0', speakerCommand !== 'none' ? 'bg-signal-blue' : 'bg-border')} />
               <span className={cn('text-sm font-bold', speaker.color)}>{speaker.label}</span>
             </div>
             <p className="text-xs text-text-muted leading-relaxed">
