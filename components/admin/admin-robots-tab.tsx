@@ -13,6 +13,7 @@ import {
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   Plus,
   Pencil,
@@ -196,14 +197,17 @@ export function AdminRobotsTab() {
             <span className="text-sm">Memuat data robot...</span>
           </div>
         ) : robots.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-text-muted gap-3">
-            <Bot className="w-10 h-10 opacity-40" />
-            <p className="text-sm">Belum ada robot terdaftar</p>
-            <Button onClick={openCreate} size="sm">
-              <Plus className="w-4 h-4" />
-              Tambah Robot Pertama
-            </Button>
-          </div>
+          <EmptyState
+            icon={Bot}
+            title="Belum Ada Robot Terdaftar"
+            description="Daftarkan perangkat robot baru beserta serial number untuk mulai memonitor."
+            action={
+              <Button onClick={openCreate} size="sm">
+                <Plus className="w-4 h-4" />
+                Tambah Robot Pertama
+              </Button>
+            }
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

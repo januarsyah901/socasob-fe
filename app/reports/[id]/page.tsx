@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { MedicalReportView, type MedicalReportData } from '@/components/report/medical-report-view'
 import { useSocket, beApi } from '@/lib/socket-context'
+import { EmptyState } from '@/components/ui/empty-state'
 
 export default function ReportDetailPage() {
   const params = useParams()
@@ -109,10 +110,12 @@ export default function ReportDetailPage() {
         )}
 
         {!isLoading && error && (
-          <div className="card p-12 flex flex-col items-center justify-center gap-3 text-sm text-text-muted">
-            <AlertCircle className="w-8 h-8 text-error mb-2" />
-            <p className="font-semibold text-text">{error}</p>
-          </div>
+          <EmptyState
+            variant="card"
+            icon={AlertCircle}
+            title="Laporan Tidak Ditemukan"
+            description={error}
+          />
         )}
 
         {!isLoading && !error && report && <MedicalReportView report={report} />}

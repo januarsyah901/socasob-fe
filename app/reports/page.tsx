@@ -24,6 +24,7 @@ import {
 import Link from 'next/link'
 import { GenerateReportModal } from '@/components/report/generate-report-modal'
 import { useSocket, beApi } from '@/lib/socket-context'
+import { EmptyState } from '@/components/ui/empty-state'
 
 export interface ReportItem {
   id?: string
@@ -198,15 +199,12 @@ export default function ReportsPage() {
           )}
 
           {!isLoading && reports.length === 0 && (
-            <div className="card p-12 flex flex-col items-center justify-center gap-3 text-center border-dashed">
-              <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-border flex items-center justify-center mb-2">
-                <FileText className="w-8 h-8 text-text-muted/50" />
-              </div>
-              <h3 className="text-base font-bold text-text">Belum Ada Laporan Medis</h3>
-              <p className="text-sm text-text-muted max-w-sm leading-relaxed">
-                Anda belum pernah men-generate dokumen apapun. Silakan klik tombol <strong className="text-text">Buat Laporan Baru</strong> di atas untuk menyusun data Anda menjadi PDF.
-              </p>
-            </div>
+            <EmptyState
+              variant="dashed"
+              icon={FileText}
+              title="Belum Ada Laporan Medis"
+              description="Anda belum pernah membuat dokumen laporan. Klik tombol Buat Laporan Baru di atas untuk menyusun data Anda menjadi PDF."
+            />
           )}
 
           <div className="space-y-3">

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import { useToast } from '@/components/ui/toast'
 import { cn, timeAgo } from '@/lib/utils'
 import {
@@ -339,9 +340,12 @@ export function CompanionChat() {
 
         <div className="overflow-y-auto flex-1 space-y-1 pr-1">
           {conversations.length === 0 && (
-            <p className="text-xs text-text-muted text-center py-8 px-3">
-              Belum ada percakapan — ajukan pertanyaan pertamamu kepada Teman Soca.
-            </p>
+            <EmptyState
+              compact
+              icon={MessagesSquare}
+              title="Belum Ada Percakapan"
+              description="Mulai percakapan baru dengan Teman Soca."
+            />
           )}
 
           {conversations.map((c) => (

@@ -25,6 +25,7 @@ import { PageHeader } from '@/components/layout/page-header'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
+import { EmptyState } from '@/components/ui/empty-state'
 import { useSocket, beApi } from '@/lib/socket-context'
 import { useAuth } from '@/lib/auth-context'
 import Link from 'next/link'
@@ -288,17 +289,11 @@ export default function DevicesPage() {
               <p className="text-sm">Memuat perangkat...</p>
             </div>
           ) : robots.length === 0 ? (
-            <div className="p-12 text-center space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-surface-2 flex items-center justify-center mx-auto text-text-muted">
-                <Bot className="w-7 h-7" />
-              </div>
-              <div>
-                <p className="text-base font-semibold text-text">Belum ada robot yang terhubung</p>
-                <p className="text-xs text-text-muted mt-1 max-w-sm mx-auto">
-                  Masukkan Serial Number robot di form di atas untuk menghubungkan robot pertama Anda.
-                </p>
-              </div>
-            </div>
+            <EmptyState
+              icon={Bot}
+              title="Belum ada robot yang terhubung"
+              description="Masukkan Serial Number robot di form di atas untuk menghubungkan robot pertama Anda."
+            />
           ) : (
             <div className="divide-y divide-border">
               {robots.map((robot) => {

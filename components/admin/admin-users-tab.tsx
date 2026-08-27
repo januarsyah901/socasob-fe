@@ -9,6 +9,7 @@ import {
 } from '@/lib/admin-api';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   Loader2,
   RefreshCw,
@@ -166,10 +167,11 @@ export function AdminUsersTab() {
             <span className="text-sm">Memuat data pengguna...</span>
           </div>
         ) : users.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-text-muted gap-3">
-            <Users className="w-10 h-10 opacity-40" />
-            <p className="text-sm">Tidak ada pengguna ditemukan</p>
-          </div>
+          <EmptyState
+            icon={Users}
+            title="Tidak Ada Pengguna Ditemukan"
+            description="Belum ada data pengguna yang terdaftar di dalam sistem."
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

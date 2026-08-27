@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { fetchMlConfig, updateMlConfig } from '@/lib/admin-api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   Loader2,
   RefreshCw,
@@ -167,17 +168,22 @@ export function AdminMlTab() {
           <span className="text-sm">Menghubungi ML Server...</span>
         </div>
       ) : !config ? (
-        <div className="card flex flex-col items-center justify-center py-16 text-text-muted gap-3">
-          <Cpu className="w-10 h-10 opacity-40" />
-          <p className="text-sm text-center">
-            ML Server tidak bisa dijangkau.
-            <br />
-            Cek konfigurasi <code className="font-mono text-xs bg-surface-2 px-1 py-0.5 rounded">ML_URL</code> di backend.
-          </p>
-          <Button variant="secondary" onClick={load} size="sm">
-            <RefreshCw className="w-4 h-4" /> Coba Lagi
-          </Button>
-        </div>
+        <EmptyState
+          variant="card"
+          icon={Cpu}
+          title="ML Server Tidak Dapat Dijangkau"
+          description={
+            <>
+              Pastikan ML Server berjalan dan periksa konfigurasi{' '}
+              <code className="font-mono text-xs bg-surface-2 px-1 py-0.5 rounded">ML_URL</code> di backend.
+            </>
+          }
+          action={
+            <Button variant="secondary" onClick={load} size="sm">
+              <RefreshCw className="w-4 h-4" /> Coba Lagi
+            </Button>
+          }
+        />
       ) : (
         <div className="space-y-4">
           {/* Status Cards */}

@@ -2,10 +2,12 @@
 
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { useState, useEffect } from 'react'
-import { ChevronDown, Info, Calendar, Clock, Loader2 } from 'lucide-react'
+import { ChevronDown, Info, Calendar, Clock, Loader2, Bot } from 'lucide-react'
+import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { PageHeader } from '@/components/layout/page-header'
 import { Badge } from '@/components/ui/badge'
+import { EmptyState } from '@/components/ui/empty-state'
 import { useSocket, beApi } from '@/lib/socket-context'
 
 interface SessionItem {
@@ -156,10 +158,19 @@ export default function LogPage() {
   }, [robotId])
 
   const NoRobotMessage = () => (
-    <div className="py-10 text-center text-sm text-text-muted">
-      <p className="font-semibold text-text mb-1">Belum ada robot yang dipilih</p>
-      <p>Atur Robot ID di halaman <a href="/settings" className="text-signal-blue font-medium hover:underline">Pengaturan</a> terlebih dahulu.</p>
-    </div>
+    <EmptyState
+      icon={Bot}
+      title="Belum ada robot yang dipilih"
+      description={
+        <>
+          Atur Robot ID di halaman{' '}
+          <Link href="/settings" className="text-signal-blue font-medium hover:underline">
+            Pengaturan
+          </Link>{' '}
+          terlebih dahulu.
+        </>
+      }
+    />
   )
 
   return (
@@ -198,15 +209,17 @@ export default function LogPage() {
               )}
 
               {robotId && !isLoadingToday && todayError && (
-                <div className="card p-10 flex flex-col items-center justify-center gap-3 text-center border-dashed border-border/60 bg-transparent shadow-none">
-                  <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-border flex items-center justify-center mb-2">
-                    <Clock className="w-8 h-8 text-text-muted/50" />
-                  </div>
-                  <h3 className="text-base font-bold text-text">Belum Ada Sesi Hari Ini</h3>
-                  <p className="text-sm text-text-muted max-w-sm leading-relaxed">
-                    Data histori tatap layar akan muncul otomatis setelah robot <strong>{robotId}</strong> mulai mendeteksi mata Anda hari ini.
-                  </p>
-                </div>
+                <EmptyState
+                  variant="dashed"
+                  icon={Clock}
+                  title="Belum Ada Sesi Hari Ini"
+                  description={
+                    <>
+                      Data histori tatap layar akan muncul otomatis setelah robot{' '}
+                      <strong>{robotId}</strong> mulai mendeteksi mata Anda hari ini.
+                    </>
+                  }
+                />
               )}
 
               {robotId && !isLoadingToday && todayLog && (() => {
@@ -291,15 +304,17 @@ export default function LogPage() {
               )}
 
               {robotId && !isLoadingWeekly && weeklyLogs.length === 0 && (
-                <div className="card p-10 flex flex-col items-center justify-center gap-3 text-center border-dashed border-border/60 bg-transparent shadow-none">
-                  <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-border flex items-center justify-center mb-2">
-                    <Calendar className="w-8 h-8 text-text-muted/50" />
-                  </div>
-                  <h3 className="text-base font-bold text-text">Riwayat Mingguan Kosong</h3>
-                  <p className="text-sm text-text-muted max-w-sm leading-relaxed">
-                    Belum ada rekaman histori selama 7 hari terakhir untuk perangkat <strong>{robotId}</strong>.
-                  </p>
-                </div>
+                <EmptyState
+                  variant="dashed"
+                  icon={Calendar}
+                  title="Riwayat Mingguan Kosong"
+                  description={
+                    <>
+                      Belum ada rekaman histori selama 7 hari terakhir untuk perangkat{' '}
+                      <strong>{robotId}</strong>.
+                    </>
+                  }
+                />
               )}
 
               {robotId && !isLoadingWeekly && weeklyLogs.length > 0 && (
