@@ -45,17 +45,17 @@ export function EmptyState({
     <div
       className={cn(
         'flex flex-col items-center justify-center text-center',
-        compact ? 'py-6 px-4' : 'py-10 px-6 md:py-12',
+        compact ? 'py-5 px-3' : 'py-8 px-4 md:py-10',
         variant === 'card' && 'card',
-        variant === 'dashed' && 'card border-dashed border-border/80 bg-transparent shadow-none',
+        variant === 'dashed' && 'border border-dashed border-border/80 rounded-2xl bg-transparent',
         className
       )}
     >
       {hasIcon && (
         <div
           className={cn(
-            'mb-3 rounded-2xl bg-surface-2 border border-border/60 flex items-center justify-center text-text-muted',
-            compact ? 'size-9' : 'size-12'
+            'mb-3 rounded-2xl bg-surface-2/60 border border-border/40 flex items-center justify-center text-text-muted',
+            compact ? 'size-8.5' : 'size-11 md:size-12'
           )}
           aria-hidden
         >

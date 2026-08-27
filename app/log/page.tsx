@@ -157,22 +157,6 @@ export default function LogPage() {
     fetchWeekly()
   }, [robotId])
 
-  const NoRobotMessage = () => (
-    <EmptyState
-      icon={Bot}
-      title="Belum ada robot yang dipilih"
-      description={
-        <>
-          Atur Robot ID di halaman{' '}
-          <Link href="/settings" className="text-signal-blue font-medium hover:underline">
-            Pengaturan
-          </Link>{' '}
-          terlebih dahulu.
-        </>
-      }
-    />
-  )
-
   return (
     <DashboardLayout>
       <div className="space-y-8 animate-fade-up">
@@ -182,140 +166,151 @@ export default function LogPage() {
           description={robotId ? `Data robot: ${robotId}` : 'Pantau histori durasi tatap layar dan status kesehatan mata.'}
         />
 
-        {/* Today's Summary */}
-        <div className="card-sm overflow-hidden">
-          <button
-            onClick={() => setExpandedSection(expandedSection === 'daily' ? null : 'daily')}
-            className="w-full flex items-center justify-between p-5 md:p-6 hover:bg-surface-2/50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-signal-blue/10 flex items-center justify-center">
-                <Clock className="w-4 h-4 text-signal-blue" />
-              </div>
-              <h2 className="text-base font-semibold text-text tracking-tight">Hasil Pantau Hari Ini</h2>
-            </div>
-            <ChevronDown className={cn('w-5 h-5 text-text-muted transition-transform duration-300', expandedSection === 'daily' && 'rotate-180')} />
-          </button>
-
-          {expandedSection === 'daily' && (
-            <div className="px-5 pb-6 md:px-6 md:pb-7 space-y-5 animate-fade-in border-t border-border">
-              {!robotId && <NoRobotMessage />}
-
-              {robotId && isLoadingToday && (
-                <div className="py-8 flex items-center justify-center gap-2 text-sm text-text-muted">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Mengambil data hari ini…
+        {!robotId ? (
+          <EmptyState
+            variant="card"
+            icon={Bot}
+            title="Belum Ada Robot yang Dipilih"
+            description="Pilih atau hubungkan perangkat robot terlebih dahulu di halaman Pengaturan untuk melihat catatan riwayat pemantauan."
+            action={
+              <Link
+                href="/settings"
+                className="inline-flex items-center justify-center font-semibold text-xs px-5 py-2.5 rounded-full bg-signal-blue text-white hover:bg-signal-blue/90 transition-colors shadow-sm"
+              >
+                Buka Pengaturan
+              </Link>
+            }
+          />
+        ) : (
+          <>
+            {/* Today's Summary */}
+            <div className="card-sm overflow-hidden">
+              <button
+                onClick={() => setExpandedSection(expandedSection === 'daily' ? null : 'daily')}
+                className="w-full flex items-center justify-between p-5 md:p-6 hover:bg-surface-2/50 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-signal-blue/10 flex items-center justify-center">
+                    <Clock className="w-4 h-4 text-signal-blue" />
+                  </div>
+                  <h2 className="text-base font-semibold text-text tracking-tight">Hasil Pantau Hari Ini</h2>
                 </div>
-              )}
+                <ChevronDown className={cn('w-5 h-5 text-text-muted transition-transform duration-300', expandedSection === 'daily' && 'rotate-180')} />
+              </button>
 
-              {robotId && !isLoadingToday && todayError && (
-                <EmptyState
-                  variant="dashed"
-                  icon={Clock}
-                  title="Belum Ada Sesi Hari Ini"
-                  description={
-                    <>
-                      Data histori tatap layar akan muncul otomatis setelah robot{' '}
-                      <strong>{robotId}</strong> mulai mendeteksi mata Anda hari ini.
-                    </>
-                  }
-                />
-              )}
-
-              {robotId && !isLoadingToday && todayLog && (() => {
-                const nearMin = secToMin(todayLog.nearDuration)
-                const farMin = secToMin(todayLog.farDuration)
-                const firstSession = todayLog.sessions?.[0]
-                const lastSession = todayLog.sessions?.[todayLog.sessions.length - 1]
-                const startTime = firstSession ? formatTime(firstSession.startTime) : '-'
-                const endTime = lastSession?.endTime ? formatTime(lastSession.endTime) : 'Sekarang'
-
-                return (
-                  <>
-                    <div className="flex items-center gap-6 pt-4 text-sm text-text-muted">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-success" />
-                        <span>Mulai: <strong className="text-text">{startTime}</strong></span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-error/60" />
-                        <span>Terakhir: <strong className="text-text">{endTime}</strong></span>
-                      </div>
+              {expandedSection === 'daily' && (
+                <div className="px-5 pb-6 md:px-6 md:pb-7 space-y-5 animate-fade-in border-t border-border">
+                  {isLoadingToday && (
+                    <div className="py-8 flex items-center justify-center gap-2 text-sm text-text-muted">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Mengambil data hari ini…
                     </div>
+                  )}
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="bg-surface-2 border border-border rounded-2xl p-5 text-center">
-                        <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block mb-2">Tatap Dekat</span>
-                        <div className="text-4xl font-bold text-error leading-none">{nearMin}</div>
-                        <p className="text-xs text-text-muted mt-2">menit (&lt; 30cm)</p>
-                      </div>
-                      <div className="bg-surface-2 border border-border rounded-2xl p-5 text-center">
-                        <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block mb-2">Tatap Aman</span>
-                        <div className="text-4xl font-bold text-success leading-none">{farMin}</div>
-                        <p className="text-xs text-text-muted mt-2">menit (≥ 30cm)</p>
-                      </div>
-                      <div className="bg-surface-2 border border-border rounded-2xl p-5 text-center">
-                        <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block mb-2">Kepatuhan Istirahat</span>
-                        <div className={cn('text-4xl font-bold leading-none', todayLog.restCompliance >= 70 ? 'text-success' : 'text-warning')}>
-                          {todayLog.restCompliance}%
+                  {!isLoadingToday && todayError && (
+                    <EmptyState
+                      icon={Clock}
+                      title="Belum Ada Sesi Hari Ini"
+                      description={
+                        <>
+                          Data histori tatap layar akan muncul otomatis setelah robot{' '}
+                          <strong>{robotId}</strong> mulai mendeteksi mata Anda hari ini.
+                        </>
+                      }
+                    />
+                  )}
+
+                  {!isLoadingToday && todayLog && (() => {
+                    const nearMin = secToMin(todayLog.nearDuration)
+                    const farMin = secToMin(todayLog.farDuration)
+                    const firstSession = todayLog.sessions?.[0]
+                    const lastSession = todayLog.sessions?.[todayLog.sessions.length - 1]
+                    const startTime = firstSession ? formatTime(firstSession.startTime) : '-'
+                    const endTime = lastSession?.endTime ? formatTime(lastSession.endTime) : 'Sekarang'
+
+                    return (
+                      <>
+                        <div className="flex items-center gap-6 pt-4 text-sm text-text-muted">
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-success" />
+                            <span>Mulai: <strong className="text-text">{startTime}</strong></span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-error/60" />
+                            <span>Terakhir: <strong className="text-text">{endTime}</strong></span>
+                          </div>
                         </div>
-                        <p className="text-xs text-text-muted mt-2">target ≥ 70%</p>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-3 pt-1">
-                      <span className="text-xs text-text-muted">Status:</span>
-                      {statusBadge(todayLog.eyeHealthStatus)}
-                      <span className="text-xs text-text-muted ml-auto">Kedipan: {todayLog.blinkCount}x</span>
-                    </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <div className="bg-surface-2 border border-border rounded-2xl p-5 text-center">
+                            <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block mb-2">Tatap Dekat</span>
+                            <div className="text-4xl font-bold text-error leading-none">{nearMin}</div>
+                            <p className="text-xs text-text-muted mt-2">menit (&lt; 30cm)</p>
+                          </div>
+                          <div className="bg-surface-2 border border-border rounded-2xl p-5 text-center">
+                            <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block mb-2">Tatap Aman</span>
+                            <div className="text-4xl font-bold text-success leading-none">{farMin}</div>
+                            <p className="text-xs text-text-muted mt-2">menit (≥ 30cm)</p>
+                          </div>
+                          <div className="bg-surface-2 border border-border rounded-2xl p-5 text-center">
+                            <span className="text-[10px] text-text-muted font-semibold uppercase tracking-wider block mb-2">Kepatuhan Istirahat</span>
+                            <div className={cn('text-4xl font-bold leading-none', todayLog.restCompliance >= 70 ? 'text-success' : 'text-warning')}>
+                              {todayLog.restCompliance}%
+                            </div>
+                            <p className="text-xs text-text-muted mt-2">target ≥ 70%</p>
+                          </div>
+                        </div>
 
-                    <DurationBar close={nearMin} far={farMin} />
-                  </>
-                )
-              })()}
-            </div>
-          )}
-        </div>
+                        <div className="flex items-center gap-3 pt-1">
+                          <span className="text-xs text-text-muted">Status:</span>
+                          {statusBadge(todayLog.eyeHealthStatus)}
+                          <span className="text-xs text-text-muted ml-auto">Kedipan: {todayLog.blinkCount}x</span>
+                        </div>
 
-        {/* Weekly History */}
-        <div className="card-sm overflow-hidden">
-          <button
-            onClick={() => setExpandedSection(expandedSection === 'weekly' ? null : 'weekly')}
-            className="w-full flex items-center justify-between p-5 md:p-6 hover:bg-surface-2/50 transition-colors"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-xl bg-signal-blue/10 flex items-center justify-center">
-                <Calendar className="w-4 h-4 text-signal-blue" />
-              </div>
-              <h2 className="text-base font-semibold text-text tracking-tight">Riwayat 7 Hari Terakhir</h2>
-            </div>
-            <ChevronDown className={cn('w-5 h-5 text-text-muted transition-transform duration-300', expandedSection === 'weekly' && 'rotate-180')} />
-          </button>
-
-          {expandedSection === 'weekly' && (
-            <div className="px-5 pb-6 md:px-6 md:pb-7 animate-fade-in border-t border-border">
-              {!robotId && <NoRobotMessage />}
-
-              {robotId && isLoadingWeekly && (
-                <div className="py-8 flex items-center justify-center gap-2 text-sm text-text-muted">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Mengambil data mingguan…
+                        <DurationBar close={nearMin} far={farMin} />
+                      </>
+                    )
+                  })()}
                 </div>
               )}
+            </div>
 
-              {robotId && !isLoadingWeekly && weeklyLogs.length === 0 && (
-                <EmptyState
-                  variant="dashed"
-                  icon={Calendar}
-                  title="Riwayat Mingguan Kosong"
-                  description={
-                    <>
-                      Belum ada rekaman histori selama 7 hari terakhir untuk perangkat{' '}
-                      <strong>{robotId}</strong>.
-                    </>
-                  }
-                />
-              )}
+            {/* Weekly History */}
+            <div className="card-sm overflow-hidden">
+              <button
+                onClick={() => setExpandedSection(expandedSection === 'weekly' ? null : 'weekly')}
+                className="w-full flex items-center justify-between p-5 md:p-6 hover:bg-surface-2/50 transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-signal-blue/10 flex items-center justify-center">
+                    <Calendar className="w-4 h-4 text-signal-blue" />
+                  </div>
+                  <h2 className="text-base font-semibold text-text tracking-tight">Riwayat 7 Hari Terakhir</h2>
+                </div>
+                <ChevronDown className={cn('w-5 h-5 text-text-muted transition-transform duration-300', expandedSection === 'weekly' && 'rotate-180')} />
+              </button>
+
+              {expandedSection === 'weekly' && (
+                <div className="px-5 pb-6 md:px-6 md:pb-7 animate-fade-in border-t border-border">
+                  {isLoadingWeekly && (
+                    <div className="py-8 flex items-center justify-center gap-2 text-sm text-text-muted">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Mengambil data mingguan…
+                    </div>
+                  )}
+
+                  {!isLoadingWeekly && weeklyLogs.length === 0 && (
+                    <EmptyState
+                      icon={Calendar}
+                      title="Riwayat Mingguan Kosong"
+                      description={
+                        <>
+                          Belum ada rekaman histori selama 7 hari terakhir untuk perangkat{' '}
+                          <strong>{robotId}</strong>.
+                        </>
+                      }
+                    />
+                  )}
 
               {robotId && !isLoadingWeekly && weeklyLogs.length > 0 && (
                 <div className="space-y-2 pt-4">
@@ -375,6 +370,8 @@ export default function LogPage() {
             </div>
           )}
         </div>
+      </>
+    )}
 
         {/* Info Box */}
         <div className="bg-surface-2 border border-border rounded-2xl p-5 flex gap-4 items-start">
