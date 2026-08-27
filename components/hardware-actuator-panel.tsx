@@ -110,7 +110,7 @@ export function HardwareActuatorPanel() {
               ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
               : 'bg-surface-2 text-text-muted border-border'
           )}>
-            <span className={cn('w-1.5 h-1.5 rounded-full', isConnected || mlWsConnected ? 'bg-emerald-500 animate-ping' : 'bg-text-muted')} />
+            <span className={cn('w-1.5 h-1.5 rounded-full', isConnected || mlWsConnected ? 'bg-emerald-500' : 'bg-text-muted')} />
             {isConnected || mlWsConnected ? 'Aktuator Sync' : 'Offline'}
           </span>
         </div>
