@@ -253,63 +253,8 @@ export function AdminMlTab() {
             </div>
           </div>
 
-          {/* Video Source Config */}
+          {/* System Config */}
           <div className="card p-5 space-y-4">
-            <SectionTitle icon={Video} title="Sumber Video" />
-            <div>
-              <label className="block text-xs font-semibold text-text-muted mb-2">
-                Mode Kamera
-              </label>
-              <div className="flex gap-3">
-                {(['webcam', 'esp32'] as const).map((src) => (
-                  <button
-                    key={src}
-                    onClick={() => setForm((f) => ({ ...f, video_source: src }))}
-                    className={cn(
-                      'flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all cursor-pointer',
-                      form.video_source === src
-                        ? 'bg-signal-blue/10 text-signal-blue border-signal-blue/40'
-                        : 'text-text-muted border-border hover:bg-surface-2'
-                    )}
-                  >
-                    {src === 'webcam' ? '💻 Webcam Lokal' : '📡 ESP32-CAM'}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {form.video_source === 'webcam' ? (
-              <div className="max-w-xs">
-                <label className="block text-xs font-semibold text-text-muted mb-1.5">
-                  Index Webcam (default: 0)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={form.webcam_index ?? 0}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, webcam_index: parseInt(e.target.value) }))
-                  }
-                  className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface text-text text-sm font-mono focus:outline-none focus:ring-2 focus:ring-signal-blue/30"
-                />
-              </div>
-            ) : (
-              <div>
-                <label className="block text-xs font-semibold text-text-muted mb-1.5">
-                  URL Stream ESP32-CAM
-                </label>
-                <input
-                  type="text"
-                  value={form.esp32_stream_url ?? ''}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, esp32_stream_url: e.target.value }))
-                  }
-                  placeholder="http://192.168.1.100:81/stream"
-                  className="w-full px-3 py-2.5 rounded-xl border border-border bg-surface text-text text-sm font-mono focus:outline-none focus:ring-2 focus:ring-signal-blue/30"
-                />
-              </div>
-            )}
-
             <div className="max-w-xs">
               <label className="block text-xs font-semibold text-text-muted mb-1.5">
                 Log Level
