@@ -52,21 +52,18 @@ export function SplashScreen() {
       }`}
     >
       <div className="flex flex-col items-center justify-center">
-        {/* Teks Logo SocaSob Animatif (Naik per huruf) */}
+        {/* Logo SocaSob Animatif (Naik Turun) */}
         <div className="flex flex-col items-center justify-center">
-          <h1 className="text-5xl md:text-6xl font-extrabold font-figtree tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-signal-blue to-active-teal drop-shadow-sm flex">
-            {"SocaSob".split("").map((char, index) => (
-              <span
-                key={index}
-                className="inline-block animate-fade-up"
-                style={{
-                  animationDelay: `${index * 100}ms`,
-                  animationFillMode: 'both'
-                }}
-              >
-                {char}
-              </span>
-            ))}
+          <div className="w-24 h-24 sm:w-28 sm:h-28 mb-4 animate-bounce">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src="/images/logo-socasob.png" 
+              alt="SocaSob Logo" 
+              className="w-full h-full object-contain drop-shadow-md"
+            />
+          </div>
+          <h1 className="text-3xl font-extrabold font-figtree tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-signal-blue to-active-teal drop-shadow-sm animate-fade-in" style={{ animationDelay: '300ms', animationFillMode: 'both' }}>
+            SocaSob
           </h1>
         </div>
         
