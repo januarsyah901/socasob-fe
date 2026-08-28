@@ -54,24 +54,6 @@ export async function sendDesktopNotification({
   lastNotificationTime = now
 
   try {
-    if ('serviceWorker' in navigator) {
-      const registration = await navigator.serviceWorker.getRegistration();
-      if (registration && registration.active) {
-        await registration.showNotification(title, { 
-          body, 
-          icon, 
-          tag: tag || 'socasob-eye-alert', 
-          requireInteraction,
-          vibrate: [200, 100, 200]
-        });
-        return true;
-      }
-    }
-  } catch (err) {
-    console.warn('[Notification] SW showNotification failed, fallback to standard Notification', err);
-  }
-
-  try {
     const notification = new Notification(title, {
       body,
       icon,
@@ -144,5 +126,111 @@ export function playGentleChime(type: 'warning' | 'relax' | 'success' = 'warning
     }
   } catch (err) {
     console.warn('[Audio Play Error]', err)
+  }
+}
+
+
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+export async function subscribeToWebPush(robotId: string): Promise<boolean> {
+  console.group('[Web Push] subscribeToWebPush() dipanggil dengan robotId:', robotId);
+  
+  if (!robotId) {
+    console.error('[Web Push] ❌ robotId kosong! Simpan settings dulu.');
+    console.groupEnd();
+    return false;
+  }
+  if (!('serviceWorker' in navigator)) {
+    console.error('[Web Push] ❌ Browser tidak support Service Worker');
+    console.groupEnd();
+    return false;
+  }
+  if (!('PushManager' in window)) {
+    console.error('[Web Push] ❌ Browser tidak support PushManager (butuh HTTPS atau localhost)');
+    console.groupEnd();
+    return false;
+  }
+  
+  console.log('[Web Push] ✅ Browser support SW + PushManager');
+  console.log('[Web Push] Notification.permission:', Notification.permission);
+  
+  try {
+    // Register SW jika belum
+    let registration = await navigator.serviceWorker.getRegistration('/');
+    console.log('[Web Push] SW registration:', registration ? 'Ada' : 'Belum ada');
+    
+    if (!registration) {
+      console.log('[Web Push] Mendaftarkan SW baru...');
+      registration = await navigator.serviceWorker.register('/sw.js');
+    }
+    
+    // Tunggu SW aktif
+    const ready = await navigator.serviceWorker.ready;
+    console.log('[Web Push] SW siap, scope:', ready.scope);
+
+    // Cek subscription lama
+    const existingSub = await ready.pushManager.getSubscription();
+    console.log('[Web Push] Existing subscription:', existingSub ? 'Ada (pakai yang lama)' : 'Belum ada');
+    
+    let subscription = existingSub;
+    if (!subscription) {
+      const publicVapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      console.log('[Web Push] VAPID key dari env:', publicVapidKey ? publicVapidKey.slice(0, 20) + '...' : '❌ TIDAK ADA');
+      
+      if (!publicVapidKey) {
+        console.error('[Web Push] ❌ NEXT_PUBLIC_VAPID_PUBLIC_KEY tidak ada di env! Restart Next.js dev server.');
+        console.groupEnd();
+        return false;
+      }
+      
+      console.log('[Web Push] Membuat subscription baru ke Push Server (FCM)...');
+      subscription = await ready.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
+      });
+      console.log('[Web Push] ✅ Subscription berhasil dibuat!');
+      console.log('[Web Push] Endpoint:', subscription.endpoint.slice(0, 60) + '...');
+    }
+
+    // Kirim ke backend
+    const BE_API = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3001';
+    const base = BE_API.replace(/\/+$/, '').replace(/\/api$/, '');
+    const url = `${base}/api/push/subscribe`;
+    console.log('[Web Push] Mengirim subscription ke backend:', url);
+    
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ robotId, subscription })
+    });
+    
+    const data = await res.json();
+    console.log('[Web Push] Response backend:', res.status, data);
+    
+    if (res.ok) {
+      console.log('[Web Push] ✅ Subscription tersimpan di backend untuk robotId:', robotId);
+    } else {
+      console.error('[Web Push] ❌ Backend error:', data);
+    }
+    
+    console.groupEnd();
+    return res.ok;
+  } catch (err) {
+    console.error('[Web Push] ❌ Exception:', err);
+    console.groupEnd();
+    return false;
   }
 }

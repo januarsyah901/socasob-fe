@@ -17,18 +17,15 @@ import {
   User,
   Link2,
   Loader2,
+  Sparkles,
+  Timer,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useSocket, beApi } from '@/lib/socket-context'
-import {
-  playGentleChime,
-  requestNotificationPermission,
-  sendDesktopNotification,
-  getNotificationPermission,
-} from '@/lib/desktop-notifications'
+import { playGentleChime, requestNotificationPermission, sendDesktopNotification, getNotificationPermission, subscribeToWebPush } from '@/lib/desktop-notifications'
 
 interface RobotStatus {
   robotId: string
@@ -146,6 +143,9 @@ export default function SettingsPage() {
 
         setRobotId(payload.robotId)
         showMessage('Pengaturan tersimpan & terhubung ke robot!')
+        if (notificationsEnabled && notificationPerm === 'granted') {
+          subscribeToWebPush(payload.robotId)
+        }
         await fetchRobotStatus(payload.robotId)
       } else {
         showMessage(data.error || 'Gagal menyimpan pengaturan', true)
@@ -188,12 +188,79 @@ export default function SettingsPage() {
     showMessage(`Audio nada '${type}' diputar.`)
   }
 
+  
+  // Debug: Jalankan subscribe secara eksplisit dari tombol
+  const debugSubscribePush = async () => {
+    console.group('[Debug] Manual Push Subscribe Test')
+    console.log('activeRobotId:', activeRobotId)
+    console.log('notificationPerm:', notificationPerm)
+    if (!activeRobotId) {
+      showMessage('ID Robot belum tersimpan! Isi dan simpan dulu.', true)
+      console.error('❌ activeRobotId null')
+      console.groupEnd()
+      return
+    }
+    const ok = await subscribeToWebPush(activeRobotId)
+    if (ok) {
+      showMessage('✅ Subscribe berhasil! Cek console untuk detail.')
+    } else {
+      showMessage('❌ Subscribe GAGAL. Lihat console (F12) untuk tahu penyebabnya.', true)
+    }
+    console.groupEnd()
+  }
+
+    const testDelayedNotification = async () => {
+    let perm = notificationPerm
+    if (perm !== 'granted') {
+      const ok = await requestNotificationPermission()
+      perm = ok ? 'granted' : 'denied'
+      setNotificationPerm(perm)
+      if (perm === 'granted' && activeRobotId) {
+        subscribeToWebPush(activeRobotId)
+      }
+    }
+
+    if (perm === 'granted') {
+      if (!activeRobotId) {
+        showMessage('Harap simpan ID Robot terlebih dahulu', true)
+        return
+      }
+      showMessage('Notifikasi akan masuk dalam 5 detik. Silakan pindah ke window lain atau tutup tab!')
+      
+      let sec = 5;
+      console.log(`[SocaSob] Countdown dimulai: ${sec} detik...`);
+      const timer = setInterval(() => {
+        sec--;
+        if (sec > 0) console.log(`[SocaSob] Countdown: ${sec}...`);
+        else {
+          clearInterval(timer);
+          console.log(`[SocaSob] Bumm! Seharusnya notifikasi muncul sekarang (terkirim dari backend).`);
+        }
+      }, 1000);
+
+      try {
+        await beApi('/api/push/test-delay', {
+          method: 'POST',
+          body: JSON.stringify({ robotId: activeRobotId, delayMs: 5000 })
+        })
+      } catch (err) {
+        clearInterval(timer);
+        showMessage('Gagal memanggil server', true)
+      }
+    } else {
+      showMessage('Izin notifikasi belum diberikan', true)
+    }
+  }
+
   const testDesktopNotification = async () => {
     let perm = notificationPerm
     if (perm !== 'granted') {
       const ok = await requestNotificationPermission()
       perm = ok ? 'granted' : 'denied'
       setNotificationPerm(perm)
+      if (perm === 'granted' && activeRobotId) {
+        subscribeToWebPush(activeRobotId)
+      }
     }
 
     if (perm === 'granted') {
@@ -553,15 +620,38 @@ export default function SettingsPage() {
                 </p>
               </div>
 
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={testDesktopNotification}
-                className="text-xs shrink-0 font-semibold gap-1.5"
-              >
+              
+              <div className="flex flex-col gap-2 shrink-0">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={testDesktopNotification}
+                  className="text-xs w-full font-semibold gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Uji Langsung
+                </Button>
+                
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={testDelayedNotification}
+                  className="text-xs w-full font-semibold gap-1.5"
+                >
+                  <Timer className="w-3.5 h-3.5" />
+                  Tes Delay (5s)
+                </Button>
 
-                Uji Notifikasi Desktop
-              </Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={debugSubscribePush}
+                  className="text-xs w-full font-semibold gap-1.5 border-amber-400/50 text-amber-600"
+                >
+                  🔧 Re-Subscribe Push
+                </Button>
+              </div>
+
             </div>
           </div>
         </div>

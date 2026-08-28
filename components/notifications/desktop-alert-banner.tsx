@@ -2,16 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { Bell, BellOff, CheckCircle2, ShieldAlert, X } from 'lucide-react'
-import {
-  isNotificationSupported,
-  getNotificationPermission,
-  requestNotificationPermission,
-  sendDesktopNotification,
-  playGentleChime,
-} from '@/lib/desktop-notifications'
+import { isNotificationSupported, getNotificationPermission, requestNotificationPermission, sendDesktopNotification, playGentleChime, subscribeToWebPush } from '@/lib/desktop-notifications'
 import { Button } from '@/components/ui/button'
+import { useSocket } from '@/lib/socket-context'
 
 export function DesktopAlertBanner() {
+  const { robotId } = useSocket()
   const [permission, setPermission] = useState<NotificationPermission>('default')
   const [dismissed, setDismissed] = useState(false)
   const [isSupported, setIsSupported] = useState(false)
@@ -30,6 +26,7 @@ export function DesktopAlertBanner() {
     if (granted) {
       setPermission('granted')
       playGentleChime('success')
+      if (robotId) subscribeToWebPush(robotId)
       sendDesktopNotification({
         title: '🔔 Notifikasi SocaSob Aktif!',
         body: 'Sistem akan memberi peringatan pintar jika jarak mata Anda terlalu dekat atau saat butuh istirahat.',

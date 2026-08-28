@@ -34,10 +34,10 @@ export function TimerDisplay() {
 
   const statusBadge = () => {
     switch (eyeStatus) {
-      case 'normal': return <Badge variant="success">Normal / Sehat</Badge>
-      case 'risk_myopia': return <Badge variant="warning">Risiko Jarak Dekat</Badge>
-      case 'risk_fatigue': return <Badge variant="error">Kelelahan Mata</Badge>
-      default: return <Badge variant="default">Tidak Terhubung</Badge>
+      case 'normal': return <Badge color="#10b981">Normal / Sehat</Badge>
+      case 'risk_myopia': return <Badge color="#f59e0b">Risiko Jarak Dekat</Badge>
+      case 'risk_fatigue': return <Badge color="#ef4444">Kelelahan Mata</Badge>
+      default: return <Badge>Tidak Terhubung</Badge>
     }
   }
 
