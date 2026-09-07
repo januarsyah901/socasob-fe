@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useId } from 'react';
 
 export function Modal({
   open,
@@ -18,10 +18,12 @@ export function Modal({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     if (!open) return;
     const dialog = ref.current;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -33,7 +35,7 @@ export function Modal({
     function trapFocus(e: KeyboardEvent) {
       if (e.key !== 'Tab') return;
       const focusable = dialog?.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
       );
       if (!focusable || focusable.length === 0) return;
 
@@ -62,6 +64,7 @@ export function Modal({
       document.removeEventListener('keydown', onKey, true);
       dialog?.removeEventListener('keydown', trapFocus);
       document.body.style.overflow = '';
+      previouslyFocused?.focus?.();
     };
   }, [open, onClose]);
 
@@ -72,25 +75,25 @@ export function Modal({
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-labelledby={titleId}
     >
       <div className="absolute inset-0 bg-midnight-harbor/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
       <div
         ref={ref}
         tabIndex={-1}
         className={cn(
-          'relative card w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 animate-fade-up rounded-b-none sm:rounded-b-[20px]',
+          'relative card w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 animate-fade-up rounded-b-none sm:rounded-b-[20px] focus:outline-none',
           className
         )}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-text">{title}</h2>
+          <h2 id={titleId} className="text-lg font-semibold text-text">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Tutup dialog"
-            className="rounded-lg p-1.5 text-text-muted hover:text-text hover:bg-surface-2 cursor-pointer"
+            className="rounded-lg p-1.5 text-text-muted hover:text-text hover:bg-surface-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-signal-blue"
           >
-            <X className="size-5" />
+            <X className="size-5" aria-hidden />
           </button>
         </div>
         {children}

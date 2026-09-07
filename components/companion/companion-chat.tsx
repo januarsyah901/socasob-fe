@@ -45,7 +45,7 @@ const DEFAULT_SUGGESTIONS = [
   'Apa tanda-tanda awal terjadinya progresi miopia (rabun jauh)?',
 ]
 
-/** Typewriter renderer — gives streaming feel regardless of provider. */
+/** Typewriter renderer: gives streaming feel regardless of provider. */
 function TypewriterText({ text, onDone }: { text: string; onDone: () => void }) {
   const [shown, setShown] = useState(0)
   useEffect(() => {
@@ -353,17 +353,17 @@ export function CompanionChat() {
             <div
               key={c.id}
               className={cn(
-                'group flex items-center gap-2 rounded-xl px-3 py-2.5 cursor-pointer transition-all',
+                'group flex items-center gap-2 rounded-xl px-2 py-1.5 transition-all',
                 activeId === c.id
                   ? 'bg-signal-blue text-white font-semibold shadow-sm'
                   : 'hover:bg-surface-2 text-text'
               )}
-              onClick={() => openConversation(c.id)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && openConversation(c.id)}
             >
-              <div className="min-w-0 flex-1">
+              <button
+                type="button"
+                onClick={() => openConversation(c.id)}
+                className="min-w-0 flex-1 text-left px-1 py-1 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+              >
                 <p className="text-xs font-semibold truncate leading-tight">{c.title}</p>
                 <p
                   className={cn(
@@ -373,21 +373,22 @@ export function CompanionChat() {
                 >
                   {timeAgo(c.updatedAt)}
                 </p>
-              </div>
+              </button>
               <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                   removeConversation(c.id)
                 }}
-                aria-label="Hapus percakapan"
+                aria-label={`Hapus percakapan: ${c.title}`}
                 className={cn(
-                  'p-1.5 rounded-lg cursor-pointer transition-all',
+                  'p-1.5 rounded-lg cursor-pointer transition-all shrink-0',
                   activeId === c.id
                     ? 'text-white/80 hover:text-white hover:bg-white/20'
                     : 'text-text-muted hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30'
                 )}
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-3.5 h-3.5" aria-hidden />
               </button>
             </div>
           ))}

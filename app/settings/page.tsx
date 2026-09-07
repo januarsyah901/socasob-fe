@@ -516,9 +516,13 @@ export default function SettingsPage() {
               </div>
 
               <button
+                type="button"
+                role="switch"
+                aria-checked={alertSoundEnabled}
+                aria-label="Aktifkan peringatan suara audio"
                 onClick={() => setAlertSoundEnabled(!alertSoundEnabled)}
                 className={cn(
-                  'relative inline-flex items-center h-6 w-14 rounded-full transition-colors shrink-0 px-1 cursor-pointer',
+                  'relative inline-flex items-center h-6 w-14 rounded-full transition-colors shrink-0 px-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-signal-blue focus-visible:ring-offset-2',
                   alertSoundEnabled ? 'bg-signal-blue' : 'bg-border'
                 )}
               >
@@ -535,16 +539,23 @@ export default function SettingsPage() {
               <div className="space-y-4 animate-fade-in">
                 <div>
                   <div className="flex justify-between text-xs font-semibold mb-2">
-                    <span className="text-text-muted uppercase text-[10px]">Volume Peringatan</span>
-                    <span className="text-text font-bold">{volume}%</span>
+                    <label htmlFor="audio-volume-range" className="text-text-muted uppercase text-[10px]">
+                      Volume Peringatan
+                    </label>
+                    <span className="text-text font-bold" aria-live="polite">{volume}%</span>
                   </div>
                   <input
+                    id="audio-volume-range"
                     type="range"
                     min="0"
                     max="100"
                     value={volume}
+                    aria-label="Volume peringatan suara"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={volume}
                     onChange={(e) => setVolume(parseInt(e.target.value))}
-                    className="w-full h-2 bg-border rounded-full appearance-none cursor-pointer accent-signal-blue"
+                    className="w-full h-2 bg-border rounded-full appearance-none cursor-pointer accent-signal-blue focus-visible:ring-2 focus-visible:ring-signal-blue"
                   />
                 </div>
 
@@ -593,9 +604,13 @@ export default function SettingsPage() {
               </div>
 
               <button
+                type="button"
+                role="switch"
+                aria-checked={notificationsEnabled}
+                aria-label="Aktifkan notifikasi desktop latar belakang"
                 onClick={() => setNotificationsEnabled(!notificationsEnabled)}
                 className={cn(
-                  'relative inline-flex items-center h-6 w-14 rounded-full transition-colors shrink-0 px-1 cursor-pointer',
+                  'relative inline-flex items-center h-6 w-14 rounded-full transition-colors shrink-0 px-1 cursor-pointer focus-visible:ring-2 focus-visible:ring-signal-blue focus-visible:ring-offset-2',
                   notificationsEnabled ? 'bg-signal-blue' : 'bg-border'
                 )}
               >
@@ -613,10 +628,10 @@ export default function SettingsPage() {
                 <p className="text-xs font-bold text-text">Status Izin Notifikasi Browser OS:</p>
                 <p className="text-[11px] text-text-muted mt-0.5">
                   {notificationPerm === 'granted'
-                    ? '🟢 Izin Diberikan — Notifikasi latar belakang siap beroperasi.'
+                    ? '🟢 Izin Diberikan. Notifikasi latar belakang siap beroperasi.'
                     : notificationPerm === 'denied'
-                    ? '🔴 Izin Ditolak — Ubah izin di pengaturan gembok URL browser.'
-                    : '🟡 Belum Meminta Izin — Klik tombol di samping untuk mengaktifkan.'}
+                    ? '🔴 Izin Ditolak. Ubah izin di pengaturan gembok URL browser.'
+                    : '🟡 Belum Meminta Izin. Klik tombol di samping untuk mengaktifkan.'}
                 </p>
               </div>
 

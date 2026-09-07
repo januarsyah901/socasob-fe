@@ -255,19 +255,26 @@ export default function DevicesPage() {
             </div>
           )}
           <form onSubmit={handlePairRobot} className="flex gap-3">
+            <label htmlFor="device-serial-input" className="sr-only">
+              Serial Number Robot
+            </label>
             <input
+              id="device-serial-input"
               type="text"
               value={serialInput}
               onChange={(e) => { setSerialInput(e.target.value.toUpperCase()); setPairError('') }}
               placeholder="Contoh: SOCA-X7B9"
-              className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 transition uppercase tracking-widest font-mono"
+              aria-label="Serial Number Robot"
+              disabled={isPairing}
+              className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/40 transition uppercase tracking-widest font-mono disabled:opacity-60"
             />
             <button
               type="submit"
               disabled={isPairing}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-signal-blue hover:bg-signal-blue/90 disabled:opacity-60 text-white font-semibold text-sm transition shrink-0"
+              aria-busy={isPairing}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-signal-blue hover:bg-signal-blue/90 disabled:opacity-60 text-white font-semibold text-sm transition shrink-0 focus-visible:ring-2 focus-visible:ring-signal-blue"
             >
-              {isPairing ? <Loader2 size={14} className="animate-spin" /> : <Link2 size={14} />}
+              {isPairing ? <Loader2 size={14} className="animate-spin" aria-hidden /> : <Link2 size={14} aria-hidden />}
               {isPairing ? 'Menghubungkan...' : 'Hubungkan'}
             </button>
           </form>

@@ -79,47 +79,59 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Error Alert */}
             {error && (
-              <div className="bg-error/10 border border-error/20 text-error text-sm px-4 py-3 rounded-xl">
+              <div
+                role="alert"
+                aria-live="polite"
+                className="bg-error/10 border border-error/20 text-error text-sm px-4 py-3 rounded-xl"
+              >
                 {error}
               </div>
             )}
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-semibold text-text mb-1.5">
+              <label htmlFor="login-email" className="block text-xs font-semibold text-text mb-1.5">
                 Email
               </label>
               <input
+                id="login-email"
                 type="email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
                 placeholder="contoh@email.com"
                 autoComplete="email"
-                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition"
+                required
+                disabled={loading}
+                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition disabled:opacity-60"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-semibold text-text mb-1.5">
+              <label htmlFor="login-password" className="block text-xs font-semibold text-text mb-1.5">
                 Password
               </label>
               <div className="relative">
                 <input
+                  id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={form.password}
                   onChange={handleChange}
                   placeholder="Masukkan password"
                   autoComplete="current-password"
-                  className="w-full px-4 py-2.5 pr-11 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition"
+                  required
+                  disabled={loading}
+                  className="w-full px-4 py-2.5 pr-11 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition disabled:opacity-60"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text transition cursor-pointer"
-                  tabIndex={-1}
+                  aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                  aria-pressed={showPassword}
+                  disabled={loading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-text transition cursor-pointer rounded-md focus-visible:ring-2 focus-visible:ring-signal-blue"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -130,12 +142,13 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-signal-blue hover:bg-signal-blue/90 active:bg-signal-blue/85 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition text-sm shadow-sm cursor-pointer mt-2"
+              aria-busy={loading}
+              className="w-full flex items-center justify-center gap-2 bg-signal-blue hover:bg-signal-blue/90 active:bg-signal-blue/85 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition text-sm shadow-sm cursor-pointer mt-2 focus-visible:ring-2 focus-visible:ring-signal-blue"
             >
               {loading ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" aria-hidden />
               ) : (
-                <LogIn size={16} />
+                <LogIn size={16} aria-hidden />
               )}
               {loading ? 'Masuk ke Akun...' : 'Masuk Sekarang'}
             </button>

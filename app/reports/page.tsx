@@ -254,23 +254,25 @@ export default function ReportsPage() {
                     
 
                     <div className="flex items-center gap-2">
-                      <Link href={`/reports/${repId}`}>
-                        <Button variant="secondary" size="sm" className="gap-1.5 text-xs font-semibold">
-                          <span>Buka Dokumen</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </Button>
+                      <Link
+                        href={`/reports/${repId}`}
+                        className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold rounded-full border border-sea-fog text-midnight-harbor hover:bg-ice-tint transition-colors dark:border-slate-channel dark:text-slate-channel dark:hover:bg-surface-2 dark:hover:text-white focus-visible:ring-2 focus-visible:ring-signal-blue"
+                      >
+                        <span>Buka Dokumen</span>
+                        <ArrowRight className="w-3.5 h-3.5" aria-hidden />
                       </Link>
 
                       <button
+                        type="button"
                         onClick={(e) => handleDeleteReport(e, repId)}
                         disabled={isDeleting === repId}
-                        title="Hapus laporan"
-                        className="p-2 rounded-xl text-text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer"
+                        aria-label={`Hapus laporan ${rep.title}`}
+                        className="p-2 rounded-xl text-text-muted hover:text-error hover:bg-error/10 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-error"
                       >
                         {isDeleting === repId ? (
-                          <Loader2 className="w-4 h-4 animate-spin text-error" />
+                          <Loader2 className="w-4 h-4 animate-spin text-error" aria-hidden />
                         ) : (
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4" aria-hidden />
                         )}
                       </button>
                     </div>

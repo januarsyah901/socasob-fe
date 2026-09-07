@@ -5,7 +5,7 @@
 /* ── Maritime-Monochrome Design System ── */
 :root {
   --color-midnight-harbor: #0b3658;
-  --color-signal-blue: #4e9ad9;
+  --color-signal-blue: #1d72b8;
   --color-slate-channel: #486984;
   --color-pale-steel: #688dac;
   --color-sea-fog: #dde7ee;
@@ -32,18 +32,18 @@
 
 .dark {
   /* Base & Surface */
-  --bg: #171717;           /* Abyss - Main background */
-  --surface: #1e1e1e;      /* Surface - Card background & elevated UI */
+  --bg: #171717;           /* Abyss: Main background */
+  --surface: #1e1e1e;      /* Surface: Card background & elevated UI */
   --surface-2: #262626;    /* Secondary elevated / hover state */
-  --border: #3f3f3f;       /* Graphite - Borders & dividers */
+  --border: #3f3f3f;       /* Graphite: Borders & dividers */
   
   /* Text & Content */
   --text: #f5f5f5;         /* Slightly brighter than #eeeeee for primary text */
   --text-muted: #d4d4d4;   /* Slightly brighter than #bcbcbc for body/secondary text */
   
   /* Accents & Brand */
-  --color-signal-blue: #7c3aed; /* Amethyst - Primary CTA & active states */
-  --color-active-teal: #a78bfa; /* Lavender - Links & active indicators */
+  --color-signal-blue: #a78bfa; /* Lavender: Primary CTA & active states */
+  --color-active-teal: #38bdf8; /* Sky: Links & active indicators */
   
   /* Status / Feedback */
   --color-success: #4ade80;     /* Success Green */

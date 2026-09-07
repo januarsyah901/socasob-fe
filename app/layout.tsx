@@ -15,11 +15,11 @@ const fontFigtree = Figtree({
 })
 
 export const metadata: Metadata = {
-  title: 'SocaSob — Smart Eye Health Monitoring & Myopia Prevention',
+  title: 'SocaSob (Smart Eye Health Monitoring & Myopia Prevention)',
   description:
     'Sistem monitoring kesehatan mata cerdas terintegrasi IoT, AI Computer Vision, evaluasi risiko miopia, dan panduan relaksasi 20-20-20.',
   manifest: '/manifest.json',
-  themeColor: '#4e9ad9',
+  themeColor: '#1d72b8',
   icons: {
     icon: '/images/logo-socasob.png',
     apple: '/images/logo-socasob.png',

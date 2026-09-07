@@ -12,7 +12,11 @@ export function ConnectionBanner() {
 
   if (!robotId) {
     return (
-      <div className="flex items-center justify-between bg-warning/5 border border-warning/25 rounded-2xl px-5 py-3.5">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex items-center justify-between bg-warning/5 border border-warning/25 rounded-2xl px-5 py-3.5"
+      >
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-warning">
             Perangkat Belum Dipilih
@@ -30,9 +34,13 @@ export function ConnectionBanner() {
 
   if (!isConnected) {
     return (
-      <div className="flex items-center justify-between bg-error/5 border border-error/25 rounded-2xl px-5 py-3.5">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex items-center justify-between bg-error/5 border border-error/25 rounded-2xl px-5 py-3.5"
+      >
         <div className="flex items-center gap-3">
-          <span className="w-2.5 h-2.5 rounded-full bg-error" />
+          <span className="w-2.5 h-2.5 rounded-full bg-error" aria-hidden />
           <span className="text-sm font-semibold text-error">
             Backend Tidak Terhubung
           </span>
@@ -44,9 +52,13 @@ export function ConnectionBanner() {
 
   if (eyeStatus === 'disconnected') {
     return (
-      <div className="flex items-center justify-between bg-surface-2 border border-border rounded-2xl px-5 py-3.5">
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex items-center justify-between bg-surface-2 border border-border rounded-2xl px-5 py-3.5"
+      >
         <div className="flex items-center gap-3">
-          <span className="w-2.5 h-2.5 rounded-full bg-text-muted" />
+          <span className="w-2.5 h-2.5 rounded-full bg-text-muted" aria-hidden />
           <span className="text-sm font-semibold text-text-muted">
             Menunggu data dari Robot
           </span>
@@ -57,11 +69,15 @@ export function ConnectionBanner() {
   }
 
   return (
-    <div className="flex items-center justify-between bg-success/5 border border-success/25 rounded-2xl px-5 py-3.5 animate-fade-in">
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex items-center justify-between bg-success/5 border border-success/25 rounded-2xl px-5 py-3.5 animate-fade-in"
+    >
       <div className="flex items-center gap-3">
-        <span className="w-2.5 h-2.5 rounded-full bg-success" />
+        <span className="w-2.5 h-2.5 rounded-full bg-success" aria-hidden />
         <span className="text-sm font-semibold text-success">
-          Robot Aktif — Data Real-time
+          Robot Aktif (Data Real-time)
         </span>
       </div>
       <span className="text-xs text-text-muted font-mono">{robotId}</span>

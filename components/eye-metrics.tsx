@@ -89,7 +89,7 @@ export function EyeMetrics() {
               {!isConnected
                 ? 'Hubungkan kamera sensor di Pengaturan.'
                 : isClose
-                  ? 'Kurang dari 30 cm — mundur sedikit!'
+                  ? 'Kurang dari 30 cm, mundur sedikit!'
                   : 'Jarak aman ≥ 30 cm. Pertahankan!'
               }
             </p>
@@ -101,12 +101,19 @@ export function EyeMetrics() {
           <div className="mt-4 pt-4 border-t border-border/60">
             <div className="flex items-center justify-between text-[10px] font-bold text-text-muted mb-1.5">
               <span className="flex items-center gap-1">
-                <Gauge className="w-3.5 h-3.5 text-text-muted/70" />
+                <Gauge className="w-3.5 h-3.5 text-text-muted/70" aria-hidden />
                 CONFIDENCE ML
               </span>
               <span className="font-mono text-text">{confidence}%</span>
             </div>
-            <div className="w-full bg-surface-2 border border-border rounded-full h-1.5 overflow-hidden">
+            <div
+              role="progressbar"
+              aria-label="Tingkat kepercayaan inferensi machine learning"
+              aria-valuenow={confidence}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              className="w-full bg-surface-2 border border-border rounded-full h-1.5 overflow-hidden"
+            >
               <div
                 className={cn('h-full rounded-full transition-all duration-500', confidenceBarColor())}
                 style={{ width: `${confidence}%` }}

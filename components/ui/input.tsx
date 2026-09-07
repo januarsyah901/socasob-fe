@@ -28,6 +28,8 @@ interface FieldWrapProps {
 }
 
 function FieldWrap({ label, error, hint, required, id, children }: FieldWrapProps) {
+  const errorId = `${id}-error`;
+  const hintId = `${id}-hint`;
   return (
     <div className="space-y-1.5">
       {label && (
@@ -37,9 +39,13 @@ function FieldWrap({ label, error, hint, required, id, children }: FieldWrapProp
         </label>
       )}
       {children}
-      {hint && !error && <p className="text-xs text-text-muted">{hint}</p>}
+      {hint && !error && (
+        <p id={hintId} className="text-xs text-text-muted">
+          {hint}
+        </p>
+      )}
       {error && (
-        <p className="text-xs text-red-600 dark:text-red-400" role="alert">
+        <p id={errorId} className="text-xs text-red-600 dark:text-red-400" role="alert">
           {error}
         </p>
       )}
@@ -56,12 +62,14 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 export function Input({ label, error, hint, required, className, id: idProp, ...props }: InputProps) {
   const autoId = useId();
   const id = idProp ?? autoId;
+  const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
     <FieldWrap label={label} error={error} hint={hint} required={required} id={id}>
       <input
         id={id}
         required={required}
         aria-invalid={!!error}
+        aria-describedby={describedBy}
         className={cn('input-base', error && 'border-red-400', className)}
         {...props}
       />
@@ -78,12 +86,14 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
 export function Textarea({ label, error, hint, required, className, id: idProp, ...props }: TextareaProps) {
   const autoId = useId();
   const id = idProp ?? autoId;
+  const describedBy = error ? `${id}-error` : hint ? `${id}-hint` : undefined;
   return (
     <FieldWrap label={label} error={error} hint={hint} required={required} id={id}>
       <textarea
         id={id}
         required={required}
         aria-invalid={!!error}
+        aria-describedby={describedBy}
         className={cn('input-base min-h-28 resize-y', error && 'border-red-400', className)}
         {...props}
       />

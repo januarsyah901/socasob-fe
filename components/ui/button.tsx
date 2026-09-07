@@ -40,15 +40,21 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center font-medium transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-70',
+        'inline-flex items-center justify-center font-medium transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-blue focus-visible:ring-offset-2',
         variants[variant],
         sizes[size],
         className
       )}
       disabled={disabled || loading}
+      aria-busy={loading}
       {...props}
     >
-      {loading && <Loader2 className="size-4 animate-spin" aria-hidden />}
+      {loading && (
+        <>
+          <Loader2 className="size-4 animate-spin" aria-hidden />
+          <span className="sr-only">Memuat...</span>
+        </>
+      )}
       {children}
     </button>
   );

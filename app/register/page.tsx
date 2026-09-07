@@ -102,61 +102,76 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Error Alert */}
             {error && (
-              <div className="bg-error/10 border border-error/20 text-error text-sm px-4 py-3 rounded-xl">
+              <div
+                role="alert"
+                aria-live="polite"
+                className="bg-error/10 border border-error/20 text-error text-sm px-4 py-3 rounded-xl"
+              >
                 {error}
               </div>
             )}
 
             {/* Nama Lengkap */}
             <div>
-              <label className="block text-xs font-semibold text-text mb-1.5">
+              <label htmlFor="register-fullname" className="block text-xs font-semibold text-text mb-1.5">
                 Nama Lengkap <span className="text-error">*</span>
               </label>
               <input
+                id="register-fullname"
                 type="text"
                 name="fullName"
                 value={form.fullName}
                 onChange={handleChange}
                 placeholder="Nama lengkap Anda"
-                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition"
+                required
+                disabled={loading}
+                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition disabled:opacity-60"
               />
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-xs font-semibold text-text mb-1.5">
+              <label htmlFor="register-email" className="block text-xs font-semibold text-text mb-1.5">
                 Email <span className="text-error">*</span>
               </label>
               <input
+                id="register-email"
                 type="email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
                 placeholder="contoh@email.com"
                 autoComplete="email"
-                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition"
+                required
+                disabled={loading}
+                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition disabled:opacity-60"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-semibold text-text mb-1.5">
+              <label htmlFor="register-password" className="block text-xs font-semibold text-text mb-1.5">
                 Password <span className="text-error">*</span>
               </label>
               <div className="relative">
                 <input
+                  id="register-password"
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   value={form.password}
                   onChange={handleChange}
                   placeholder="Min. 6 karakter"
-                  className="w-full px-4 py-2.5 pr-11 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition"
+                  required
+                  disabled={loading}
+                  className="w-full px-4 py-2.5 pr-11 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition disabled:opacity-60"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-text-muted hover:text-text transition cursor-pointer"
-                  tabIndex={-1}
+                  aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                  aria-pressed={showPassword}
+                  disabled={loading}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-text transition cursor-pointer rounded-md focus-visible:ring-2 focus-visible:ring-signal-blue"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -165,20 +180,23 @@ export default function RegisterPage() {
 
             {/* Konfirmasi Password */}
             <div>
-              <label className="block text-xs font-semibold text-text mb-1.5">
+              <label htmlFor="register-confirm-password" className="block text-xs font-semibold text-text mb-1.5">
                 Konfirmasi Password <span className="text-error">*</span>
               </label>
               <input
+                id="register-confirm-password"
                 type={showPassword ? 'text' : 'password'}
                 name="confirmPassword"
                 value={form.confirmPassword}
                 onChange={handleChange}
                 placeholder="Ulangi password"
-                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition"
+                required
+                disabled={loading}
+                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition disabled:opacity-60"
               />
             </div>
 
-            {/* Divider — Data Opsional */}
+            {/* Divider (Data Opsional) */}
             <div className="flex items-center gap-3 pt-1">
               <div className="flex-1 h-px bg-border" />
               <span className="text-[11px] font-medium text-text-muted uppercase tracking-wider">
@@ -189,30 +207,34 @@ export default function RegisterPage() {
 
             {/* Nomor Telepon */}
             <div>
-              <label className="block text-xs font-semibold text-text mb-1.5">
+              <label htmlFor="register-phone" className="block text-xs font-semibold text-text mb-1.5">
                 Nomor Telepon / WhatsApp
               </label>
               <input
+                id="register-phone"
                 type="tel"
                 name="phoneNumber"
                 value={form.phoneNumber}
                 onChange={handleChange}
                 placeholder="08xxxxxxxxxx"
-                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition"
+                disabled={loading}
+                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text placeholder:text-text-muted/60 text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition disabled:opacity-60"
               />
             </div>
 
             {/* Tanggal Lahir */}
             <div>
-              <label className="block text-xs font-semibold text-text mb-1.5">
+              <label htmlFor="register-dob" className="block text-xs font-semibold text-text mb-1.5">
                 Tanggal Lahir
               </label>
               <input
+                id="register-dob"
                 type="date"
                 name="dateOfBirth"
                 value={form.dateOfBirth}
                 onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition"
+                disabled={loading}
+                className="w-full px-4 py-2.5 rounded-xl border border-border bg-bg text-text text-sm focus:outline-none focus:ring-2 focus:ring-signal-blue/30 focus:border-signal-blue transition disabled:opacity-60"
               />
             </div>
 
@@ -220,12 +242,13 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-signal-blue hover:bg-signal-blue/90 active:bg-signal-blue/85 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition text-sm shadow-sm cursor-pointer mt-2"
+              aria-busy={loading}
+              className="w-full flex items-center justify-center gap-2 bg-signal-blue hover:bg-signal-blue/90 active:bg-signal-blue/85 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition text-sm shadow-sm cursor-pointer mt-2 focus-visible:ring-2 focus-visible:ring-signal-blue"
             >
               {loading ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" aria-hidden />
               ) : (
-                <UserPlus size={16} />
+                <UserPlus size={16} aria-hidden />
               )}
               {loading ? 'Mendaftarkan Akun...' : 'Daftar Sekarang'}
             </button>
