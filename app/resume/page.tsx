@@ -68,6 +68,15 @@ export default function ResumePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const [reportModalOpen, setReportModalOpen] = useState(false)
+  const [activeTooltip, setActiveTooltip] = useState<string | null>(null)
+
+  useEffect(() => {
+    const handleDismiss = () => setActiveTooltip(null)
+    if (activeTooltip) {
+      window.addEventListener('click', handleDismiss)
+      return () => window.removeEventListener('click', handleDismiss)
+    }
+  }, [activeTooltip])
 
   useEffect(() => {
     if (!robotId) {
@@ -163,45 +172,91 @@ export default function ResumePage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 flex-1 w-full">
                     {[
                       {
+                        id: 'avgDistance',
                         label: 'Rata-rata Jarak',
                         value: `${resumeData.avgDistance} cm`,
-                        icon: Info,
                         good: resumeData.avgDistance >= 30,
+                        tooltipTitle: 'Rata-rata Jarak Layar',
+                        tooltipDesc:
+                          'Estimasi jarak pandang ke monitor berdasarkan pembobotan durasi tatap dekat (< 30 cm) dan aman (≥ 30 cm). Batas optimal adalah ≥ 30 cm.',
                       },
                       {
+                        id: 'restCompliance',
                         label: 'Kepatuhan 20-20-20',
                         value: `${resumeData.restCompliance}%`,
-                        icon: Info,
                         good: resumeData.restCompliance >= 70,
+                        tooltipTitle: 'Kepatuhan Aturan 20-20-20',
+                        tooltipDesc:
+                          'Persentase kedisiplinan jeda 20 detik setiap 20 menit menatap layar. Dihitung dari rasio slot kerja harian yang dipatuhi. Nilai optimal adalah ≥ 70%.',
                       },
                       {
+                        id: 'totalHours',
                         label: 'Total Waktu Layar',
                         value: `${resumeData.totalHours} Jam`,
-                        icon: Info,
                         good: true,
+                        tooltipTitle: 'Total Waktu Layar',
+                        tooltipDesc:
+                          'Akumulasi jam kerja aktif di depan monitor yang tercatat oleh kamera sensor SocaSob selama periode pemantauan.',
                       },
                       {
+                        id: 'daysMonitored',
                         label: 'Hari Monitoring',
                         value: `${resumeData.totalDaysMonitored} Hari`,
-                        icon: Info,
                         good: true,
+                        tooltipTitle: 'Hari Monitoring Aktif',
+                        tooltipDesc:
+                          'Jumlah hari kalender unik saat perangkat SocaSob aktif memantau dan merekam kebiasaan visual pengguna.',
                       },
                     ].map((item) => (
-                      <div key={item.label} className="bg-surface-2 border border-border rounded-2xl p-4">
+                      <div key={item.id} className="bg-surface-2 border border-border rounded-2xl p-4 relative min-w-0">
                         <div className="flex items-center justify-between mb-2">
-                          <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
+                          <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider truncate">
                             {item.label}
                           </p>
-                          <Info className="w-4 h-4 text-text-muted/60" />
+
+                          {/* Info Button with Hover & Click Tooltip */}
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setActiveTooltip(activeTooltip === item.id ? null : item.id)
+                              }}
+                              onMouseEnter={() => setActiveTooltip(item.id)}
+                              onMouseLeave={() => setActiveTooltip(null)}
+                              className="rounded-full p-1 text-text-muted hover:text-signal-blue hover:bg-surface transition-colors cursor-pointer focus:outline-none"
+                              aria-label={`Informasi ${item.label}`}
+                            >
+                              <Info className="w-3.5 h-3.5 text-text-muted/70 hover:text-signal-blue transition-colors" />
+                            </button>
+
+                            {/* Floating Tooltip Card */}
+                            {activeTooltip === item.id && (
+                              <div
+                                role="tooltip"
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute right-0 top-7 z-30 w-56 sm:w-64 p-3 bg-slate-900 text-white rounded-xl shadow-2xl border border-white/10 animate-fade-in pointer-events-auto"
+                              >
+                                <div className="absolute right-2.5 -top-1 w-2 h-2 bg-slate-900 rotate-45 border-l border-t border-white/10" />
+                                <p className="font-bold text-active-teal text-[11px] mb-1">
+                                  {item.tooltipTitle}
+                                </p>
+                                <p className="text-[10px] text-slate-200 leading-relaxed font-normal">
+                                  {item.tooltipDesc}
+                                </p>
+                              </div>
+                            )}
+                          </div>
                         </div>
+
                         <p className="text-xl md:text-2xl font-black text-text leading-none font-figtree">
                           {item.value}
                         </p>
                         <div className="flex items-center gap-1 mt-2.5">
                           {item.good ? (
-                            <CheckCircle2 className="w-3 h-3 text-success" />
+                            <CheckCircle2 className="w-3 h-3 text-success shrink-0" />
                           ) : (
-                            <AlertTriangle className="w-3 h-3 text-warning" />
+                            <AlertTriangle className="w-3 h-3 text-warning shrink-0" />
                           )}
                           <span
                             className={cn(
