@@ -1,99 +1,116 @@
 'use client'
 
 import { useSocket } from '@/lib/socket-context'
-import { Gauge } from 'lucide-react'
+import { Eye, Clock, Timer } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function EyeMetrics() {
-  const { eyeDistance, confidence, isConnected } = useSocket()
+  const { eyeDistance, isConnected, hardware } = useSocket()
+  const { breakRemainingSec, workElapsedSec } = hardware
 
   const isClose = eyeDistance === 'Dekat'
 
-  const confidenceBarColor = () => {
-    if (confidence >= 85) return 'bg-success'
-    if (confidence >= 65) return 'bg-warning'
-    return 'bg-error'
+  const formatSec = (sec: number) => {
+    const m = Math.floor(sec / 60)
+    const s = sec % 60
+    if (m === 0) return `${s}s`
+    return `${m}m ${s}s`
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Card Jarak Layar */}
-      <div className={cn(
-        'card-sm p-6 flex-1 flex flex-col justify-between min-h-[200px] transition-all duration-300 relative overflow-hidden',
-        isClose && isConnected ? 'border-error/40 shadow-[0_0_20px_rgba(220,38,38,0.1)]' : 'border-border'
-      )}>
-        {/* Latar Belakang Desain Dekoratif */}
-        <div className="absolute top-0 right-0 w-28 h-28 bg-signal-blue/5 rounded-full blur-2xl pointer-events-none" />
+    <div className="card-sm p-6 md:p-8 flex flex-col h-full justify-between space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between pb-3 border-b border-border/60">
+        <div className="flex items-center gap-2.5">
+          <Eye className="w-5 h-5 text-signal-blue" />
+          <h2 className="text-lg font-semibold text-text tracking-tight">
+            Metrik Penglihatan & Layar
+          </h2>
+        </div>
+        {isClose && isConnected && (
+          <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-error/10 text-error border border-error/20 uppercase tracking-wider animate-pulse">
+            Terlalu Dekat
+          </span>
+        )}
+      </div>
 
-        <div className="space-y-4">
-          {/* Header */}
+      {/* 3 Susunan Stat: Jarak Layar, Total Tatap Layar, Sisa Waktu Istirahat 20s */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-auto">
+        {/* Stat 1: Jarak Layar */}
+        <div className={cn(
+          'p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between min-h-[120px]',
+          isClose && isConnected
+            ? 'bg-error/5 border-error/30'
+            : 'bg-surface-2/60 border-border/60'
+        )}>
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-widest">
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
               Jarak Layar
             </span>
-            {isConnected ? (
-              <span className={cn(
-                'text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider',
-                isClose ? 'bg-error/10 text-error' : 'bg-success/10 text-success'
-              )}>
-                {isClose ? 'Dekat' : 'Aman'}
-              </span>
-            ) : (
-              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-surface-2 text-text-muted">
-                Offline
-              </span>
-            )}
+            <Eye className={cn('w-4 h-4', isClose && isConnected ? 'text-error' : 'text-signal-blue')} />
           </div>
-
-          {/* Value Utama */}
-          <div>
-            <div className={cn(
-              'text-3xl font-black tracking-tight leading-none',
-              isClose && isConnected ? 'text-error' : isConnected ? 'text-success' : 'text-text-muted'
+          <div className="mt-2">
+            <p className={cn(
+              'text-2xl md:text-3xl font-black font-figtree tracking-tight tabular-nums',
+              !isConnected
+                ? 'text-text-muted'
+                : isClose
+                  ? 'text-error'
+                  : 'text-text'
             )}>
               {!isConnected
                 ? 'N/A'
                 : isClose
-                  ? 'Terlalu Dekat'
-                  : 'Jarak Aman'
+                  ? '< 30 cm'
+                  : '≥ 30 cm'
               }
-            </div>
-            <p className="text-xs text-text-muted mt-2 leading-relaxed">
+            </p>
+            <p className="text-[11px] text-text-muted mt-1 leading-snug">
               {!isConnected
-                ? 'Hubungkan kamera sensor di Pengaturan.'
+                ? 'Sensor offline'
                 : isClose
-                  ? 'Kurang dari 30 cm, mundur sedikit!'
-                  : 'Jarak aman ≥ 30 cm. Pertahankan!'
+                  ? 'Mundurkan posisi duduk'
+                  : 'Jarak terjaga'
               }
             </p>
           </div>
         </div>
 
-        {/* Meter ML Confidence */}
-        {isConnected && (
-          <div className="mt-4 pt-4 border-t border-border/60">
-            <div className="flex items-center justify-between text-[10px] font-bold text-text-muted mb-1.5">
-              <span className="flex items-center gap-1">
-                <Gauge className="w-3.5 h-3.5 text-text-muted/70" aria-hidden />
-                CONFIDENCE ML
-              </span>
-              <span className="font-mono text-text">{confidence}%</span>
-            </div>
-            <div
-              role="progressbar"
-              aria-label="Tingkat kepercayaan inferensi machine learning"
-              aria-valuenow={confidence}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              className="w-full bg-surface-2 border border-border rounded-full h-1.5 overflow-hidden"
-            >
-              <div
-                className={cn('h-full rounded-full transition-all duration-500', confidenceBarColor())}
-                style={{ width: `${confidence}%` }}
-              />
-            </div>
+        {/* Stat 2: Total Tatap Layar */}
+        <div className="p-4 rounded-2xl bg-surface-2/60 border border-border/60 flex flex-col justify-between min-h-[120px] transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+              Total Tatap Layar
+            </span>
+            <Clock className="w-4 h-4 text-signal-blue" />
           </div>
-        )}
+          <div className="mt-2">
+            <p className="text-2xl md:text-3xl font-black text-text font-figtree tracking-tight tabular-nums font-mono">
+              {formatSec(workElapsedSec)}
+            </p>
+            <p className="text-[11px] text-text-muted mt-1 leading-snug">
+              Waktu aktif di depan monitor
+            </p>
+          </div>
+        </div>
+
+        {/* Stat 3: Sisa Waktu Istirahat 20s */}
+        <div className="p-4 rounded-2xl bg-surface-2/60 border border-border/60 flex flex-col justify-between min-h-[120px] transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+              Sisa Waktu Istirahat 20s
+            </span>
+            <Timer className="w-4 h-4 text-emerald-500" />
+          </div>
+          <div className="mt-2">
+            <p className="text-2xl md:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-figtree tracking-tight tabular-nums font-mono">
+              {breakRemainingSec > 0 ? `${breakRemainingSec}s` : '0s (Siap)'}
+            </p>
+            <p className="text-[11px] text-text-muted mt-1 leading-snug">
+              Jeda aturan 20-20-20
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )

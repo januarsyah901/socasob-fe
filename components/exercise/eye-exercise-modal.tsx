@@ -220,7 +220,12 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: Ey
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="Panduan Senam Mata 20-20-20" className="max-w-2xl">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Panduan Senam Mata 20-20-20"
+      className="max-w-6xl w-[96vw] max-h-[95vh] p-6 md:p-8"
+    >
       <div className="space-y-6">
         {/* Mode Selector */}
         <div className="flex items-center justify-between border-b border-border pb-3">
@@ -287,7 +292,7 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: Ey
             </div>
 
             {/* Interactive Stage */}
-            <div className="relative h-72 rounded-2xl bg-surface-2 border border-border p-6 flex flex-col items-center justify-between overflow-hidden shadow-inner">
+            <div className="relative h-[440px] md:h-[500px] rounded-3xl bg-surface-2 border border-border p-6 md:p-8 flex flex-col items-center justify-between overflow-hidden shadow-inner">
               <div className="absolute inset-0 bg-gradient-to-b from-signal-blue/5 to-active-teal/5 pointer-events-none" />
 
               {/* Countdown badge */}
@@ -303,51 +308,51 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: Ey
               {/* Center Animation Target */}
               <div className="relative z-10 my-auto w-full flex flex-col items-center justify-center">
                 {currentStep.targetPos === 'center' && (
-                  <div className="flex flex-col items-center gap-3 animate-focus-distant">
-                    <div className="w-16 h-16 rounded-full bg-signal-blue/20 border-2 border-signal-blue flex items-center justify-center shadow-lg">
-                      <Eye className="w-8 h-8 text-signal-blue" />
+                  <div className="flex flex-col items-center gap-4 animate-focus-distant">
+                    <div className="w-20 h-20 rounded-full bg-signal-blue/20 border-2 border-signal-blue flex items-center justify-center shadow-xl">
+                      <Eye className="w-10 h-10 text-signal-blue" />
                     </div>
-                    <span className="text-xs font-semibold text-text">Tatap Objek Sejauh 6 Meter (20 Kaki)</span>
+                    <span className="text-sm font-bold text-text">Tatap Objek Sejauh 6 Meter (20 Kaki)</span>
                   </div>
                 )}
 
                 {currentStep.targetPos === 'moving' && (
-                  <div className="relative w-full h-36 flex items-center justify-center">
+                  <div className="relative w-full h-72 flex items-center justify-center">
                     {/* Visual 8-direction guide paths */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
-                      <div className="w-64 h-px border-t border-dashed border-border" />
-                      <div className="h-28 w-px border-l border-dashed border-border absolute" />
-                      <div className="w-48 h-px border-t border-dashed border-border absolute rotate-45" />
-                      <div className="w-48 h-px border-t border-dashed border-border absolute -rotate-45" />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-25">
+                      <div className="w-[500px] max-w-[90%] h-px border-t border-dashed border-border" />
+                      <div className="h-[250px] w-px border-l border-dashed border-border absolute" />
+                      <div className="w-[360px] max-w-[70%] h-px border-t border-dashed border-border absolute rotate-45" />
+                      <div className="w-[360px] max-w-[70%] h-px border-t border-dashed border-border absolute -rotate-45" />
                     </div>
 
                     <div
                       className={cn(
-                        'w-12 h-12 rounded-full bg-active-teal border-2 border-white shadow-[0_0_24px_rgba(66,179,177,0.7)] flex items-center justify-center transition-transform',
+                        'w-14 h-14 rounded-full bg-active-teal border-3 border-white shadow-[0_0_30px_rgba(66,179,177,0.8)] flex items-center justify-center transition-transform',
                         isRunning ? 'animate-ocular-8' : ''
                       )}
                       style={{
                         animationPlayState: isRunning ? 'running' : 'paused',
                       }}
                     >
-                      <div className="w-4 h-4 rounded-full bg-white shadow-inner flex items-center justify-center">
-                        <div className="w-1.5 h-1.5 rounded-full bg-active-teal" />
+                      <div className="w-5 h-5 rounded-full bg-white shadow-inner flex items-center justify-center">
+                        <div className="w-2 h-2 rounded-full bg-active-teal" />
                       </div>
                     </div>
                   </div>
                 )}
 
                 {currentStep.targetPos === 'palming' && (
-                  <div className="flex flex-col items-center gap-3 animate-palming">
-                    <div className="w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center shadow-lg">
-                      <Smile className="w-8 h-8 text-amber-500" />
+                  <div className="flex flex-col items-center gap-4 animate-palming">
+                    <div className="w-20 h-20 rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center shadow-xl">
+                      <Smile className="w-10 h-10 text-amber-500" />
                     </div>
-                    <span className="text-xs font-semibold text-text">Tutup Kelopak Mata & Rasakan Kehangatan Tangan</span>
+                    <span className="text-sm font-bold text-text">Tutup Kelopak Mata & Rasakan Kehangatan Tangan</span>
                   </div>
                 )}
               </div>
 
-              <p className="relative z-10 text-xs text-center text-text-muted italic max-w-md">
+              <p className="relative z-10 text-xs md:text-sm text-center text-text-muted italic max-w-md">
                 💡 {currentStep.tip}
               </p>
             </div>

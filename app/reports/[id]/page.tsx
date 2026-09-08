@@ -41,7 +41,7 @@ export default function ReportDetailPage() {
           const data = res.data
           const formatted: MedicalReportData = {
             id: data.reportId || data._id || id,
-            title: data.title || `Laporan Evaluasi Ergonomi & Risiko Miopia (${periodLabel})`,
+            title: data.title || `Laporan Evaluasi & Risiko Miopia (${periodLabel})`,
             patientName: data.patientName || nameParam,
             robotId: data.robotId || robotId || undefined,
             generatedAt: data.createdAt

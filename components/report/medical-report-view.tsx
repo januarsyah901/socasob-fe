@@ -104,14 +104,14 @@ export function MedicalReportView({ report }: MedicalReportViewProps) {
               <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight uppercase" style={{ fontFamily: 'var(--font-figtree)' }}>
                 LAPORAN DETEKSI SOCASOB
               </h1>
-              <p className="text-xs font-semibold text-slate-600 tracking-wide uppercase mt-0.5">Sistem Monitoring & Evaluasi Ergonomi Visual</p>
+              <p className="text-xs font-semibold text-slate-600 tracking-wide uppercase mt-0.5">Sistem Monitoring & Evaluasi Kesehatan Mata</p>
             </div>
           </header>
 
           {/* Title & Patient Info */}
           <div className="mb-8">
             <h2 className="text-xl font-bold text-slate-900 text-center uppercase tracking-wider mb-6 border-b border-slate-300 pb-4" style={{ fontFamily: 'var(--font-figtree)' }}>
-              Hasil Evaluasi Ergonomi Visual
+              Hasil Evaluasi Deteksi Mata
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4 text-sm">
@@ -233,7 +233,7 @@ export function MedicalReportView({ report }: MedicalReportViewProps) {
                 Catatan & Batasan Hasil Deteksi:
               </p>
               <p className="text-xs leading-relaxed">
-                Laporan ini merupakan hasil deteksi kasar berbasis sensor dan visi komputer SocaSob untuk pemantauan kebiasaan ergonomi visual secara mandiri. Hasil ini bukan merupakan diagnosis medis klinis. Apabila Anda mengalami keluhan penglihatan seperti mata buram berlanjut, nyeri mata, atau pusing berulang, silakan berkonsultasi langsung ke dokter spesialis mata.
+                Laporan ini merupakan hasil deteksi kasar berbasis sensor dan visi komputer SocaSob untuk pemantauan kebiasaan menatap layar secara mandiri. Hasil ini bukan merupakan diagnosis medis klinis. Apabila Anda mengalami keluhan penglihatan seperti mata buram berlanjut, nyeri mata, atau pusing berulang, silakan berkonsultasi langsung ke dokter spesialis mata.
               </p>
             </div>
 

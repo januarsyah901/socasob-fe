@@ -200,21 +200,21 @@
 
   @keyframes ocular-movement {
     0% { transform: translate(0, 0); }
-    6.25% { transform: translate(0, -65px); }
+    6.25% { transform: translate(0, -110px); }
     12.5% { transform: translate(0, 0); }
-    18.75% { transform: translate(0, 65px); }
+    18.75% { transform: translate(0, 110px); }
     25% { transform: translate(0, 0); }
-    31.25% { transform: translate(-120px, 0); }
+    31.25% { transform: translate(-220px, 0); }
     37.5% { transform: translate(0, 0); }
-    43.75% { transform: translate(120px, 0); }
+    43.75% { transform: translate(220px, 0); }
     50% { transform: translate(0, 0); }
-    56.25% { transform: translate(90px, -55px); }
+    56.25% { transform: translate(160px, -85px); }
     62.5% { transform: translate(0, 0); }
-    68.75% { transform: translate(-90px, 55px); }
+    68.75% { transform: translate(-160px, 85px); }
     75% { transform: translate(0, 0); }
-    81.25% { transform: translate(-90px, -55px); }
+    81.25% { transform: translate(-160px, -85px); }
     87.5% { transform: translate(0, 0); }
-    93.75% { transform: translate(90px, 55px); }
+    93.75% { transform: translate(160px, 85px); }
     100% { transform: translate(0, 0); }
   }
 
