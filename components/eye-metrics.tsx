@@ -38,20 +38,20 @@ export function EyeMetrics() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-auto">
         {/* Stat 1: Jarak Layar */}
         <div className={cn(
-          'p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between min-h-[120px]',
+          'p-3.5 sm:p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between min-h-[110px] min-w-0',
           isClose && isConnected
             ? 'bg-error/5 border-error/30'
             : 'bg-surface-2/60 border-border/60'
         )}>
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider truncate">
               Jarak Layar
             </span>
-            <Eye className={cn('w-4 h-4', isClose && isConnected ? 'text-error' : 'text-signal-blue')} />
+            <Eye className={cn('w-4 h-4 shrink-0', isClose && isConnected ? 'text-error' : 'text-signal-blue')} />
           </div>
           <div className="mt-2">
             <p className={cn(
-              'text-2xl md:text-3xl font-black font-figtree tracking-tight tabular-nums',
+              'text-lg sm:text-xl font-bold font-figtree tracking-tight tabular-nums whitespace-nowrap',
               !isConnected
                 ? 'text-text-muted'
                 : isClose
@@ -65,7 +65,7 @@ export function EyeMetrics() {
                   : '≥ 30 cm'
               }
             </p>
-            <p className="text-[11px] text-text-muted mt-1 leading-snug">
+            <p className="text-[11px] text-text-muted mt-1 leading-snug truncate">
               {!isConnected
                 ? 'Sensor offline'
                 : isClose
@@ -77,36 +77,36 @@ export function EyeMetrics() {
         </div>
 
         {/* Stat 2: Total Tatap Layar */}
-        <div className="p-4 rounded-2xl bg-surface-2/60 border border-border/60 flex flex-col justify-between min-h-[120px] transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-surface-2/60 border border-border/60 flex flex-col justify-between min-h-[110px] min-w-0 transition-all">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider truncate">
               Total Tatap Layar
             </span>
-            <Clock className="w-4 h-4 text-signal-blue" />
+            <Clock className="w-4 h-4 text-signal-blue shrink-0" />
           </div>
           <div className="mt-2">
-            <p className="text-2xl md:text-3xl font-black text-text font-figtree tracking-tight tabular-nums font-mono">
+            <p className="text-lg sm:text-xl font-bold text-text font-figtree tracking-tight tabular-nums font-mono whitespace-nowrap">
               {formatSec(workElapsedSec)}
             </p>
-            <p className="text-[11px] text-text-muted mt-1 leading-snug">
-              Waktu aktif di depan monitor
+            <p className="text-[11px] text-text-muted mt-1 leading-snug truncate">
+              Waktu aktif di monitor
             </p>
           </div>
         </div>
 
         {/* Stat 3: Sisa Waktu Istirahat 20s */}
-        <div className="p-4 rounded-2xl bg-surface-2/60 border border-border/60 flex flex-col justify-between min-h-[120px] transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider">
-              Sisa Waktu Istirahat 20s
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-surface-2/60 border border-border/60 flex flex-col justify-between min-h-[110px] min-w-0 transition-all">
+          <div className="flex items-center justify-between gap-1">
+            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider truncate">
+              Sisa Istirahat 20s
             </span>
-            <Timer className="w-4 h-4 text-emerald-500" />
+            <Timer className="w-4 h-4 text-emerald-500 shrink-0" />
           </div>
           <div className="mt-2">
-            <p className="text-2xl md:text-3xl font-black text-emerald-600 dark:text-emerald-400 font-figtree tracking-tight tabular-nums font-mono">
+            <p className="text-lg sm:text-xl font-bold text-emerald-600 dark:text-emerald-400 font-figtree tracking-tight tabular-nums font-mono whitespace-nowrap">
               {breakRemainingSec > 0 ? `${breakRemainingSec}s` : '0s (Siap)'}
             </p>
-            <p className="text-[11px] text-text-muted mt-1 leading-snug">
+            <p className="text-[11px] text-text-muted mt-1 leading-snug truncate">
               Jeda aturan 20-20-20
             </p>
           </div>

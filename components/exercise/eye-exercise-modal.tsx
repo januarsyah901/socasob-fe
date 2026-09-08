@@ -224,7 +224,7 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: Ey
       open={open}
       onClose={onClose}
       title="Panduan Senam Mata 20-20-20"
-      className="max-w-6xl w-[96vw] max-h-[95vh] p-6 md:p-8"
+      className="max-w-7xl w-[96vw] h-[92vh] max-h-[95vh] p-5 sm:p-7 md:p-8 flex flex-col justify-between overflow-y-auto"
     >
       <div className="space-y-6">
         {/* Mode Selector */}
@@ -389,8 +389,8 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: Ey
 
         {/* Tab 2: YouTube Video Embed */}
         {activeTab === 'youtube' && (
-          <div className="space-y-4 animate-fade-in">
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black/90 border border-border shadow-dreamy-lg">
+          <div className="space-y-4 animate-fade-in flex-1 flex flex-col justify-center">
+            <div className="relative w-full aspect-video md:max-h-[62vh] rounded-3xl overflow-hidden bg-black/95 border border-border shadow-dreamy-lg mx-auto">
               <iframe
                 src={`https://www.youtube-nocookie.com/embed/${youtubeVideoId}?autoplay=1&rel=0&modestbranding=1`}
                 title="Panduan Senam Mata 20-20-20"

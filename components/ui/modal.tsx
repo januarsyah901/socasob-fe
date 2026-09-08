@@ -2,7 +2,8 @@
 
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
-import { useEffect, useRef, useId } from 'react';
+import { useEffect, useRef, useId, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 export function Modal({
   open,
@@ -19,6 +20,11 @@ export function Modal({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -68,36 +74,46 @@ export function Modal({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 w-screen h-screen overflow-hidden"
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
+      onClick={onClose}
     >
-      <div className="absolute inset-0 bg-midnight-harbor/50 backdrop-blur-sm animate-fade-in" onClick={onClose} />
+      {/* Backdrop overlay */}
+      <div
+        className="absolute inset-0 bg-midnight-harbor/60 backdrop-blur-md animate-fade-in cursor-pointer"
+        aria-hidden="true"
+      />
+
+      {/* Modal Dialog Content */}
       <div
         ref={ref}
         tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
         className={cn(
-          'relative card w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 animate-fade-up rounded-b-none sm:rounded-b-[20px] focus:outline-none',
+          'relative card w-full max-w-lg max-h-[92vh] overflow-y-auto p-6 animate-fade-up rounded-[24px] focus:outline-none z-10 shadow-2xl border border-border/80 my-auto',
           className
         )}
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 shrink-0">
           <h2 id={titleId} className="text-lg font-semibold text-text">{title}</h2>
           <button
+            type="button"
             onClick={onClose}
             aria-label="Tutup dialog"
-            className="rounded-lg p-1.5 text-text-muted hover:text-text hover:bg-surface-2 cursor-pointer focus-visible:ring-2 focus-visible:ring-signal-blue"
+            className="rounded-xl p-1.5 text-text-muted hover:text-text hover:bg-surface-2 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-signal-blue"
           >
             <X className="size-5" aria-hidden />
           </button>
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
