@@ -59,6 +59,26 @@ const STEPS = [
   },
 ]
 
+const DEFAULT_YOUTUBE_VIDEO_ID = 'vRRpt0cbuok'
+const YOUTUBE_STORAGE_KEY = 'socasob-youtube-video-id'
+
+function extractYoutubeVideoId(url: string): string {
+  const trimmed = url.trim()
+  if (!trimmed) return DEFAULT_YOUTUBE_VIDEO_ID
+
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/
+  const match = trimmed.match(regExp)
+  if (match && match[2] && match[2].length === 11) {
+    return match[2]
+  }
+
+  if (/^[a-zA-Z0-9_-]{11}$/.test(trimmed)) {
+    return trimmed
+  }
+
+  return trimmed
+}
+
 export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: EyeExerciseModalProps) {
   const { robotId } = useSocket()
   const [activeTab, setActiveTab] = useState<'youtube' | 'animated'>(initialMode)
@@ -67,7 +87,7 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: Ey
   const [isRunning, setIsRunning] = useState(false)
   const [isCompleted, setIsCompleted] = useState(false)
   const [completedBreaks, setCompletedBreaks] = useState(0)
-  const [youtubeVideoId, setYoutubeVideoId] = useState('0wQszk3kPqA')
+  const [youtubeVideoId, setYoutubeVideoId] = useState(DEFAULT_YOUTUBE_VIDEO_ID)
   const [customYoutubeUrl, setCustomYoutubeUrl] = useState('')
   const [showUrlInput, setShowUrlInput] = useState(false)
 
@@ -86,10 +106,13 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: Ey
     }
   }
 
-  // Load saved completed breaks count from localStorage
+  // Load saved completed breaks count and saved YouTube video ID from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('socasob-completed-breaks')
     if (saved) setCompletedBreaks(parseInt(saved, 10) || 0)
+
+    const savedVid = localStorage.getItem(YOUTUBE_STORAGE_KEY)
+    if (savedVid) setYoutubeVideoId(savedVid)
   }, [])
 
   // When modal is opened, initialize and start session automatically
@@ -182,15 +205,16 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: Ey
   const handleUpdateYoutubeUrl = (e: React.FormEvent) => {
     e.preventDefault()
     if (!customYoutubeUrl.trim()) return
-    let vidId = customYoutubeUrl.trim()
-    if (customYoutubeUrl.includes('v=')) {
-      vidId = customYoutubeUrl.split('v=')[1].split('&')[0]
-    } else if (customYoutubeUrl.includes('youtu.be/')) {
-      vidId = customYoutubeUrl.split('youtu.be/')[1].split('?')[0]
-    } else if (customYoutubeUrl.includes('embed/')) {
-      vidId = customYoutubeUrl.split('embed/')[1].split('?')[0]
-    }
+    const vidId = extractYoutubeVideoId(customYoutubeUrl)
     setYoutubeVideoId(vidId)
+    localStorage.setItem(YOUTUBE_STORAGE_KEY, vidId)
+    setShowUrlInput(false)
+    setCustomYoutubeUrl('')
+  }
+
+  const handleResetYoutubeUrl = () => {
+    setYoutubeVideoId(DEFAULT_YOUTUBE_VIDEO_ID)
+    localStorage.removeItem(YOUTUBE_STORAGE_KEY)
     setShowUrlInput(false)
     setCustomYoutubeUrl('')
   }
@@ -378,33 +402,66 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: Ey
                   <Tv className="w-4 h-4" />
                 </span>
                 <div>
-                  <p className="text-xs font-semibold text-text">Panduan Relaksasi Layar & Senam Otot Mata</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold text-text">Panduan Relaksasi Layar & Senam Otot Mata</p>
+                    {youtubeVideoId !== DEFAULT_YOUTUBE_VIDEO_ID && (
+                      <span className="text-[10px] font-bold text-active-teal bg-active-teal/10 px-2 py-0.5 rounded-full border border-active-teal/20">
+                        Kustom
+                      </span>
+                    )}
+                  </div>
                   <p className="text-[11px] text-text-muted">Ikuti video 1-2 menit untuk meregangkan otot penglihatan.</p>
                 </div>
               </div>
 
-              <div className="shrink-0 flex items-center gap-2">
+              <div className="shrink-0 flex items-center gap-3">
+                {youtubeVideoId !== DEFAULT_YOUTUBE_VIDEO_ID && (
+                  <button
+                    type="button"
+                    onClick={handleResetYoutubeUrl}
+                    className="text-xs text-rose-500 hover:underline font-semibold cursor-pointer flex items-center gap-1 transition-colors"
+                    title="Kembalikan ke video default"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Reset Default Video
+                  </button>
+                )}
                 <button
+                  type="button"
                   onClick={() => setShowUrlInput(!showUrlInput)}
                   className="text-xs text-signal-blue hover:underline font-medium cursor-pointer"
                 >
-                  {showUrlInput ? 'Tutup URL' : 'Ganti Video YouTube'}
+                  {showUrlInput ? 'Tutup Input' : 'Ganti Video YouTube'}
                 </button>
               </div>
             </div>
 
             {showUrlInput && (
-              <form onSubmit={handleUpdateYoutubeUrl} className="flex gap-2 animate-fade-up">
+              <form onSubmit={handleUpdateYoutubeUrl} className="flex flex-col sm:flex-row gap-2 animate-fade-up">
                 <input
                   type="text"
                   placeholder="Paste link YouTube (misal: https://youtu.be/...)"
                   value={customYoutubeUrl}
                   onChange={(e) => setCustomYoutubeUrl(e.target.value)}
-                  className="input-base text-xs py-2"
+                  className="input-base text-xs py-2 flex-1"
                 />
-                <Button type="submit" size="sm" variant="primary" className="text-xs shrink-0">
-                  Pasang Video
-                </Button>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button type="submit" size="sm" variant="primary" className="text-xs">
+                    Pasang Video
+                  </Button>
+                  {youtubeVideoId !== DEFAULT_YOUTUBE_VIDEO_ID && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="secondary"
+                      onClick={handleResetYoutubeUrl}
+                      className="text-xs gap-1 text-rose-600 hover:text-rose-700"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      Reset Default
+                    </Button>
+                  )}
+                </div>
               </form>
             )}
           </div>
