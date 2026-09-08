@@ -140,7 +140,6 @@ export default function ResumePage() {
         {/* Data Display */}
         {!isLoading && !error && resumeData && (() => {
           const myopiaColors = riskColor(resumeData.myopiaRisk)
-          const fatigueColors = riskColor(resumeData.fatigueRisk)
 
           return (
             <div className="space-y-6">
@@ -219,55 +218,29 @@ export default function ResumePage() {
                 </div>
               </div>
 
-              {/* Risk Assessment Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className={cn('card p-6 border', myopiaColors.border)}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center', myopiaColors.bg)}>
-                        <Search className={cn('w-4 h-4', myopiaColors.text)} />
-                      </div>
-                      <h3 className="text-sm font-bold text-text">Asesmen Risiko Miopia</h3>
+              {/* Risk Assessment Card */}
+              <div className={cn('card p-6 border', myopiaColors.border)}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center', myopiaColors.bg)}>
+                      <Search className={cn('w-4 h-4', myopiaColors.text)} />
                     </div>
-                    <span
-                      className={cn(
-                        'text-xs font-extrabold px-3 py-1 rounded-full border',
-                        myopiaColors.bg,
-                        myopiaColors.text,
-                        myopiaColors.border
-                      )}
-                    >
-                      {resumeData.myopiaRisk}
-                    </span>
+                    <h3 className="text-sm font-bold text-text">Risiko Miopia</h3>
                   </div>
-                  <p className="text-xs text-text-muted leading-relaxed">
-                    {riskRecommendation(resumeData.myopiaRisk, 'myopia')}
-                  </p>
+                  <span
+                    className={cn(
+                      'text-xs font-extrabold px-3 py-1 rounded-full border',
+                      myopiaColors.bg,
+                      myopiaColors.text,
+                      myopiaColors.border
+                    )}
+                  >
+                    {resumeData.myopiaRisk}
+                  </span>
                 </div>
-
-                <div className={cn('card p-6 border', fatigueColors.border)}>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className={cn('w-8 h-8 rounded-xl flex items-center justify-center', fatigueColors.bg)}>
-                        <AlertTriangle className={cn('w-4 h-4', fatigueColors.text)} />
-                      </div>
-                      <h3 className="text-sm font-bold text-text">Asesmen Risiko Kelelahan (CVS)</h3>
-                    </div>
-                    <span
-                      className={cn(
-                        'text-xs font-extrabold px-3 py-1 rounded-full border',
-                        fatigueColors.bg,
-                        fatigueColors.text,
-                        fatigueColors.border
-                      )}
-                    >
-                      {resumeData.fatigueRisk}
-                    </span>
-                  </div>
-                  <p className="text-xs text-text-muted leading-relaxed">
-                    {riskRecommendation(resumeData.fatigueRisk, 'fatigue')}
-                  </p>
-                </div>
+                <p className="text-xs text-text-muted leading-relaxed">
+                  {riskRecommendation(resumeData.myopiaRisk, 'myopia')}
+                </p>
               </div>
 
               {/* Interactive Micro-Break Module in Resume */}

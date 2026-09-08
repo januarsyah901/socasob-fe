@@ -194,6 +194,39 @@
 
   .animate-pulse-glow-red { animation: pulse-glow-red 2s ease-in-out infinite; }
   .animate-pulse-glow-teal { animation: pulse-glow-teal 2s ease-in-out infinite; }
+  .animate-ocular-8 { animation: ocular-movement 10s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
+  .animate-palming { animation: palming-glow 3s ease-in-out infinite; }
+  .animate-focus-distant { animation: focus-distant 4s ease-in-out infinite; }
+
+  @keyframes ocular-movement {
+    0% { transform: translate(0, 0); }
+    6.25% { transform: translate(0, -65px); }
+    12.5% { transform: translate(0, 0); }
+    18.75% { transform: translate(0, 65px); }
+    25% { transform: translate(0, 0); }
+    31.25% { transform: translate(-120px, 0); }
+    37.5% { transform: translate(0, 0); }
+    43.75% { transform: translate(120px, 0); }
+    50% { transform: translate(0, 0); }
+    56.25% { transform: translate(90px, -55px); }
+    62.5% { transform: translate(0, 0); }
+    68.75% { transform: translate(-90px, 55px); }
+    75% { transform: translate(0, 0); }
+    81.25% { transform: translate(-90px, -55px); }
+    87.5% { transform: translate(0, 0); }
+    93.75% { transform: translate(90px, 55px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  @keyframes palming-glow {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.3)); }
+    50% { transform: scale(1.08); filter: drop-shadow(0 0 25px rgba(245, 158, 11, 0.6)); }
+  }
+
+  @keyframes focus-distant {
+    0%, 100% { transform: scale(0.92); opacity: 0.75; }
+    50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 22px rgba(56, 189, 248, 0.6)); }
+  }
 
   /* ── Hover: bg-(--surface-2) pattern (direct CSS var reference) ── */
   .hover\:bg-\(--surface-2\):hover { background: var(--surface-2); }

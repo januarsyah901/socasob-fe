@@ -406,10 +406,6 @@ export function CompanionChat() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="font-bold text-sm text-text leading-tight">Teman Soca AI</h1>
-                <span className="flex items-center gap-1 text-[9px] font-bold text-signal-blue bg-signal-blue/10 px-2 py-0.5 rounded-full">
-
-                  Telemetri Aktif
-                </span>
               </div>
               <p className="text-[10px] text-text-muted font-medium">
                 Konsultan AI Ergonomi & Kesehatan Penglihatan

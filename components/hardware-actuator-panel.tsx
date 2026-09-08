@@ -168,7 +168,7 @@ export function HardwareActuatorPanel() {
       </div>
 
       {/* Grid Time Monitoring (Pemantauan Waktu Real-Time) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
         <div className="p-3.5 rounded-xl bg-surface-2/60 border border-border/60 flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-signal-blue/10 border border-signal-blue/20 flex items-center justify-center text-signal-blue shrink-0">
             <Clock className="w-4 h-4" />
@@ -176,16 +176,6 @@ export function HardwareActuatorPanel() {
           <div className="min-w-0">
             <p className="text-[10px] font-bold text-text-muted uppercase">Total Tatap Layar</p>
             <p className="text-sm font-extrabold text-text font-mono mt-0.5">{formatSec(workElapsedSec)}</p>
-          </div>
-        </div>
-
-        <div className="p-3.5 rounded-xl bg-surface-2/60 border border-border/60 flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shrink-0">
-            <AlertCircle className="w-4 h-4" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-[10px] font-bold text-text-muted uppercase">Durasi Lelah Beruntun</p>
-            <p className="text-sm font-extrabold text-amber-500 font-mono mt-0.5">{formatSec(fatigueDurationSec)}</p>
           </div>
         </div>
 

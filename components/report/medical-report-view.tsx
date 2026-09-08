@@ -8,6 +8,7 @@ import {
   Share2,
   CheckCircle2,
   AlertTriangle,
+  AlertCircle,
   Shield,
   Activity,
   Eye,
@@ -15,7 +16,6 @@ import {
   User,
   Bot,
   Calendar,
-
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -28,88 +28,83 @@ export interface MedicalReportData {
   generatedAt: string
   period: string
   dateRange: string
-  myopiaRisk: 'Rendah' | 'Sedang' | 'Tinggi'
-  fatigueRisk: 'Rendah' | 'Sedang' | 'Tinggi'
-  cvsRisk: 'Rendah' | 'Sedang' | 'Tinggi'
-  restCompliance: number // %
-  nearDurationMin: number
-  farDurationMin: number
   totalHours: number
   avgDistanceCm: number
   blinkRatePerMin: number
+  safeDistanceRatio: number
+  riskDistanceRatio: number
+  myopiaRisk: 'Rendah' | 'Sedang' | 'Tinggi'
+  cvsRisk: 'Rendah' | 'Sedang' | 'Tinggi'
+  restCompliance: number
   clinicalNotes: string[]
   examinerNotes?: string
 }
 
-export function MedicalReportView({ report }: { report: MedicalReportData }) {
-  const totalMin = report.nearDurationMin + report.farDurationMin
-  const nearPct = totalMin > 0 ? Math.round((report.nearDurationMin / totalMin) * 100) : 0
-  const farPct = 100 - nearPct
+interface MedicalReportViewProps {
+  report: MedicalReportData
+}
+
+export function MedicalReportView({ report }: MedicalReportViewProps) {
+  const handlePrint = () => {
+    window.print()
+  }
 
   const riskBadge = (level: 'Rendah' | 'Sedang' | 'Tinggi') => {
     switch (level) {
       case 'Rendah':
-        return 'text-emerald-700 bg-emerald-100 border-emerald-300'
+        return 'bg-emerald-50 text-emerald-700 border-emerald-300'
       case 'Sedang':
-        return 'text-amber-700 bg-amber-100 border-amber-300'
+        return 'bg-amber-50 text-amber-700 border-amber-300'
       case 'Tinggi':
-        return 'text-rose-700 bg-rose-100 border-rose-300'
+        return 'bg-rose-50 text-rose-700 border-rose-300 font-bold'
     }
   }
 
+  const farPct = Math.round(report.safeDistanceRatio * 100)
+  const nearPct = Math.round(report.riskDistanceRatio * 100)
+
   return (
     <div className="space-y-6">
-      {/* Top Action Bar (Hidden on Print) */}
-      <div className="no-print flex flex-wrap items-center justify-between gap-3 p-4 bg-surface rounded-2xl border border-border shadow-dreamy">
-        <div className="flex items-center gap-2 text-sm text-text-muted">
-          <FileText className="size-4 text-signal-blue" />
-          <span>Laporan Medis Terverifikasi SocaSob</span>
-          <span className="text-border">·</span>
-          <span className="font-mono text-xs">{report.id}</span>
+      {/* Action Bar (Hidden during printing) */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-surface rounded-2xl border border-border shadow-xs print:hidden">
+        <div className="flex items-center gap-2">
+          <FileText className="size-5 text-signal-blue" />
+          <span className="text-sm font-semibold text-text">Pratinjau Laporan Medis Siap Cetak</span>
         </div>
-
-        <div className="flex items-center gap-2.5">
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => window.print()}
-            className="gap-2 text-xs font-semibold shadow-sm cursor-pointer"
-          >
-            <Printer className="size-3.5" />
-            Cetak Laporan / PDF
+        <div className="flex items-center gap-2">
+          <Button variant="secondary" size="sm" onClick={() => window.location.reload()} className="gap-1.5 text-xs">
+            Perbarui
+          </Button>
+          <Button variant="primary" size="sm" onClick={handlePrint} className="gap-1.5 text-xs shadow-sm">
+            <Printer className="size-3.5" /> Cetak / Unduh PDF
           </Button>
         </div>
       </div>
 
-      {/* Formal Printable Document Area */}
-      <article className="card p-0 overflow-hidden print-area bg-white text-slate-900 shadow-dreamy-lg max-w-4xl mx-auto rounded-none sm:rounded-3xl border sm:border-slate-300 relative">
-        
-        {/* Background watermark (visible slightly) */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none no-print">
-          <img src="/images/logo-socasob.png" alt="" className="w-96 h-96 object-contain grayscale" />
+      {/* Official Medical Document Paper Container */}
+      <article
+        id="medical-document"
+        className="mx-auto max-w-[210mm] min-h-[297mm] bg-white text-slate-900 border border-slate-300 rounded-lg shadow-xl print:border-none print:shadow-none print:m-0 print:p-0 print:w-full print:max-w-none overflow-hidden relative font-sans leading-normal"
+        style={{ colorScheme: 'light' }}
+      >
+        {/* Subtle Watermark for Authenticity */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.025] select-none">
+          <span className="text-9xl font-black rotate-[-35deg] uppercase tracking-widest text-slate-950">
+            SOCASOB
+          </span>
         </div>
 
         <div className="p-8 md:p-12 relative z-10">
-          {/* Clinic & System Header */}
-          <header className="border-b-[3px] border-slate-900 pb-6 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="flex items-start gap-4">
-              <div className="size-16 shrink-0 flex items-center justify-center">
-                <img src="/images/logo-socasob.png" alt="SocaSob Logo" className="w-full h-full object-contain" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight uppercase" style={{ fontFamily: 'var(--font-figtree)' }}>
-                  SOCASOB CLINICAL SYSTEM
-                </h1>
-                <p className="text-sm font-semibold text-slate-600 tracking-wide uppercase mt-1">Pusat Deteksi Dini & Pencegahan Miopia</p>
-                <p className="text-xs text-slate-500 mt-0.5">Jl. Kesehatan Mata No. 12, Smart City · (021) 555-0198</p>
-              </div>
+          {/* System Header */}
+          <header className="border-b-[3px] border-slate-900 pb-6 mb-8 flex items-center gap-4">
+            <div className="size-14 shrink-0 flex items-center justify-center">
+              <img src="/images/logo-socasob.png" alt="SocaSob Logo" className="w-full h-full object-contain" />
             </div>
-
-            <div className="text-left md:text-right">
-              <div className="inline-block border-2 border-slate-900 p-2 text-center bg-slate-50">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">Kode Dokumen</p>
-                <p className="font-mono font-bold text-slate-900 text-base">{report.id}</p>
-              </div>
+            <div>
+              <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight uppercase" style={{ fontFamily: 'var(--font-figtree)' }}>
+                LAPORAN DETEKSI SOCASOB
+              </h1>
+              <p className="text-xs font-semibold text-slate-600 tracking-wide uppercase mt-0.5">Sistem Monitoring & Evaluasi Ergonomi Visual</p>
             </div>
           </header>
 
@@ -154,7 +149,7 @@ export function MedicalReportView({ report }: { report: MedicalReportData }) {
                 </span>
               </div>
               <div className="p-4 flex flex-col items-center justify-center text-center">
-                <span className="text-[10px] font-bold text-slate-500 uppercase mb-2">Gejala CVS</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase mb-2">Risiko Mata Lelah & Kering</span>
                 <span className={cn('px-3 py-1 rounded-md text-xs font-bold border uppercase', riskBadge(report.cvsRisk))}>
                   {report.cvsRisk}
                 </span>
@@ -172,7 +167,7 @@ export function MedicalReportView({ report }: { report: MedicalReportData }) {
           {/* Section 2: Detailed Quantitative Ergonomic Metrics */}
           <section className="mb-8">
             <h3 className="text-sm font-bold text-slate-900 border-b border-slate-300 pb-2 mb-4 uppercase tracking-wide">
-              2. Data Telemetri Visual
+              2. Data Visual
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4">
@@ -230,28 +225,19 @@ export function MedicalReportView({ report }: { report: MedicalReportData }) {
             </ul>
           </section>
 
-          {/* Section 4: Validation */}
-          <section className="border-t-[3px] border-slate-900 pt-8 mt-12">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 text-sm text-slate-800">
-              <div>
-                <p className="font-bold text-slate-900 uppercase text-xs mb-3 flex items-center gap-2">
-                  <FileText className="size-4"/> Catatan Klinis Tambahan:
-                </p>
-                <div className="h-24 bg-yellow-50/50 border border-yellow-200 rounded-lg p-3 text-slate-700 italic">
-                  {report.examinerNotes || 'Tidak ada catatan tambahan. Kondisi stabil.'}
-                </div>
-              </div>
-
-              <div className="flex flex-col items-end text-center">
-                <p className="font-semibold text-slate-600 mb-16">Dokter Pemeriksa / Optometris</p>
-                <div className="w-48 border-b-2 border-slate-900 relative">
-                </div>
-                <p className="text-slate-900 font-bold mt-2">................................................</p>
-                <p className="text-slate-500 text-[10px] uppercase mt-1 tracking-widest">SIP / NIK</p>
-              </div>
+          {/* Section 4: Disclaimer */}
+          <section className="border-t-[2px] border-slate-900 pt-6 mt-10">
+            <div className="p-4 rounded-xl bg-slate-50 border border-slate-300 text-slate-700">
+              <p className="font-bold text-slate-900 uppercase text-xs mb-1.5 flex items-center gap-2">
+                <AlertCircle className="size-4 text-slate-700" />
+                Catatan & Batasan Hasil Deteksi:
+              </p>
+              <p className="text-xs leading-relaxed">
+                Laporan ini merupakan hasil deteksi kasar berbasis sensor dan visi komputer SocaSob untuk pemantauan kebiasaan ergonomi visual secara mandiri. Hasil ini bukan merupakan diagnosis medis klinis. Apabila Anda mengalami keluhan penglihatan seperti mata buram berlanjut, nyeri mata, atau pusing berulang, silakan berkonsultasi langsung ke dokter spesialis mata.
+              </p>
             </div>
 
-            <footer className="mt-12 pt-4 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
+            <footer className="mt-8 pt-4 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] text-slate-500 uppercase tracking-wider font-semibold">
               <span>Dicetak otomatis oleh SocaSob System v2.0</span>
               <span>Halaman 1 dari 1</span>
             </footer>

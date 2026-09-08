@@ -1,18 +1,15 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Modal } from '@/components/ui/modal'
 import { Button } from '@/components/ui/button'
 import {
   Play,
   Pause,
   RotateCcw,
-
   Tv,
   Eye,
   CheckCircle2,
-  Volume2,
-  VolumeX,
   Smile,
   Flame,
   Award,
@@ -42,7 +39,7 @@ const STEPS = [
     duration: 20,
     desc: 'Alihkan pandangan dari layar ke objek sejauh minimal 6 meter (20 kaki) untuk melemaskan otot siliaris mata.',
     targetPos: 'center',
-    tip: 'Tatap pepohonan di luar jendela atau sudut terjauh di ruangan Anda.',
+    tip: 'Tatap objek terjauh di luar jendela atau sudut terjauh ruangan Anda.',
   },
   {
     step: 2,
@@ -50,7 +47,7 @@ const STEPS = [
     duration: 20,
     desc: 'Ikuti bola target bergerak secara perlahan tanpa menggerakkan kepala Anda.',
     targetPos: 'moving',
-    tip: 'Latih kelenturan otot ekstraokular mata ke atas, bawah, kiri, kanan, dan diagonal.',
+    tip: 'Latih kelenturan otot ekstraokular: atas, bawah, kiri, kanan, dan diagonal.',
   },
   {
     step: 3,
@@ -58,11 +55,11 @@ const STEPS = [
     duration: 20,
     desc: 'Gosok kedua telapak tangan hingga hangat, lalu tempelkan lembut di atas kelopak mata terpejam.',
     targetPos: 'palming',
-    tip: 'Bernapas perlahan dan biarkan kehangatan telapak tangan meredakan kelelahan mata.',
+    tip: 'Bernapas perlahan dan biarkan kehangatan telapak tangan meredakan ketegangan mata.',
   },
 ]
 
-export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: EyeExerciseModalProps) {
+export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: EyeExerciseModalProps) {
   const { robotId } = useSocket()
   const [activeTab, setActiveTab] = useState<'youtube' | 'animated'>(initialMode)
   const [currentStepIdx, setCurrentStepIdx] = useState(0)
@@ -89,11 +86,29 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
     }
   }
 
-  // Read / save completed breaks from localStorage
+  // Load saved completed breaks count from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('socasob-completed-breaks')
     if (saved) setCompletedBreaks(parseInt(saved, 10) || 0)
   }, [])
+
+  // When modal is opened, initialize and start session automatically
+  useEffect(() => {
+    if (open) {
+      setActiveTab(initialMode)
+      setCurrentStepIdx(0)
+      setTimeLeft(STEPS[0].duration)
+      setIsCompleted(false)
+      if (initialMode === 'animated') {
+        setIsRunning(true)
+        playGentleChime('relax')
+      } else {
+        setIsRunning(false)
+      }
+    } else {
+      setIsRunning(false)
+    }
+  }, [open, initialMode])
 
   // Timer countdown
   useEffect(() => {
@@ -141,11 +156,25 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
 
   const handleNextStep = () => {
     if (currentStepIdx < STEPS.length - 1) {
-      setCurrentStepIdx((prev) => prev + 1)
-      setTimeLeft(STEPS[currentStepIdx + 1].duration)
-      setIsRunning(false)
+      const nextIdx = currentStepIdx + 1
+      setCurrentStepIdx(nextIdx)
+      setTimeLeft(STEPS[nextIdx].duration)
+      setIsRunning(true)
     } else {
       setIsCompleted(true)
+      setIsRunning(false)
+    }
+  }
+
+  const handleSelectStep = (idx: number) => {
+    setCurrentStepIdx(idx)
+    setTimeLeft(STEPS[idx].duration)
+    setIsRunning(true)
+  }
+
+  const handleTabChange = (tab: 'youtube' | 'animated') => {
+    setActiveTab(tab)
+    if (tab === 'youtube') {
       setIsRunning(false)
     }
   }
@@ -173,19 +202,7 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
         <div className="flex items-center justify-between border-b border-border pb-3">
           <div className="flex items-center gap-1.5 p-1 bg-surface-2 rounded-2xl border border-border">
             <button
-              onClick={() => setActiveTab('youtube')}
-              className={cn(
-                'flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer',
-                activeTab === 'youtube'
-                  ? 'bg-signal-blue text-white shadow-sm'
-                  : 'text-text-muted hover:text-text hover:bg-surface'
-              )}
-            >
-              <YoutubeIcon className="w-4 h-4 text-red-500 fill-current" />
-              <span>Video Tutorial YouTube</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('animated')}
+              onClick={() => handleTabChange('animated')}
               className={cn(
                 'flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer',
                 activeTab === 'animated'
@@ -196,6 +213,18 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
               <Eye className="w-4 h-4 text-active-teal" />
               <span>Latihan Interaktif (20s)</span>
             </button>
+            <button
+              onClick={() => handleTabChange('youtube')}
+              className={cn(
+                'flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer',
+                activeTab === 'youtube'
+                  ? 'bg-signal-blue text-white shadow-sm'
+                  : 'text-text-muted hover:text-text hover:bg-surface'
+              )}
+            >
+              <YoutubeIcon className="w-4 h-4 text-red-500 fill-current" />
+              <span>Video Tutorial YouTube</span>
+            </button>
           </div>
 
           <div className="hidden sm:flex items-center gap-2 text-xs text-text-muted font-medium">
@@ -204,7 +233,132 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
           </div>
         </div>
 
-        {/* Tab 1: YouTube Video Embed */}
+        {/* Tab 1: Interactive 20-20-20 Countdown & Eye Movement Animation */}
+        {activeTab === 'animated' && (
+          <div className="space-y-4 animate-fade-in">
+            {/* Step Indicators */}
+            <div className="grid grid-cols-3 gap-2">
+              {STEPS.map((s, idx) => (
+                <button
+                  key={s.step}
+                  onClick={() => handleSelectStep(idx)}
+                  className={cn(
+                    'p-2.5 rounded-xl border text-left transition-all cursor-pointer',
+                    idx === currentStepIdx
+                      ? 'border-signal-blue bg-signal-blue/10'
+                      : idx < currentStepIdx
+                        ? 'border-active-teal/40 bg-active-teal/5 text-text-muted'
+                        : 'border-border bg-surface-2 text-text-muted opacity-75'
+                  )}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider">
+                      Langkah {s.step}
+                    </span>
+                    {idx < currentStepIdx && <CheckCircle2 className="w-3.5 h-3.5 text-active-teal" />}
+                  </div>
+                  <p className="text-xs font-semibold line-clamp-1">{s.title}</p>
+                </button>
+              ))}
+            </div>
+
+            {/* Interactive Stage */}
+            <div className="relative h-72 rounded-2xl bg-surface-2 border border-border p-6 flex flex-col items-center justify-between overflow-hidden shadow-inner">
+              <div className="absolute inset-0 bg-gradient-to-b from-signal-blue/5 to-active-teal/5 pointer-events-none" />
+
+              {/* Countdown badge */}
+              <div className="relative z-10 flex items-center gap-2 bg-surface/80 backdrop-blur px-3 py-1 rounded-full border border-border/80">
+                <span className="text-xs font-bold uppercase tracking-widest text-text-muted">
+                  Sisa Waktu
+                </span>
+                <span className="text-2xl font-black font-figtree text-signal-blue tabular-nums">
+                  {timeLeft}s
+                </span>
+              </div>
+
+              {/* Center Animation Target */}
+              <div className="relative z-10 my-auto w-full flex flex-col items-center justify-center">
+                {currentStep.targetPos === 'center' && (
+                  <div className="flex flex-col items-center gap-3 animate-focus-distant">
+                    <div className="w-16 h-16 rounded-full bg-signal-blue/20 border-2 border-signal-blue flex items-center justify-center shadow-lg">
+                      <Eye className="w-8 h-8 text-signal-blue" />
+                    </div>
+                    <span className="text-xs font-semibold text-text">Tatap Objek Sejauh 6 Meter (20 Kaki)</span>
+                  </div>
+                )}
+
+                {currentStep.targetPos === 'moving' && (
+                  <div className="relative w-full h-36 flex items-center justify-center">
+                    {/* Visual 8-direction guide paths */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+                      <div className="w-64 h-px border-t border-dashed border-border" />
+                      <div className="h-28 w-px border-l border-dashed border-border absolute" />
+                      <div className="w-48 h-px border-t border-dashed border-border absolute rotate-45" />
+                      <div className="w-48 h-px border-t border-dashed border-border absolute -rotate-45" />
+                    </div>
+
+                    <div
+                      className={cn(
+                        'w-12 h-12 rounded-full bg-active-teal border-2 border-white shadow-[0_0_24px_rgba(66,179,177,0.7)] flex items-center justify-center transition-transform',
+                        isRunning ? 'animate-ocular-8' : ''
+                      )}
+                      style={{
+                        animationPlayState: isRunning ? 'running' : 'paused',
+                      }}
+                    >
+                      <div className="w-4 h-4 rounded-full bg-white shadow-inner flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 rounded-full bg-active-teal" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {currentStep.targetPos === 'palming' && (
+                  <div className="flex flex-col items-center gap-3 animate-palming">
+                    <div className="w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center shadow-lg">
+                      <Smile className="w-8 h-8 text-amber-500" />
+                    </div>
+                    <span className="text-xs font-semibold text-text">Tutup Kelopak Mata & Rasakan Kehangatan Tangan</span>
+                  </div>
+                )}
+              </div>
+
+              <p className="relative z-10 text-xs text-center text-text-muted italic max-w-md">
+                💡 {currentStep.tip}
+              </p>
+            </div>
+
+            {/* Action Controls */}
+            <div className="flex items-center justify-between pt-2">
+              <Button size="sm" variant="secondary" onClick={handleReset} className="gap-1.5 text-xs">
+                <RotateCcw className="w-3.5 h-3.5" />
+                Ulangi
+              </Button>
+
+              <div className="flex items-center gap-2">
+                {!isRunning ? (
+                  <Button size="md" variant="primary" onClick={handleStart} className="gap-2">
+                    <Play className="w-4 h-4 fill-current" />
+                    {timeLeft === 0 ? 'Mulai Lagi' : 'Mulai Sesi'}
+                  </Button>
+                ) : (
+                  <Button size="md" variant="secondary" onClick={handlePause} className="gap-2">
+                    <Pause className="w-4 h-4" />
+                    Jeda
+                  </Button>
+                )}
+
+                {currentStepIdx < STEPS.length - 1 && (
+                  <Button size="sm" variant="ghost" onClick={handleNextStep} className="text-xs">
+                    Lanjut →
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 2: YouTube Video Embed */}
         {activeTab === 'youtube' && (
           <div className="space-y-4 animate-fade-in">
             <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black/90 border border-border shadow-dreamy-lg">
@@ -253,118 +407,6 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'youtube' }: Eye
                 </Button>
               </form>
             )}
-          </div>
-        )}
-
-        {/* Tab 2: Interactive 20-20-20 Countdown & Eye Follow Animation */}
-        {activeTab === 'animated' && (
-          <div className="space-y-4 animate-fade-in">
-            {/* Step Indicators */}
-            <div className="grid grid-cols-3 gap-2">
-              {STEPS.map((s, idx) => (
-                <button
-                  key={s.step}
-                  onClick={() => {
-                    setCurrentStepIdx(idx)
-                    setTimeLeft(s.duration)
-                    setIsRunning(false)
-                  }}
-                  className={cn(
-                    'p-2.5 rounded-xl border text-left transition-all cursor-pointer',
-                    idx === currentStepIdx
-                      ? 'border-signal-blue bg-signal-blue/10'
-                      : idx < currentStepIdx
-                        ? 'border-active-teal/40 bg-active-teal/5 text-text-muted'
-                        : 'border-border bg-surface-2 text-text-muted opacity-75'
-                  )}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wider">
-                      Langkah {s.step}
-                    </span>
-                    {idx < currentStepIdx && <CheckCircle2 className="w-3.5 h-3.5 text-active-teal" />}
-                  </div>
-                  <p className="text-xs font-semibold line-clamp-1">{s.title}</p>
-                </button>
-              ))}
-            </div>
-
-            {/* Interactive Stage */}
-            <div className="relative h-64 rounded-2xl bg-surface-2 border border-border p-6 flex flex-col items-center justify-between overflow-hidden shadow-inner">
-              <div className="absolute inset-0 bg-gradient-to-b from-signal-blue/5 to-active-teal/5 pointer-events-none" />
-
-              {/* Countdown badge */}
-              <div className="relative z-10 flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-widest text-text-muted">
-                  Sisa Waktu
-                </span>
-                <span className="text-3xl font-black font-figtree text-signal-blue tabular-nums">
-                  {timeLeft}s
-                </span>
-              </div>
-
-              {/* Center Animation Target */}
-              <div className="relative z-10 my-auto flex flex-col items-center justify-center">
-                {currentStep.targetPos === 'center' && (
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-16 h-16 rounded-full bg-signal-blue/20 border-2 border-signal-blue flex items-center justify-center shadow-lg">
-                      <Eye className="w-8 h-8 text-signal-blue" />
-                    </div>
-                    <span className="text-xs font-semibold text-text">Tatap Objek Sejauh 6 Meter (20 Kaki)</span>
-                  </div>
-                )}
-
-                {currentStep.targetPos === 'moving' && (
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-active-teal border-2 border-white shadow-[0_0_20px_rgba(66,179,177,0.5)] animate-drift flex items-center justify-center">
-
-                    </div>
-                    <span className="text-xs font-semibold text-text">Ikuti Gerakan Objek dengan Bola Mata</span>
-                  </div>
-                )}
-
-                {currentStep.targetPos === 'palming' && (
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center shadow-lg">
-                      <Smile className="w-8 h-8 text-amber-500" />
-                    </div>
-                    <span className="text-xs font-semibold text-text">Tutup Kelopak Mata & Rasakan Kehangatan Tangan</span>
-                  </div>
-                )}
-              </div>
-
-              <p className="relative z-10 text-xs text-center text-text-muted italic max-w-md">
-                💡 {currentStep.tip}
-              </p>
-            </div>
-
-            {/* Action Controls */}
-            <div className="flex items-center justify-between pt-2">
-              <Button size="sm" variant="secondary" onClick={handleReset} className="gap-1.5 text-xs">
-                <RotateCcw className="w-3.5 h-3.5" />
-                Ulangi
-              </Button>
-
-              <div className="flex items-center gap-2">
-                {!isRunning ? (
-                  <Button size="md" variant="primary" onClick={handleStart} className="gap-2">
-                    <Play className="w-4 h-4 fill-current" />
-                    Mulai Sesi
-                  </Button>
-                ) : (
-                  <Button size="md" variant="secondary" onClick={handlePause} className="gap-2">
-                    <Pause className="w-4 h-4" />
-                    Jeda
-                  </Button>
-                )}
-
-                {currentStepIdx < STEPS.length - 1 && (
-                  <Button size="sm" variant="ghost" onClick={handleNextStep} className="text-xs">
-                    Lanjut →
-                  </Button>
-                )}
-              </div>
-            </div>
           </div>
         )}
 
