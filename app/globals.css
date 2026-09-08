@@ -198,23 +198,57 @@
   .animate-palming { animation: palming-glow 3s ease-in-out infinite; }
   .animate-focus-distant { animation: focus-distant 4s ease-in-out infinite; }
 
+  :root {
+    --ocular-x: 200px;
+    --ocular-y: 100px;
+    --ocular-diag-x: 150px;
+    --ocular-diag-y: 75px;
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --ocular-x: 320px;
+      --ocular-y: 115px;
+      --ocular-diag-x: 240px;
+      --ocular-diag-y: 90px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :root {
+      --ocular-x: 460px;
+      --ocular-y: 130px;
+      --ocular-diag-x: 340px;
+      --ocular-diag-y: 100px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    :root {
+      --ocular-x: 520px;
+      --ocular-y: 140px;
+      --ocular-diag-x: 380px;
+      --ocular-diag-y: 105px;
+    }
+  }
+
   @keyframes ocular-movement {
     0% { transform: translate(0, 0); }
-    6.25% { transform: translate(0, -110px); }
+    6.25% { transform: translate(0, calc(-1 * var(--ocular-y))); }
     12.5% { transform: translate(0, 0); }
-    18.75% { transform: translate(0, 110px); }
+    18.75% { transform: translate(0, var(--ocular-y)); }
     25% { transform: translate(0, 0); }
-    31.25% { transform: translate(-220px, 0); }
+    31.25% { transform: translate(calc(-1 * var(--ocular-x)), 0); }
     37.5% { transform: translate(0, 0); }
-    43.75% { transform: translate(220px, 0); }
+    43.75% { transform: translate(var(--ocular-x), 0); }
     50% { transform: translate(0, 0); }
-    56.25% { transform: translate(160px, -85px); }
+    56.25% { transform: translate(var(--ocular-diag-x), calc(-1 * var(--ocular-diag-y))); }
     62.5% { transform: translate(0, 0); }
-    68.75% { transform: translate(-160px, 85px); }
+    68.75% { transform: translate(calc(-1 * var(--ocular-diag-x)), var(--ocular-diag-y)); }
     75% { transform: translate(0, 0); }
-    81.25% { transform: translate(-160px, -85px); }
+    81.25% { transform: translate(calc(-1 * var(--ocular-diag-x)), calc(-1 * var(--ocular-diag-y))); }
     87.5% { transform: translate(0, 0); }
-    93.75% { transform: translate(160px, 85px); }
+    93.75% { transform: translate(var(--ocular-diag-x), var(--ocular-diag-y)); }
     100% { transform: translate(0, 0); }
   }
 

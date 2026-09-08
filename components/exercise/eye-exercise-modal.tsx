@@ -320,10 +320,10 @@ export function EyeExerciseModal({ open, onClose, initialMode = 'animated' }: Ey
                   <div className="relative w-full h-72 flex items-center justify-center">
                     {/* Visual 8-direction guide paths */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-25">
-                      <div className="w-[500px] max-w-[90%] h-px border-t border-dashed border-border" />
-                      <div className="h-[250px] w-px border-l border-dashed border-border absolute" />
-                      <div className="w-[360px] max-w-[70%] h-px border-t border-dashed border-border absolute rotate-45" />
-                      <div className="w-[360px] max-w-[70%] h-px border-t border-dashed border-border absolute -rotate-45" />
+                      <div className="w-[1100px] max-w-[94%] h-px border-t border-dashed border-border" />
+                      <div className="h-[300px] w-px border-l border-dashed border-border absolute" />
+                      <div className="w-[800px] max-w-[85%] h-px border-t border-dashed border-border absolute rotate-45" />
+                      <div className="w-[800px] max-w-[85%] h-px border-t border-dashed border-border absolute -rotate-45" />
                     </div>
 
                     <div
