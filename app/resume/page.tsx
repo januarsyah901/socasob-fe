@@ -16,8 +16,8 @@ import {
   Minus,
   Loader2,
   FileText,
-
   Printer,
+  Info,
 } from 'lucide-react'
 import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
@@ -165,25 +165,25 @@ export default function ResumePage() {
                       {
                         label: 'Rata-rata Jarak',
                         value: `${resumeData.avgDistance} cm`,
-                        icon: Ruler,
+                        icon: Info,
                         good: resumeData.avgDistance >= 30,
                       },
                       {
                         label: 'Kepatuhan 20-20-20',
                         value: `${resumeData.restCompliance}%`,
-                        icon: Coffee,
+                        icon: Info,
                         good: resumeData.restCompliance >= 70,
                       },
                       {
                         label: 'Total Waktu Layar',
                         value: `${resumeData.totalHours} Jam`,
-                        icon: Clock,
+                        icon: Info,
                         good: true,
                       },
                       {
                         label: 'Hari Monitoring',
                         value: `${resumeData.totalDaysMonitored} Hari`,
-                        icon: Award,
+                        icon: Info,
                         good: true,
                       },
                     ].map((item) => (
@@ -192,7 +192,7 @@ export default function ResumePage() {
                           <p className="text-[10px] text-text-muted font-bold uppercase tracking-wider">
                             {item.label}
                           </p>
-                          <item.icon className="w-4 h-4 text-text-muted/60" />
+                          <Info className="w-4 h-4 text-text-muted/60" />
                         </div>
                         <p className="text-xl md:text-2xl font-black text-text leading-none font-figtree">
                           {item.value}
