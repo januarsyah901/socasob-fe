@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { sendDesktopNotification, playGentleChime } from './desktop-notifications'
+import { useAuth } from './auth-context'
 
 const getIsProd = () => typeof window !== 'undefined' && window.location.hostname !== 'localhost'
 
@@ -315,6 +316,37 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       })
     }
   }, [socket])
+
+  const { user, token } = useAuth()
+
+  // Auto-sync paired robot based on logged-in user
+  useEffect(() => {
+    if (!user || !token) return
+    let isMounted = true
+
+    const fetchUserRobot = async () => {
+      try {
+        const res = await fetch(`${BE_API}/api/robots`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        const data = await res.json()
+        if (isMounted && data.success && Array.isArray(data.data)) {
+          const myRobot = data.data.find((r: any) => r.ownerId === user._id)
+          if (myRobot && myRobot.robotId && myRobot.robotId !== robotId) {
+            setRobotId(myRobot.robotId)
+            console.log(`[SocaSob] Auto-selected paired robot for ${user.fullName}: ${myRobot.robotId}`)
+          }
+        }
+      } catch (err) {
+        console.warn('[SocaSob] Error auto-syncing robot for user:', err)
+      }
+    }
+
+    fetchUserRobot()
+    return () => {
+      isMounted = false
+    }
+  }, [user, token, robotId, setRobotId])
 
   const value: SocketContextType = {
     socket,

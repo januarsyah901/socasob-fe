@@ -31,11 +31,14 @@ export interface MedicalReportData {
   totalHours: number
   avgDistanceCm: number
   blinkRatePerMin: number
-  safeDistanceRatio: number
-  riskDistanceRatio: number
+  safeDistanceRatio?: number
+  riskDistanceRatio?: number
   myopiaRisk: 'Rendah' | 'Sedang' | 'Tinggi'
   cvsRisk: 'Rendah' | 'Sedang' | 'Tinggi'
+  fatigueRisk?: 'Rendah' | 'Sedang' | 'Tinggi'
   restCompliance: number
+  nearDurationMin?: number
+  farDurationMin?: number
   clinicalNotes: string[]
   examinerNotes?: string
 }
@@ -60,8 +63,8 @@ export function MedicalReportView({ report }: MedicalReportViewProps) {
     }
   }
 
-  const farPct = Math.round(report.safeDistanceRatio * 100)
-  const nearPct = Math.round(report.riskDistanceRatio * 100)
+  const farPct = Math.round((report.safeDistanceRatio ?? 0.8) * 100)
+  const nearPct = Math.round((report.riskDistanceRatio ?? 0.2) * 100)
 
   return (
     <div className="space-y-6">

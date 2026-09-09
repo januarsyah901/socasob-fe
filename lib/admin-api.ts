@@ -114,3 +114,60 @@ export async function updateMlConfig(token: string, data: Record<string, unknown
     body: JSON.stringify(data),
   });
 }
+
+// ============================================================
+// Testing Switch (PKM Multi-User Testing)
+// ============================================================
+
+export interface TestingSwitchStatus {
+  enabled: boolean;
+  physicalRobotId: string;
+  targetRobotId: string;
+  currentTarget: {
+    robotId: string;
+    robotName: string;
+    serialNumber?: string;
+    userId: string;
+    userName: string;
+    userEmail: string;
+  } | null;
+  availableTargets: Array<{
+    robotId: string;
+    robotName: string;
+    serialNumber?: string;
+    userId: string;
+    userName: string;
+    userEmail: string;
+  }>;
+  todayStats: {
+    nearDuration: number;
+    farDuration: number;
+    totalDurationSec: number;
+    totalDurationMin: number;
+    blinkCount: number;
+    eyeHealthStatus: string;
+  } | null;
+  lastSwitchedAt: string;
+}
+
+export async function fetchTestingSwitch(token: string) {
+  return adminFetch('/api/admin/testing-switch', token);
+}
+
+export async function updateTestingSwitch(
+  token: string,
+  data: { enabled?: boolean; physicalRobotId?: string; targetRobotId?: string }
+) {
+  return adminFetch('/api/admin/testing-switch', token, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function resetTestingSwitchLog(token: string, robotId?: string) {
+  return adminFetch('/api/admin/testing-switch/reset-log', token, {
+    method: 'POST',
+    body: JSON.stringify({ robotId }),
+  });
+}
+

@@ -10,6 +10,7 @@ import {
   unpairAdminRobot,
   type CreateRobotPayload,
 } from '@/lib/admin-api';
+import { AdminTestingSwitchCard } from './admin-testing-switch-card';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -163,7 +164,10 @@ export function AdminRobotsTab() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Saklar Pengujian Multi-User */}
+      <AdminTestingSwitchCard />
+
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-text">Daftar Robot</h2>
