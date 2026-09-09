@@ -206,33 +206,35 @@ export function AdminTestingSwitchCard() {
       )}
 
       {/* Controller Inputs Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
         {/* Physical Robot Input */}
-        <div className="md:col-span-4 space-y-1.5">
-          <label className="text-xs font-bold text-text flex items-center gap-1.5">
-            <Bot className="w-3.5 h-3.5 text-text-muted" /> ID Robot Fisik (ESP32)
+        <div className="md:col-span-4 flex flex-col">
+          <label className="text-xs font-bold text-text flex items-center gap-1.5 mb-1.5 h-5">
+            <Bot className="w-3.5 h-3.5 text-text-muted shrink-0" />
+            <span>ID Robot Fisik (ESP32)</span>
           </label>
           <input
             type="text"
             value={physicalId}
             onChange={(e) => setPhysicalId(e.target.value)}
             placeholder="dummyrobot01"
-            className="w-full px-3 py-2 text-xs font-mono rounded-xl bg-surface-2 border border-border focus:border-signal-blue focus:outline-none transition-colors"
+            className="w-full h-10 px-3.5 text-xs font-mono rounded-xl bg-surface-2 border border-border focus:border-signal-blue focus:outline-none transition-colors"
           />
-          <span className="text-[10px] text-text-muted block">String ID yang dikirim oleh ESP32-CAM</span>
+          <span className="text-[11px] text-text-muted mt-1.5">String ID yang dikirim oleh ESP32-CAM</span>
         </div>
 
         {/* Target User Dropdown */}
-        <div className="md:col-span-5 space-y-1.5">
-          <label className="text-xs font-bold text-text flex items-center gap-1.5">
-            <UserCheck className="w-3.5 h-3.5 text-emerald-500" /> Subjek / Target Penguji
+        <div className="md:col-span-5 flex flex-col">
+          <label className="text-xs font-bold text-text flex items-center gap-1.5 mb-1.5 h-5">
+            <UserCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            <span>Subjek / Target Penguji</span>
           </label>
           <select
             value={selectedTarget}
             onChange={(e) => {
               setSelectedTarget(e.target.value);
             }}
-            className="w-full px-3 py-2 text-xs font-medium rounded-xl bg-surface-2 border border-border focus:border-signal-blue focus:outline-none transition-colors cursor-pointer"
+            className="w-full h-10 px-3.5 text-xs font-medium rounded-xl bg-surface-2 border border-border focus:border-signal-blue focus:outline-none transition-colors cursor-pointer"
           >
             {data?.availableTargets && data.availableTargets.length > 0 ? (
               data.availableTargets.map((t) => (
@@ -244,20 +246,26 @@ export function AdminTestingSwitchCard() {
               <option value="ROBOT-01">User 01 (ROBOT-01)</option>
             )}
           </select>
-          <span className="text-[10px] text-text-muted block">Pilih akun responden yang sedang diuji</span>
+          <span className="text-[11px] text-text-muted mt-1.5">Pilih akun responden yang sedang diuji</span>
         </div>
 
         {/* Save Button */}
-        <div className="md:col-span-3 flex gap-2">
+        <div className="md:col-span-3 flex flex-col">
+          <label aria-hidden="true" className="text-xs font-bold text-transparent select-none mb-1.5 h-5 block">
+            Aksi
+          </label>
           <button
             type="button"
             onClick={() => handleSave()}
             disabled={saving}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-signal-blue text-white shadow-sm hover:bg-signal-blue/90 disabled:opacity-50 transition-all cursor-pointer"
+            className="w-full h-10 inline-flex items-center justify-center gap-1.5 px-4 rounded-xl text-xs font-bold bg-signal-blue text-white shadow-sm hover:bg-signal-blue/90 disabled:opacity-50 transition-all cursor-pointer shrink-0"
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
             Simpan Saklar
           </button>
+          <span aria-hidden="true" className="text-[11px] text-transparent select-none mt-1.5 block">
+            Simpan
+          </span>
         </div>
       </div>
 
