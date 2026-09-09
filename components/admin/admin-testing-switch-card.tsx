@@ -250,8 +250,8 @@ export function AdminTestingSwitchCard() {
         </div>
 
         {/* Save Button */}
-        <div className="md:col-span-3 flex flex-col">
-          <label aria-hidden="true" className="text-xs font-bold text-transparent select-none mb-1.5 h-5 block">
+        <div className="md:col-span-3 flex flex-col md:-translate-y-2">
+          <label aria-hidden="true" className="text-xs font-bold text-transparent select-none mb-1.5 h-5 flex items-center">
             Aksi
           </label>
           <button
@@ -263,9 +263,6 @@ export function AdminTestingSwitchCard() {
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
             Simpan Saklar
           </button>
-          <span aria-hidden="true" className="text-[11px] text-transparent select-none mt-1.5 block">
-            Simpan
-          </span>
         </div>
       </div>
 
