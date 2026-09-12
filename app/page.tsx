@@ -47,7 +47,7 @@ export default function HomePage() {
               </span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold text-text tracking-tight leading-tight font-figtree">
-              Pantau Pandangan, Sayangi Netra.
+              Track the time, rest your eyes!
             </h1>
             <p className="text-sm text-text-muted mt-1 max-w-2xl leading-relaxed">
               Sistem pencegahan miopia terintegrasi memantau jarak mata, kebiasaan berkedip, dan memandu istirahat ergonomis 20-20-20 secara real-time.
