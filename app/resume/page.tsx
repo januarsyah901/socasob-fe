@@ -26,6 +26,7 @@ import { useSocket, beApi } from '@/lib/socket-context'
 import { GenerateReportModal } from '@/components/report/generate-report-modal'
 import { EyeExerciseCard } from '@/components/exercise/eye-exercise-card'
 import { EmptyState } from '@/components/ui/empty-state'
+import { TrendLineChart, type TrendPoint } from '@/components/resume/trend-line-chart'
 import Link from 'next/link'
 
 interface ResumeData {
@@ -38,6 +39,7 @@ interface ResumeData {
   farPercent: number
   totalHours: number
   totalDaysMonitored: number
+  trend?: TrendPoint[]
 }
 
 const riskColor = (level: 'Rendah' | 'Sedang' | 'Tinggi') => {
@@ -301,94 +303,11 @@ export default function ResumePage() {
               {/* Interactive Micro-Break Module in Resume */}
               <EyeExerciseCard />
 
-              {/* Distribution Chart */}
-              <div className="card p-6 md:p-8">
-                <h3 className="text-base font-bold text-text tracking-tight mb-6">
-                  Distribusi Rasio Jarak Pandang Terpantau
-                </h3>
-
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                  <div className="relative shrink-0 w-36 h-36">
-                    {(() => {
-                      const r = 52
-                      const circ = 2 * Math.PI * r
-                      const closeDash = (resumeData.nearPercent / 100) * circ
-                      const farDash = (resumeData.farPercent / 100) * circ
-                      const gap = 3
-                      return (
-                        <svg viewBox="0 0 140 140" className="-rotate-90 w-full h-full">
-                          <circle
-                            cx="70"
-                            cy="70"
-                            r={r}
-                            fill="none"
-                            stroke="#16a34a"
-                            strokeWidth="18"
-                            strokeDasharray={`${farDash - gap} ${circ - farDash + gap}`}
-                            strokeDashoffset={0}
-                            strokeLinecap="butt"
-                          />
-                          <circle
-                            cx="70"
-                            cy="70"
-                            r={r}
-                            fill="none"
-                            stroke="#dc2626"
-                            strokeWidth="18"
-                            strokeDasharray={`${closeDash - gap} ${circ - closeDash + gap}`}
-                            strokeDashoffset={-farDash}
-                            strokeLinecap="butt"
-                          />
-                        </svg>
-                      )
-                    })()}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-2xl font-black text-text font-figtree">
-                        {resumeData.farPercent}%
-                      </span>
-                      <span className="text-[10px] font-bold text-text-muted uppercase">Aman</span>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 w-full space-y-4">
-                    <div>
-                      <div className="flex justify-between mb-1.5 text-xs font-semibold">
-                        <span className="flex items-center gap-2 text-text">
-                          <span className="w-2.5 h-2.5 rounded-full bg-error" />
-                          Tatap Terlalu Dekat (&lt; 30cm)
-                        </span>
-                        <span className="font-bold text-text">{resumeData.nearPercent}%</span>
-                      </div>
-                      <div className="w-full bg-surface-2 border border-border rounded-full h-2.5 overflow-hidden">
-                        <div
-                          className="bg-error h-full rounded-full transition-all duration-700"
-                          style={{ width: `${resumeData.nearPercent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <div className="flex justify-between mb-1.5 text-xs font-semibold">
-                        <span className="flex items-center gap-2 text-text">
-                          <span className="w-2.5 h-2.5 rounded-full bg-success" />
-                          Tatap Jarak Aman (≥ 30cm)
-                        </span>
-                        <span className="font-bold text-text">{resumeData.farPercent}%</span>
-                      </div>
-                      <div className="w-full bg-surface-2 border border-border rounded-full h-2.5 overflow-hidden">
-                        <div
-                          className="bg-success h-full rounded-full transition-all duration-700"
-                          style={{ width: `${resumeData.farPercent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <p className="text-[11px] text-text-muted pt-1 leading-relaxed">
-                      💡 <strong>Standar Klinis Ergonomi:</strong> Pertahankan rasio Jarak Aman di atas <strong>70%</strong> untuk meminimalkan beban akomodasi berlebih pada otot siliaris mata.
-                    </p>
-                  </div>
-                </div>
-              </div>
+              {/* Line Chart Tren Longitudinal */}
+              <TrendLineChart
+                trend={resumeData.trend || []}
+                robotId={resumeData.robotId}
+              />
             </div>
           )
         })()}
