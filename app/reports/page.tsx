@@ -13,8 +13,6 @@ import {
   Eye,
   Activity,
   ArrowRight,
-
-  ShieldCheck,
   CheckCircle2,
   Trash2,
   RefreshCw,
@@ -150,7 +148,7 @@ export default function ReportsPage() {
         />
 
         {/* Feature Highlights Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="card-sm p-5 flex items-center gap-4">
             <div className="w-10 h-10 rounded-2xl bg-signal-blue/10 flex items-center justify-center shrink-0">
               <FileText className="w-5 h-5 text-signal-blue" />
@@ -168,16 +166,6 @@ export default function ReportsPage() {
             <div>
               <p className="text-sm font-bold text-text">1-Click PDF Export</p>
               <p className="text-xs text-text-muted mt-0.5">Desain print-optimized otomatis tanpa header web</p>
-            </div>
-          </div>
-
-          <div className="card-sm p-5 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <ShieldCheck className="w-5 h-5 text-emerald-500" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-text">Data Terverifikasi AI</p>
-              <p className="text-xs text-text-muted mt-0.5">Telemetri MediaPipe & formula optik presisi</p>
             </div>
           </div>
         </div>
