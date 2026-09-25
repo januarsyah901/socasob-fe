@@ -1,21 +1,14 @@
 'use client'
 
 import { useSocket } from '@/lib/socket-context'
-import { Eye, Clock, Timer } from 'lucide-react'
+import { Eye, Timer } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function EyeMetrics() {
   const { eyeDistance, isConnected, hardware } = useSocket()
-  const { breakRemainingSec, workElapsedSec } = hardware
+  const { breakRemainingSec } = hardware
 
   const isClose = eyeDistance === 'Dekat'
-
-  const formatSec = (sec: number) => {
-    const m = Math.floor(sec / 60)
-    const s = sec % 60
-    if (m === 0) return `${s}s`
-    return `${m}m ${s}s`
-  }
 
   return (
     <div className="card-sm p-6 md:p-8 flex flex-col h-full justify-between space-y-4">
@@ -34,8 +27,8 @@ export function EyeMetrics() {
         )}
       </div>
 
-      {/* 3 Susunan Stat: Jarak Layar, Total Tatap Layar, Sisa Waktu Istirahat 20s */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 my-auto">
+      {/* 2 Susunan Stat: Jarak Layar & Sisa Waktu Istirahat 20s */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 my-auto">
         {/* Stat 1: Jarak Layar */}
         <div className={cn(
           'p-3.5 sm:p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between min-h-[110px] min-w-0',
@@ -76,25 +69,7 @@ export function EyeMetrics() {
           </div>
         </div>
 
-        {/* Stat 2: Total Tatap Layar */}
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-surface-2/60 border border-border/60 flex flex-col justify-between min-h-[110px] min-w-0 transition-all">
-          <div className="flex items-center justify-between gap-1">
-            <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider truncate">
-              Total Tatap Layar
-            </span>
-            <Clock className="w-4 h-4 text-signal-blue shrink-0" />
-          </div>
-          <div className="mt-2">
-            <p className="text-lg sm:text-xl font-bold text-text font-figtree tracking-tight tabular-nums font-mono whitespace-nowrap">
-              {formatSec(workElapsedSec)}
-            </p>
-            <p className="text-[11px] text-text-muted mt-1 leading-snug truncate">
-              Waktu aktif di monitor
-            </p>
-          </div>
-        </div>
-
-        {/* Stat 3: Sisa Waktu Istirahat 20s */}
+        {/* Stat 2: Sisa Waktu Istirahat 20s */}
         <div className="p-3.5 sm:p-4 rounded-2xl bg-surface-2/60 border border-border/60 flex flex-col justify-between min-h-[110px] min-w-0 transition-all">
           <div className="flex items-center justify-between gap-1">
             <span className="text-[10px] font-bold text-text-muted uppercase tracking-wider truncate">
