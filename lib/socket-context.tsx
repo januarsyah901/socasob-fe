@@ -53,6 +53,7 @@ interface SocketContextType {
     seconds: number
   }
   eyeDistance: string
+  distanceCm: number | null
   eyeStatus: 'normal' | 'risk_myopia' | 'risk_fatigue' | 'disconnected'
   confidence: number
   hardware: HardwareState
@@ -72,6 +73,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [robotId, setRobotIdState] = useState<string | null>(null)
   const [timer, setTimer] = useState({ hours: 0, minutes: 0, seconds: 0 })
   const [eyeDistance, setEyeDistance] = useState('Jauh')
+  const [distanceCm, setDistanceCm] = useState<number | null>(null)
   const [eyeStatus, setEyeStatus] = useState<SocketContextType['eyeStatus']>('disconnected')
   const [confidence, setConfidence] = useState(0)
 
@@ -152,6 +154,8 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     socketInstance.on('eye-distance', (data) => {
       const dist = data.distance || 'Jauh'
       setEyeDistance(dist)
+      const cm = data.distanceCm != null ? Number(data.distanceCm) : (data.distance_cm != null ? Number(data.distance_cm) : null)
+      setDistanceCm(cm)
       if (data.confidence !== undefined) setConfidence(Math.round(data.confidence))
 
       if (dist === 'Dekat') {
@@ -355,6 +359,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     setRobotId,
     timer,
     eyeDistance,
+    distanceCm,
     eyeStatus,
     confidence,
     hardware,
