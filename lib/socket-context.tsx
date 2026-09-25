@@ -10,6 +10,7 @@ const getIsProd = () => typeof window !== 'undefined' && window.location.hostnam
 const BE_URL = process.env.NEXT_PUBLIC_SOCKET_URL || (getIsProd() ? 'https://be-socasob.hallojanu.xyz' : 'http://localhost:3001')
 const BE_API = process.env.NEXT_PUBLIC_API_URL || BE_URL
 const ML_WS_URL = process.env.NEXT_PUBLIC_ML_WS_URL || (getIsProd() ? 'wss://socasob-ml.hallojanu.xyz/ws' : 'ws://localhost:5000/ws')
+const ML_HTTP_URL = process.env.NEXT_PUBLIC_ML_URL || (getIsProd() ? 'https://socasob-ml.hallojanu.xyz' : 'http://localhost:5000')
 
 export type LcdCommand = 'normal' | 'fatigue_5m' | 'fatigue_10m' | 'break_20m' | 'dry_eye'
 export type SpeakerCommand = 'cling' | 'bip-bip' | 'ting-tong' | 'pop-pop' | 'ta-da' | 'none'
@@ -286,6 +287,48 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
       if (ws) ws.close()
     }
   }, [])
+
+  // Resilient fallback / hydration metrik jarak & hardware dari ML API
+  useEffect(() => {
+    const activeId = robotId || (typeof window !== 'undefined' ? localStorage.getItem('socasob-robot-id') : null) || 'dummyrobot01'
+    let isCancelled = false
+
+    const fetchLatestFeatures = async () => {
+      try {
+        const res = await fetch(`${ML_HTTP_URL}/api/features?robot_id=${activeId}`)
+        if (!res.ok) return
+        const json = await res.json()
+        if (!isCancelled && json.success && json.data) {
+          const d = json.data
+          if (d.distance_cm != null) {
+            setDistanceCm(Number(d.distance_cm))
+          }
+          if (d.distance) {
+            setEyeDistance(d.distance)
+          }
+          if (d.hardware) {
+            setHardware((prev) => ({
+              lcdCommand: d.hardware.lcd_command || prev.lcdCommand,
+              speakerCommand: prev.speakerCommand,
+              fatigueDurationSec: prev.fatigueDurationSec,
+              breakRemainingSec: d.hardware.break_remaining_sec ?? prev.breakRemainingSec,
+              workElapsedSec: d.hardware.work_elapsed_sec ?? prev.workElapsedSec,
+            }))
+          }
+        }
+      } catch (err) {
+        // Silently ignore network interruptions
+      }
+    }
+
+    fetchLatestFeatures()
+    const interval = setInterval(fetchLatestFeatures, 2000)
+
+    return () => {
+      isCancelled = true
+      clearInterval(interval)
+    }
+  }, [robotId])
 
   // Helper untuk query histori & summary via Native ML WebSocket
   const queryMlHistory = useCallback((type: 'fatigue' | 'dry_eye' | 'myopia_risk', days = 7) => {
