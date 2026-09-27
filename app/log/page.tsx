@@ -282,7 +282,7 @@ export default function LogPage() {
         ) : (
           <div className="space-y-8">
             {/* ============================================================ */}
-            {/* SEKSI 1: HASIL METRIK PEMANTAUAN (6 PARAMETER) */}
+            {/* SEKSI 1: HASIL METRIK PEMANTAUAN (5 PARAMETER) */}
             {/* ============================================================ */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -292,7 +292,7 @@ export default function LogPage() {
                     Hasil Pemantauan ({formatDateIndo(activeLog.date)})
                   </h3>
                 </div>
-                <span className="text-xs text-text-muted font-medium">6 Parameter Terukur</span>
+                <span className="text-xs text-text-muted font-medium">5 Parameter Terukur</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -341,7 +341,7 @@ export default function LogPage() {
                   </p>
                 </div>
 
-                {/* 4. Blink rate harian (TOTAL KEDIPAN DIHAPUS) */}
+                {/* 4. Blink rate harian */}
                 <div className="card-sm p-5 border border-border bg-surface-1 hover:border-signal-blue/40 transition-colors">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">Blink Rate Harian</span>
@@ -357,23 +357,7 @@ export default function LogPage() {
                   </p>
                 </div>
 
-                {/* 5. Incomplete blink harian */}
-                <div className="card-sm p-5 border border-border bg-surface-1 hover:border-signal-blue/40 transition-colors">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">Incomplete Blink Harian</span>
-                    <span className="w-7 h-7 rounded-lg bg-error/10 flex items-center justify-center text-error">
-                      <Droplets className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                  <div className="text-3xl font-extrabold text-error tracking-tight">
-                    {activeLog.incompleteBlinkRatio}%
-                  </div>
-                  <p className="text-xs text-text-muted mt-2">
-                    Rasio kelopak mata tidak menutup sempurna saat berkedip
-                  </p>
-                </div>
-
-                {/* 6. Jarak <20 cm */}
+                {/* 5. Jarak <20 cm */}
                 <div className="card-sm p-5 border border-border bg-surface-1 hover:border-signal-blue/40 transition-colors">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">Jarak &lt;20 cm</span>
