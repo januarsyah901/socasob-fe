@@ -69,7 +69,7 @@ export function EyeMetrics() {
             Jarak Pandang Real-Time
           </span>
           <span className="text-[11px] text-text-muted">
-            Batas minimal: <strong className="text-text font-semibold">30 cm</strong>
+            Batas minimal: <strong className="text-text font-semibold">45 cm</strong>
           </span>
         </div>
 
