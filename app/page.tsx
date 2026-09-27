@@ -72,9 +72,7 @@ export default function HomePage() {
         {/* Main Monitoring Deck (Timer & Vision Inference Metrics) */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
           <TimerDisplay />
-          <div className="flex flex-col justify-between gap-6">
-            <EyeMetrics />
-          </div>
+          <EyeMetrics />
         </section>
 
         {/* Status Sistem */}
